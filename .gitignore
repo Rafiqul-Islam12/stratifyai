@@ -1,0 +1,20 @@
+# Secrets and local configuration
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Test and cache
+.pytest_cache/
+
+# Runtime state
+*.db
+.runtime/
+
+# Build output
+dist/
+
+# OS noise
+.DS_Store
