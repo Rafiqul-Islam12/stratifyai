@@ -54,7 +54,7 @@
 - [ ] C-01 Technical documentation (T16)
 - [ ] C-02 Deck outline for max 10 minutes (T16)
 - [ ] C-03 Demo script for max 5 minutes (T16)
-- [ ] C-04 Source, README, deployment instructions, tests, GitHub (T01, T16, T18)
+- [~] C-04 Source, README, deployment instructions, tests, GitHub (T01, T16, T18) — source, README stub and tests done (T01); deployment instructions are T17, no GitHub remote yet
 - [ ] C-05 Security self-assessment (T16)
 - [ ] C-06 Execution evidence logs (T12, T15)
 - [ ] C-07 Integrity: no copied code, licences respected (T18)
@@ -72,8 +72,8 @@
 - [ ] D-04 Verifiable readiness pack with hash check (T10)
 - [ ] D-05 Scripted task-completion suite with results (T15)
 - [ ] D-06 STRIDE threat model and LLM-risk mapping in docs (T16)
-- [ ] D-07 CI workflow runs tests on every push (T01)
-- [ ] D-08 One-command launcher run.py (T01, T17)
+- [~] D-07 CI workflow runs tests on every push (T01) — .github/workflows/ci.yml on push+PR, Python 3.11 and 3.12, `pytest -q` then `ruff check .`; both commands pass locally, CI has not yet run remotely (no origin)
+- [x] D-08 One-command launcher run.py (T01, T17) — setup/start/demo/test/eval/check/status/report; verified setup, test, check, status and a live HTTP 200 from `start`
 - [ ] D-09 Consolidated final report builder (T15)
 
 ## Packaging and reachability

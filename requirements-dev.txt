@@ -1,0 +1,2 @@
+# Development-only dependencies - pinned from `pip freeze`
+ruff==0.17.1

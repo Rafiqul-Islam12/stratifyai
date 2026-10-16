@@ -1,0 +1,5 @@
+[project]
+name = "stratifyai"
+version = "0.1.0"
+description = "StratifyAI: The Liquidity Decision Lab for SME Financial Intelligence"
+requires-python = ">=3.11"

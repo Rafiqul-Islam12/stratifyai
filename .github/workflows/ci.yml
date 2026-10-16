@@ -1,0 +1,44 @@
+# StratifyAI
+
+Runs `pytest -q` and `ruff check .` on every push and pull request. No secrets needed.
+
+name: StratifyAI CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run tests
+        # pytest.ini confines collection to tests/ - without it pytest also
+        # collects the suites of installed packages under .venv (thousands of
+        # unrelated tests). Keep pytest.ini if you keep this layout.
+        run: pytest -q
+
+      - name: Lint
+        run: ruff check .

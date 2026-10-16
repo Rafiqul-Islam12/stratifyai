@@ -1,0 +1,9 @@
+# StratifyAI runtime dependencies - pinned from `pip freeze` after `python run.py setup`
+# Python 3.11.9 on Windows (streamlit >= 1.45 needed for self-hosted fonts)
+streamlit==1.66.0
+pandas==3.0.6
+numpy==2.4.6
+plotly==7.1.0
+pydantic==2.14.1
+pytest==9.1.1
+openpyxl==3.1.5

@@ -2,7 +2,7 @@
 
 Legend: [ ] todo, [x] done. P1 must, P2 should, P3 cut first.
 
-- [ ] T01 Scaffold, tooling, run.py launcher, CI, status script (P1)
+- [x] T01 Scaffold, tooling, run.py launcher, CI, status script (P1)
 - [ ] T02 Design system and app shell (P1) WAIT for user approval
 - [ ] T03 Synthetic data and schema, five cases (P1)
 - [ ] T04 Upload, validation and Data Upload page (P1)

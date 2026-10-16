@@ -46,3 +46,8 @@ Score 0 to 100 per customer, weights editable: overdue-amount share of the custo
 - Copilot llm mode (optional) uses a generic OpenAI-compatible endpoint from env (COPILOT_BASE_URL, COPILOT_MODEL, COPILOT_API_KEY); default is offline.
 - No CDN or external fonts. Docker image runs offline. Live hosting (optional) is a bonus link and may be unreachable from mainland China; the demo video file is part of the submission package.
 
+## Tooling (T01)
+- Dependencies are pinned exactly in requirements.txt (recorded from `pip freeze` after `python run.py setup`) rather than left at the ">=" floors in the task spec, so a clean clone installs the same streamlit 1.66.0 the local demo was verified against.
+- pytest.ini sets `testpaths = tests`. Without it, `pytest -q` at the repo root walks .venv and collects the installed packages' own suites (observed 4464 collected instead of 9). Keep the config while the venv stays inside the repo.
+- scripts/check_secrets.py skips docs/inputs/ plus build and cache dirs, so the competition brief PDF is not scanned as project code. All tracked files and untracked non-ignored files are still scanned; it reported "no matches in 58 files".
+
