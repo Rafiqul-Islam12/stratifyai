@@ -4,7 +4,7 @@ Current task: T07 (next)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-
+- T07 deterministic comparison engine and known-number mini-scenario tests implemented; focused checks: 6 tests passed and Ruff passed.
 
 
 
