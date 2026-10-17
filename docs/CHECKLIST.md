@@ -21,7 +21,7 @@
 - [ ] B-18 Synthetic data and illustrative terms labelled (T03, T06, T14)
 - [ ] B-19 Transparent formulas, no double counting, four layers separated (T05, T07, T14)
 - [ ] B-20 No accuracy claim without backtest (T15)
-- [ ] B-21 Five synthetic cases (T03)
+- [x] B-21 Five synthetic cases (T03) — five generated case folders, schema validation and deterministic hash test in tests/test_data.py
 - [ ] B-22 Required tests: gap, alerts, scenarios, financing cost, invalid data, unauthorized actions, audit tamper, AI grounding (T15)
 - [ ] B-23 UI/UX direction followed (T02, T14)
 - [ ] B-24 End-to-end workflow works (T14, T18)
