@@ -62,7 +62,7 @@ Last updated: 2026-10-18
   - Replaced placeholder Analysis UI with computed weekly/monthly income and expense summaries, aging, DSO/DPO when invoice data supports them, burn/runway, gross margin only with identified COGS, trend flags and an evidence-linked customer watchlist.
   - Added weighted readiness scoring with component reasons/missing data, editable weights, and a consent/expiry-marked Markdown pack with SHA-256 verification tool on Financing. Labels explicitly say the indicator is not loan approval and pack integrity is not lender submission.
   - Verified: `pytest -q` (117 passed, including all five Analysis and Financing cases), `ruff check .` (all checks passed), secret scan (no matches in 130 files).
-  - Local checkpoint commit: pending.
+  - Local checkpoint commit: `280a988`.
 
 ## How to run
 ```
