@@ -96,11 +96,40 @@ def login(
         log_event(normalized or "anonymous", "anonymous", "login.denied", "authentication",
                   {"username": normalized}, db_path=db_path)
         raise AuthenticationError("Username or password is incorrect.")
+    return _issue_session(record, session_state=session_state, db_path=db_path)
+
+
+def login_demo(
+    username: str,
+    *,
+    session_state: MutableMapping | None = None,
+    db_path: str | Path | None = None,
+) -> AuthenticatedUser:
+    """Open a labelled local demo account from the sign-in shortcut buttons.
+
+    This intentionally bypasses password entry for the synthetic-data demo UI.
+    It must not be treated as production authentication.
+    """
+    normalized = username.strip().lower() if isinstance(username, str) else ""
+    record = _RECORDS.get(normalized)
+    if record is None:
+        raise AuthenticationError("Choose one of the available demo accounts.")
+    return _issue_session(record, session_state=session_state, db_path=db_path, demo_shortcut=True)
+
+
+def _issue_session(
+    record: UserRecord,
+    *,
+    session_state: MutableMapping | None,
+    db_path: str | Path | None,
+    demo_shortcut: bool = False,
+) -> AuthenticatedUser:
     token = secrets.token_urlsafe(32)
     _ACTIVE_SESSIONS[token] = record.username
     principal = AuthenticatedUser(record.username, record.display_name, record.role, token)
     _state(session_state)[AUTH_SESSION_KEY] = token
-    log_event(record.username, record.role, "login.success", "authentication", db_path=db_path)
+    log_event(record.username, record.role, "login.success", "authentication",
+              {"demo_shortcut": demo_shortcut}, db_path=db_path)
     return principal
 
 

@@ -105,3 +105,18 @@ def test_login_screen_accepts_a_demo_user(monkeypatch, audit_db):
     assert not app.exception
     assert any("Viewer" in item.value for item in app.markdown)
 
+
+@pytest.mark.parametrize("role,label", [
+    ("owner", "Owner"),
+    ("finance_ops", "Finance Ops"),
+    ("viewer", "Viewer"),
+    ("auditor", "Auditor"),
+])
+def test_demo_shortcut_buttons_open_each_role(monkeypatch, audit_db, role, label):
+    monkeypatch.setenv("STRATIFY_AUDIT_DB", str(audit_db))
+    app = AppTest.from_file(Path(__file__).resolve().parents[1] / "app" / "main.py", default_timeout=30).run()
+    demo_button = next(button for button in app.button if button.key == f"demo-login-{role}")
+    demo_button.click().run()
+    assert not app.exception
+    assert any(label in item.value for item in app.markdown)
+

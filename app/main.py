@@ -20,7 +20,7 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app import components as ui
-from services.auth import AuthenticationError, current_user, login, logout
+from services.auth import AuthenticationError, current_user, login, login_demo, logout
 from services.permissions import can_user
 
 PAGE_ACTIONS = {
@@ -46,15 +46,23 @@ def _login_panel() -> None:
             st.error(str(exc))
         except Exception:  # noqa: BLE001 - hide database/provider details from the login screen
             st.error("Sign in could not be completed. Check the local audit service and try again.")
-    with st.expander("DEMO accounts"):
-        st.markdown("""
-        These defaults are only for local synthetic-data demonstrations. Set the matching `DEMO_*_PASSWORD` values in the ignored `.env` file to replace them.
-
-        - `owner` / `DEMO-owner-123`
-        - `finance_ops` / `DEMO-finance-123`
-        - `viewer` / `DEMO-viewer-123`
-        - `auditor` / `DEMO-auditor-123`
-        """)
+    st.markdown("### Quick sign-in · DEMO")
+    st.caption("Choose a synthetic demo role to enter without typing a password. The regular username and password login remains available above.")
+    demo_accounts = (
+        ("owner", "Owner"),
+        ("finance_ops", "Finance Ops"),
+        ("viewer", "Viewer"),
+        ("auditor", "Auditor"),
+    )
+    columns = st.columns(4)
+    for column, (username, label) in zip(columns, demo_accounts):
+        with column:
+            if st.button(f"Continue as {label}", key=f"demo-login-{username}", use_container_width=True):
+                try:
+                    login_demo(username)
+                    st.rerun()
+                except Exception:  # noqa: BLE001 - keep audit storage details out of the login screen
+                    st.error("Demo sign-in could not be completed. Check the local audit service and try again.")
 
 
 def run() -> None:

@@ -16,6 +16,7 @@
 - Usernames are `owner`, `finance_ops`, `viewer`, and `auditor`; the role is resolved from the server-side user record.
 - The local synthetic-data demo defaults are `DEMO-owner-123`, `DEMO-finance-123`, `DEMO-viewer-123`, and `DEMO-auditor-123`. Replace them with `DEMO_OWNER_PASSWORD`, `DEMO_FINANCE_OPS_PASSWORD`, `DEMO_VIEWER_PASSWORD`, and `DEMO_AUDITOR_PASSWORD` in the ignored `.env` file for a local run.
 - Passwords are held as salted PBKDF2-HMAC-SHA256 hashes in process memory. This is a demo authentication boundary, not a production identity provider.
+- The sign-in page also exposes password-free quick-sign-in buttons for these synthetic demo accounts. This is a deliberate demo convenience and must be disabled before any production use.
 - The SQLite audit database is `data/audit.sqlite3` by default; set `STRATIFY_AUDIT_DB` to select a different local path. Rows are sanitized, append-only under SQLite triggers, and linked by SHA-256 hashes.
 
 ## Controls (baseline)
