@@ -1,10 +1,10 @@
 # PROGRESS
 
-Current task: T12 (next)
+Current task: T12 (in progress)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-- T12: added persistent draft records, deterministic escaped previews, status timeline, role-checked transitions, plan confirmation metadata, and an idempotent offline execution log; wiring UI and workflow tests next.
+- T12: persistent draft state machine and offline execution log are implemented; wired finance_ops draft creation, owner review, simulated execution, Lab plan submission, and confirmed-chart rendering. Focused UI test reaches the chart but fails because the test harness does not expose `proto.figure`; stopping after two test-fix attempts per CLAUDE.md.
 
 ## Done
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)
@@ -85,6 +85,7 @@ Python 3.11.9 in `.venv`; no CDN and no external fonts.
 Secret scan: `python scripts/check_secrets.py` (exit 0 = clean).
 
 ## Known issues
+- T12 in progress: `tests/test_agent_actions.py::test_full_finance_ops_to_owner_ui_flow` fails only at its final Plotly trace inspection (`AttributeError: figure` on the AppTest element's `proto`). The preceding finance_ops draft, owner approval, sandbox execution, Lab proposal creation, and plan approval assertions passed. Hypothesis: this Streamlit AppTest version exposes Plotly data through a different property; resolve the supported inspection API before completing T12.
 - T02 visual follow-up deferred at the user's direction: font sizing, alignment, vertical text placement, and card text/layout need review and correction during T14 cross-page UI polish. T02 shell is implemented; the user confirmed all 10 pages are clickable and show content, with these visual issues remaining.
 - The competition PDF in docs/inputs/ could not be read on this machine (no poppler, no PDF library; the file has no /ToUnicode CMap). docs/COMPETITION.md is therefore unverified against the PDF - verify by hand before submission.
 - `python run.py start` leaves the server running in its terminal (normal Streamlit behaviour); stop with Ctrl-C.

@@ -54,6 +54,7 @@ def _connect(db_path: str | Path | None = None) -> sqlite3.Connection:
     connection = sqlite3.connect(path, timeout=10)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA busy_timeout=10000")
+    connection.execute("PRAGMA foreign_keys=ON")
     return connection
 
 

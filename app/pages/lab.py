@@ -16,6 +16,7 @@ from core.stress import apply_stress
 from data.generate_synthetic import CASES
 from services.actions import record_scenario_change
 from services.actions import run_lab as run_authorized_lab
+from services.agent_actions import create_draft, confirmed_plans, submit_draft
 from services.auth import current_user
 
 CASE_LABELS = {
@@ -154,6 +155,7 @@ if case.profile.import_scenario and values["include_import_scenario"]:
     scenario_case = import_result.scenario_case
 lab_assumptions = to_lab_assumptions(values)
 lab_result = run_authorized_lab(user, scenario_case, lab_assumptions) if user else _cached_lab(scenario_case, lab_assumptions)
+confirmed = confirmed_plans(user, case_name) if user else []
 st.session_state["lab_result"] = lab_result
 st.session_state["lab_case_name"] = case_name
 st.session_state["lab_scenario_case"] = scenario_case
@@ -229,6 +231,13 @@ for name in PLAN_ORDER:
         lab_result.reserve, float(values["sales_variability_cv"]), float(values["customer_delay_sd_days"]))
     if name == "Option 0":
         charts.band(figure, week_labels, mc.p10, mc.p90)
+for proposal in confirmed:
+    snapshot = proposal.get("plan_snapshot", {})
+    points = snapshot.get("balance_series_after", [])
+    if points:
+        charts.line(figure, [point["week_start"] for point in points],
+                    [point["closing_balance"] for point in points], layer="CONFIRMED",
+                    name=f"Confirmed · {proposal.get('plan_id', 'Lab plan')}")
 charts.reserve(figure, week_labels, lab_result.reserve)
 st.plotly_chart(figure, width="stretch")
 ui.layer_legend()
@@ -335,55 +344,20 @@ if saved_scenarios:
 else:
     st.caption("Save up to three settings snapshots to compare them in this session.")
 
-st.button("Save as proposal", disabled=True, help="Proposal drafts become available when the T12 draft service is implemented.")
-ui.footer()
-
-ui.load_styles()
-
-ui.page_header(
-    "Liquidity Decision Lab",
-    "Compare four ways to close a cash gap: do nothing, optimise, partial financing, full financing.",
-    business="Demo business",
-)
-
-ui.kpi_row(
-    [
-        ("Funding gap", "BDT 240,000", "Reserve minus the lowest projected balance."),
-        ("Shortage week", "W7", "First week below the reserve."),
-        ("Recommended plan", "Option A", "Feasible plan with the lowest total cost."),
-    ]
-)
-
-st.caption("Sample data for layout review only - plans are computed in T07.")
-
-plans = [
-    ("Option 0 - Do nothing", "BDT 650,000", "BDT 240,000", "W7", False),
-    ("Option A - Collect & optimise", "BDT 480,000", "BDT 70,000", "W10", True),
-    ("Option B - Partial financing", "BDT 690,000", "BDT 0", "None", False),
-    ("Option C - Full financing", "BDT 900,000", "BDT 0", "None", False),
-]
-ui.plan_row(
-    [
-        (name, [("Best balance", best), ("Remaining gap", gap), ("Shortage", week)], recommended)
-        for name, best, gap, week, recommended in plans
-    ]
-)
-
-x = [f"W{i}" for i in range(1, 11)]
-fig = charts.base_layout(title="Plan comparison (placeholder data)", x_title="Week", y_title="BDT")
-charts.line(fig, x, [1250, 1180, 1090, 980, 870, 760, 660, 570, 490, 420], layer="FORECAST", name="Option 0")
-charts.line(fig, x, [1250, 1180, 1290, 1180, 1120, 1010, 880, 790, 720, 660], layer="HYPOTHETICAL", name="Option A")
-charts.line(fig, x, [1250, 1330, 1300, 1350, 1310, 1330, 1290, 1310, 1270, 1290], layer="HYPOTHETICAL", name="Option B")
-charts.reserve(fig, x, 650)
-st.plotly_chart(fig, use_container_width=True)
-ui.layer_legend()
-
-ui.section_title("Decision Lab")
-ui.empty_state(
-    "Lab content lands in T07 and T08",
-    "Isolated L1/L2/L3 levers, per-plan cost and capacity, sliders, stress tests and saved scenarios.",
-    "Open Overview",
-    disabled=True,
-)
-
+ui.section_title("Submit a plan proposal")
+proposal_plan_id = st.selectbox("Plan to submit", PLAN_ORDER, index=PLAN_ORDER.index(lab_result.best_plan_id)
+    if lab_result.best_plan_id in PLAN_ORDER else 0, key=f"lab-proposal-plan-{case_name}")
+if st.button("Save as proposal", disabled=user is None, key=f"lab-proposal-save-{case_name}"):
+    try:
+        plan_snapshot = lab_result.plans[proposal_plan_id].to_dict()
+        draft = create_draft(user, "plan_proposal", {
+            "case_name": case_name,
+            "plan_id": proposal_plan_id,
+            "plan_snapshot": plan_snapshot,
+        })
+        submit_draft(user, draft.draft_id)
+        st.success(f"Proposal {draft.draft_id[:8]} submitted for owner review. Assumptions remain HYPOTHETICAL until approved.")
+        st.rerun()
+    except Exception:  # noqa: BLE001 - don't expose persistence or internal plan details
+        st.error("The plan proposal could not be saved. No external action was taken.")
 ui.footer()
