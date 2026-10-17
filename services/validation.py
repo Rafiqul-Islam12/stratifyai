@@ -4,13 +4,12 @@ from __future__ import annotations
 
 import csv
 import io
-import math
-import re
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
+from zipfile import BadZipFile
 
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 MAX_ROWS = 50_000
@@ -74,7 +73,10 @@ def _parse_xlsx(content: bytes) -> tuple[list[str], list[list[Any]]]:
         from openpyxl import load_workbook
     except ImportError as exc:
         raise RuntimeError("Excel support is unavailable; install the project's openpyxl dependency.") from exc
-    workbook = load_workbook(io.BytesIO(content), read_only=True, data_only=False)
+    try:
+        workbook = load_workbook(io.BytesIO(content), read_only=True, data_only=False)
+    except (BadZipFile, OSError, ValueError) as exc:
+        raise ValueError("Could not read the uploaded Excel workbook.") from exc
     try:
         sheet = workbook.active
         iterator = sheet.iter_rows(values_only=True)
@@ -111,8 +113,12 @@ def _parse_date(value: Any) -> date | None:
         return value
     raw = str(value).strip()
     try:
-        return date.fromisoformat(raw[:10])
+        return date.fromisoformat(raw)
     except ValueError:
+        try:
+            return datetime.fromisoformat(raw).date()
+        except ValueError:
+            pass
         for fmt in ("%d/%m/%Y", "%m/%d/%Y", "%Y/%m/%d"):
             try:
                 return datetime.strptime(raw, fmt).date()
@@ -123,7 +129,7 @@ def _parse_date(value: Any) -> date | None:
 
 def _parse_number(value: Any) -> float:
     if isinstance(value, bool):
-        raise ValueError("Expected a numeric amount.")
+        raise TypeError("Expected a numeric amount.")
     try:
         number = Decimal(str(value).strip())
     except (InvalidOperation, ValueError):
@@ -166,7 +172,7 @@ def validate_upload(
         return report
     try:
         headers, raw_rows = _parse_csv(content) if suffix == ".csv" else _parse_xlsx(content)
-    except (UnicodeDecodeError, csv.Error, RuntimeError, OSError, ValueError) as exc:
+    except (UnicodeError, csv.Error, RuntimeError, OSError, ValueError, BadZipFile, TypeError) as exc:
         report.errors.append(ValidationIssue(str(exc) if isinstance(exc, RuntimeError) else "Could not read the uploaded file."))
         return report
     if not headers or not any(headers):
@@ -226,7 +232,7 @@ def validate_upload(
                     row[column] = number
                     if (column == "amount" or column.endswith("_amount")) and number < 0:
                         error(index, "Amount cannot be negative.", column)
-                except ValueError as exc:
+                except (ValueError, TypeError) as exc:
                     row[column] = _safe_text(text_value)
                     if _looks_formula(text_value):
                         warning(index, "Formula-like content was neutralised.", column)

@@ -3,12 +3,17 @@
 import csv
 import io
 from datetime import date
+from pathlib import Path
 
+import pytest
 from openpyxl import Workbook
+from streamlit.testing.v1 import AppTest
 
 from core.loaders import load_case
 from data.generate_synthetic import CASES
 from services.validation import REQUIRED_COLUMNS, validate_upload
+
+UPLOAD_PAGE = Path(__file__).resolve().parents[1] / "app" / "pages" / "upload.py"
 
 
 def _csv_content(headers=None, rows=None):
@@ -73,6 +78,13 @@ def test_formula_like_cells_are_neutralised_and_reported():
     assert report.is_valid
 
 
+@pytest.mark.parametrize("value", ["=1+1", "+SUM(A1:A2)", "-cmd", "@SUM(A1:A2)"])
+def test_formula_prefixes_are_neutralised(value):
+    report = validate_upload("transactions.csv", _csv_content(rows=[_transaction_row(description=value)]))
+    assert report.cleaned_data[0]["description"] == "'" + value
+    assert any("neutralised" in issue.message for issue in report.warnings)
+
+
 def test_formula_in_amount_is_neutralised_but_invalid():
     report = validate_upload("transactions.csv", _csv_content(rows=[_transaction_row(amount="=1+1")]))
     assert report.cleaned_data[0]["amount"] == "'=1+1"
@@ -95,6 +107,12 @@ def test_row_limit_is_reported_without_silently_dropping_rows():
     assert any("maximum is 1" in issue.message for issue in report.errors)
     assert len(report.cleaned_data) == 1
     assert report.stats["rows"] == 2
+    assert any(issue.row == 3 and "not processed" in issue.message for issue in report.errors)
+
+
+def test_text_length_limit_is_reported():
+    report = validate_upload("transactions.csv", _csv_content(rows=[_transaction_row(description="x" * 501)]))
+    assert any(issue.column == "description" and "500-character" in issue.message for issue in report.errors)
 
 
 def test_inconsistent_currency_is_rejected():
@@ -125,3 +143,28 @@ def test_all_demo_cases_load_through_validated_loader():
         assert loaded.transactions
         assert loaded.receivables
         assert loaded.payables
+
+
+def test_upload_page_accepts_good_file_and_stores_validated_rows():
+    app = AppTest.from_file(UPLOAD_PAGE).run()
+    app.file_uploader[0].upload("transactions.csv", _csv_content(), "text/csv").run()
+    assert not app.exception
+    app.button[0].click().run()
+    assert app.session_state["uploaded_dataset"]["rows"][0]["transaction_id"] == "T-1"
+
+
+def test_upload_page_reports_broken_file_without_exception():
+    headers = [column for column in REQUIRED_COLUMNS["transactions"] if column != "amount"]
+    values = dict(zip(REQUIRED_COLUMNS["transactions"], _transaction_row()))
+    app = AppTest.from_file(UPLOAD_PAGE).run()
+    app.file_uploader[0].upload("broken.csv", _csv_content(headers, [[values[column] for column in headers]]), "text/csv").run()
+    assert not app.exception
+    assert any("validation error" in element.value for element in app.error)
+
+
+def test_upload_page_uses_formula_neutralised_value():
+    app = AppTest.from_file(UPLOAD_PAGE).run()
+    content = _csv_content(rows=[_transaction_row(description="=1+1")])
+    app.file_uploader[0].upload("formula.csv", content, "text/csv").run()
+    app.button[0].click().run()
+    assert app.session_state["uploaded_dataset"]["rows"][0]["description"] == "'=1+1"
