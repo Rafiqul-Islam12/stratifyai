@@ -119,4 +119,7 @@ def test_demo_shortcut_buttons_open_each_role(monkeypatch, audit_db, role, label
     demo_button.click().run()
     assert not app.exception
     assert any(label in item.value for item in app.markdown)
+    if role == "auditor":
+        app.switch_page("pages/approvals.py").run()
+        assert not app.exception
 

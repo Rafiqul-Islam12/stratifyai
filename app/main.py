@@ -79,17 +79,19 @@ def run() -> None:
         _login_panel()
         return
     visible = [page for page in ui.PAGES if page[1] not in PAGE_ACTIONS or can_user(user, PAGE_ACTIONS[page[1]])]
-    ui.sidebar_top(visible)
+    pages = [
+        st.Page(path, title=title, icon=icon, default=path == ui.PAGES[0][1])
+        for title, path, icon in visible
+    ]
+    page_by_path = {path: page for (_, path, _), page in zip(visible, pages)}
+    pg = st.navigation(pages, position="hidden")
+    sidebar_pages = [(title, page_by_path[path], icon) for title, path, icon in visible]
+    ui.sidebar_top(sidebar_pages)
     ui.sidebar_bottom(user.display_name, user.role)
     with st.sidebar:
         if st.button("Log out", key="auth-logout"):
             logout()
             st.rerun()
-    pages = [
-        st.Page(path, title=title, icon=icon, default=path == ui.PAGES[0][1])
-        for title, path, icon in visible
-    ]
-    pg = st.navigation(pages, position="hidden")
     pg.run()
 
 

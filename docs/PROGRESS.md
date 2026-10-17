@@ -4,6 +4,7 @@ Current task: T12 (next)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
+- T11 follow-up: register role-filtered Streamlit pages before rendering sidebar links and pass the registered page objects; add auditor Approvals navigation regression coverage.
 
 ## Done
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)
