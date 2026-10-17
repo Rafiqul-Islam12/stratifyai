@@ -1,14 +1,17 @@
 """Deterministic forecast behavior: balances, reserve breaches and category rules."""
 
 from datetime import date, timedelta
+from pathlib import Path
 
 import pytest
+from streamlit.testing.v1 import AppTest
 
 from core.forecast import ForecastWeek, forecast
-from core.loaders import SyntheticCase
+from core.loaders import SyntheticCase, load_case
 from core.schema import Assumptions, BusinessProfile, Customer, Payable, Receivable, Supplier, Transaction
 from data.generate_synthetic import CASES
-from core.loaders import load_case
+
+CASHFLOW_PAGE = Path(__file__).resolve().parents[1] / "app" / "pages" / "cashflow.py"
 
 
 def _mini_case(transactions, *, receivables=None, payables=None, opening_cash=500.0, delays=0):
@@ -97,3 +100,20 @@ def test_forecast_is_deterministic_and_horizon_is_at_least_eight_weeks():
     assert forecast(case) == forecast(case)
     with pytest.raises(ValueError, match="at least 8"):
         forecast(case, horizon_weeks=7)
+
+
+def test_cashflow_page_renders_for_all_five_demo_cases():
+    app = AppTest.from_file(CASHFLOW_PAGE, default_timeout=20).run()
+    assert not app.exception
+    for case_name in CASES:
+        app.selectbox[0].select(case_name).run(timeout=20)
+        assert not app.exception
+        assert app.session_state["active_synthetic_case"] == case_name
+        assert app.session_state["cash_flow_forecast"].forecast_weeks
+
+
+def test_cashflow_reserve_input_recalculates_shortage_week():
+    app = AppTest.from_file(CASHFLOW_PAGE, default_timeout=20).run()
+    assert app.session_state["cash_flow_forecast"].shortage_week is None
+    app.number_input[0].set_value(6_000_000).run(timeout=20)
+    assert app.session_state["cash_flow_forecast"].shortage_week == 1

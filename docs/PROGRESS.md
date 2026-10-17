@@ -4,7 +4,8 @@ Current task: T05 (in progress)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-- T05: deterministic forecast engine and focused tests done (10 passed); all five qualitative case outcomes match expected.json. Strengthened delayed-payment case inputs to exercise its documented shortage outcome.
+- T05: deterministic forecast engine and focused tests done (12 passed); all five qualitative case outcomes match expected.json. Strengthened delayed-payment case inputs to exercise its documented shortage outcome.
+- T05: Cash Flow page now renders the actual/forecast chart, weekly table, reserve input, assumptions, and computed shortage alerts; AppTest exercises all five cases and reserve recalculation.
 
 
 

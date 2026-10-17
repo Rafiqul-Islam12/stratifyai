@@ -1,12 +1,141 @@
-"""Cash Flow - forecast, reserve and shortage alerts. Built in T05."""
+"""Cash Flow page backed by the deterministic weekly forecast engine."""
 from __future__ import annotations
 
+import pandas as pd
 import streamlit as st
 
 from app import charts
 from app import components as ui
+from core.forecast import ForecastResult, forecast
+from core.loaders import load_case
+from data.generate_synthetic import CASES
+
+CASE_LABELS = {
+    "stable_healthy": "Stable and healthy",
+    "delayed_customer_payments": "Delayed customer payments",
+    "high_expense_shortage": "High expense, shortage",
+    "import_financing": "Import financing",
+    "sales_drop_cost_rise": "Sales drop, cost rise",
+}
+
+
+def _money(value: float) -> str:
+    return f"BDT {value:,.0f}"
+
+
+def _alert(result: ForecastResult) -> tuple[str, str, str]:
+    if result.shortage_week is None:
+        return "info", "No projected reserve breach", "The projected closing balance stays at or above the minimum reserve throughout the forecast."
+    when = result.shortage_date.isoformat() if result.shortage_date else ""
+    week_detail = f"Week {result.shortage_week} ({when})"
+    if result.severity == "critical":
+        return (
+            "critical",
+            "Projected cash falls below zero",
+            f"The first reserve breach is {week_detail}; the forecast also falls below zero in week {result.below_zero_week}.",
+        )
+    return (
+        "warning",
+        "Projected reserve breach",
+        f"The first reserve breach is {week_detail}. The minimum projected balance is {_money(result.minimum_balance)}.",
+    )
+
 
 ui.load_styles()
+active_case_name = st.session_state.get("active_synthetic_case")
+default_case_index = CASES.index(active_case_name) if active_case_name in CASES else 0
+case_name = st.selectbox(
+    "Synthetic demo case",
+    options=CASES,
+    index=default_case_index,
+    format_func=lambda value: CASE_LABELS[value],
+    key="cashflow-case-select",
+)
+case_data = load_case(case_name)
+st.session_state["active_synthetic_case"] = case_name
+st.session_state["synthetic_case_data"] = case_data
+
+ui.page_header(
+    "Cash Flow",
+    "Weekly actuals, a deterministic cash forecast, and the first reserve breach.",
+    business=case_data.profile.business_name,
+    scenario=CASE_LABELS[case_name],
+)
+st.caption("Synthetic data · BDT · forecast values are deterministic and use editable assumptions.")
+
+default_result = forecast(case_data)
+reserve_value = st.number_input(
+    "Minimum cash reserve (BDT)",
+    min_value=0,
+    value=max(0, round(default_result.reserve)),
+    step=10_000,
+    key=f"cashflow-reserve-{case_name}",
+    help="Default reserve equals the configured reserve weeks multiplied by average fixed weekly outflows.",
+)
+result = forecast(case_data, reserve=float(reserve_value))
+st.session_state["cash_flow_forecast"] = result
+tone, title, body = _alert(result)
+ui.alert_banner(tone, title, body)
+
+first_shortage = f"Week {result.shortage_week}" if result.shortage_week is not None else "None"
+ui.kpi_row(
+    [
+        ("Opening cash", _money(result.opening_cash), "Latest recorded transaction balance."),
+        ("Forecast horizon", f"{result.horizon_weeks} weeks", "Weekly deterministic forecast horizon."),
+        ("Minimum reserve", _money(result.reserve), "Editable reserve threshold for closing cash."),
+        ("First shortage", first_shortage, "First forecast week with closing cash below the reserve."),
+    ]
+)
+ui.kpi_row(
+    [
+        ("Minimum projected balance", _money(result.minimum_balance), f"Forecast week {result.minimum_balance_week}."),
+        ("Funding gap", _money(result.funding_gap), f"Includes a {result.funding_buffer_pct:g}% optional buffer."),
+        ("Below-zero week", f"Week {result.below_zero_week}" if result.below_zero_week is not None else "None", "First forecast closing balance below zero."),
+        ("Fixed weekly outflow", _money(result.fixed_weekly_outflow), "Average non-discretionary outflow over the recent eight weeks."),
+    ]
+)
+
+ui.section_title("Cash balance")
+figure = charts.base_layout(title="Actual and forecast cash balance", x_title="Week starting", y_title="BDT", height=420)
+actual_x = [week.week_start.isoformat() for week in result.actual_weeks]
+forecast_x = [week.week_start.isoformat() for week in result.forecast_weeks]
+charts.line(figure, actual_x, [week.closing_balance for week in result.actual_weeks], layer="ACTUAL", name="Actual closing balance")
+charts.line(figure, forecast_x, [week.closing_balance for week in result.forecast_weeks], layer="FORECAST", name="Forecast closing balance")
+charts.reserve(figure, actual_x + forecast_x, result.reserve)
+if result.shortage_week is not None:
+    breach_x = forecast_x[result.shortage_week - 1]
+    charts.shortage(figure, breach_x, forecast_x[-1])
+    charts.shortage_marker(figure, breach_x, result.forecast_weeks[result.shortage_week - 1].closing_balance)
+st.plotly_chart(figure, width="stretch")
+ui.layer_legend()
+
+ui.section_title("Weekly cash table")
+table_rows = [
+    {
+        "Week starting": row.week_start.isoformat(),
+        "Layer": row.layer,
+        "Inflow (BDT)": round(row.inflow, 2),
+        "Outflow (BDT)": round(row.outflow, 2),
+        "Net (BDT)": round(row.net, 2),
+        "Closing (BDT)": round(row.closing_balance, 2),
+    }
+    for row in result.weeks
+]
+st.dataframe(pd.DataFrame(table_rows), width="stretch", hide_index=True)
+
+ui.section_title("Forecast assumptions")
+delay_values = list(result.payment_delay_days.values())
+if delay_values:
+    delay_summary = f"{len(delay_values)} customer delay assumptions; range {min(delay_values):g} to {max(delay_values):g} days."
+else:
+    delay_summary = "No customer delay assumptions; the expected delay defaults to zero days."
+st.markdown(
+    f"- Reserve basis: {case_data.assumptions.minimum_reserve_weeks:g} weeks of average fixed outflows.\n"
+    f"- Fixed weekly outflow estimate: {_money(result.fixed_weekly_outflow)} from the most recent eight weeks.\n"
+    f"- Customer payment timing: {delay_summary}\n"
+    "- Run-rate categories covered by receivables or payables are excluded from recurring projections."
+)
+ui.footer()
 
 ui.page_header(
     "Cash Flow",
