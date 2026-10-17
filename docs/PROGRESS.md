@@ -1,11 +1,10 @@
 # PROGRESS
 
-Current task: T02 (in progress)
-Last updated: 2026-10-17
+Current task: T03 (in progress)
+Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-- T02: design tokens + Inter setup done (fallback stack: no Inter files present)
-- T02: config.toml, styles.css, components.py, charts.py, shell done
+- T03: typed schemas, validated case loader, deterministic five-case generator and focused tests done (7 passed)
 
 ## Done
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)
@@ -32,9 +31,10 @@ Python 3.11.9 in `.venv`; no CDN and no external fonts.
 Secret scan: `python scripts/check_secrets.py` (exit 0 = clean).
 
 ## Known issues
+- T02 visual follow-up deferred at the user's direction: font sizing, alignment, vertical text placement, and card text/layout need review and correction during T14 cross-page UI polish. T02 shell is implemented; the user confirmed all 10 pages are clickable and show content, with these visual issues remaining.
 - The competition PDF in docs/inputs/ could not be read on this machine (no poppler, no PDF library; the file has no /ToUnicode CMap). docs/COMPETITION.md is therefore unverified against the PDF - verify by hand before submission.
 - `python run.py start` leaves the server running in its terminal (normal Streamlit behaviour); stop with Ctrl-C.
-- data/, evidence/ and static/fonts/ hold only .gitkeep until T02/T03.
+- evidence/ and static/fonts/ hold only .gitkeep until related later tasks; static/fonts/ has no Inter files, so the system fallback stack is active.
 
 ## Decisions or assumptions changed (details in DECISIONS.md)
 - Streamlit pinned to 1.66.0 rather than ">= 1.45" so the demo is reproducible (>= 1.45 was the stated floor for self-hosted fonts).

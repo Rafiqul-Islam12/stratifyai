@@ -1,0 +1,102 @@
+{
+  "assumptions": {
+    "collection_haircut_pct": 0,
+    "collection_pct": 50,
+    "collection_weeks": 2,
+    "currency": "BDT",
+    "customer_delay_sd_days": 7,
+    "deferral_weeks": 2,
+    "discretionary_reduction_pct": 10,
+    "discretionary_start_week": 1,
+    "forecast_horizon_weeks": 13,
+    "funding_buffer_pct": 0,
+    "late_fee_pct": 0,
+    "minimum_reserve_weeks": 2,
+    "random_seed": 20261220,
+    "sales_variability_cv": 0.15
+  },
+  "business_id": "SYN-03",
+  "business_name": "Synthetic SME Case 3",
+  "currency": "BDT",
+  "customers": [
+    {
+      "customer_id": "C01",
+      "name": "Synthetic Customer 01",
+      "typical_delay_days": 26
+    },
+    {
+      "customer_id": "C02",
+      "name": "Synthetic Customer 02",
+      "typical_delay_days": 9
+    },
+    {
+      "customer_id": "C03",
+      "name": "Synthetic Customer 03",
+      "typical_delay_days": 24
+    },
+    {
+      "customer_id": "C04",
+      "name": "Synthetic Customer 04",
+      "typical_delay_days": 10
+    },
+    {
+      "customer_id": "C05",
+      "name": "Synthetic Customer 05",
+      "typical_delay_days": 16
+    },
+    {
+      "customer_id": "C06",
+      "name": "Synthetic Customer 06",
+      "typical_delay_days": 19
+    },
+    {
+      "customer_id": "C07",
+      "name": "Synthetic Customer 07",
+      "typical_delay_days": 24
+    },
+    {
+      "customer_id": "C08",
+      "name": "Synthetic Customer 08",
+      "typical_delay_days": 16
+    },
+    {
+      "customer_id": "C09",
+      "name": "Synthetic Customer 09",
+      "typical_delay_days": 14
+    },
+    {
+      "customer_id": "C10",
+      "name": "Synthetic Customer 10",
+      "typical_delay_days": 25
+    }
+  ],
+  "import_scenario": {},
+  "industry": "Synthetic wholesale and distribution",
+  "opening_cash": 480000,
+  "suppliers": [
+    {
+      "name": "Synthetic Supplier 01",
+      "supplier_id": "S01"
+    },
+    {
+      "name": "Synthetic Supplier 02",
+      "supplier_id": "S02"
+    },
+    {
+      "name": "Synthetic Supplier 03",
+      "supplier_id": "S03"
+    },
+    {
+      "name": "Synthetic Supplier 04",
+      "supplier_id": "S04"
+    },
+    {
+      "name": "Synthetic Supplier 05",
+      "supplier_id": "S05"
+    },
+    {
+      "name": "Synthetic Supplier 06",
+      "supplier_id": "S06"
+    }
+  ]
+}

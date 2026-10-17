@@ -1,0 +1,8 @@
+{
+  "approximate_shortage_week_range": [
+    1,
+    6
+  ],
+  "note": "Qualitative synthetic scenario expectation; validate with the forecast engine.",
+  "shortage_expected": true
+}

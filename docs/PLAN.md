@@ -3,7 +3,7 @@
 Legend: [ ] todo, [x] done. P1 must, P2 should, P3 cut first.
 
 - [x] T01 Scaffold, tooling, run.py launcher, CI, status script (P1)
-- [ ] T02 Design system and app shell (P1) WAIT for user approval
+- [x] T02 Design system and app shell (P1; visual follow-up deferred to T14 per user direction)
 - [ ] T03 Synthetic data and schema, five cases (P1)
 - [ ] T04 Upload, validation and Data Upload page (P1)
 - [ ] T05 Forecast engine, shortage alerts, Cash Flow page (P1)
@@ -15,7 +15,7 @@ Legend: [ ] todo, [x] done. P1 must, P2 should, P3 cut first.
 - [ ] T11 Security core, roles, audit chain, Approvals/Audit and Security pages (P1)
 - [ ] T12 Agent action drafts, approval workflow, simulated execution (P1)
 - [ ] T13 Grounded copilot, injection protection, offline mode, receipt (P1)
-- [ ] T14 Overview page and cross-page polish (P1)
+- [ ] T14 Overview page and cross-page polish (P1; include T02 font sizing, alignment, card text/layout, and vertical text placement fixes)
 - [ ] T15 Evaluation, task-completion suite, evidence, report builder, decision report (P1)
 - [ ] T16 Documentation, README blueprint, submission docs, demo fixtures (P1)
 - [ ] T17 Packaging, Docker, submission zip, optional live deployment (P2)
