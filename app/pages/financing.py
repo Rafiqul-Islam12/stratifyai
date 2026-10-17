@@ -1,14 +1,20 @@
 """Financing comparison page backed by transparent illustrative calculations."""
 from __future__ import annotations
 
+from datetime import date
+
 import pandas as pd
 import streamlit as st
 
 from app import charts
 from app import components as ui
+from core.analysis import analyze
 from core.financing import TEMPLATES, FinancingTerms, calculate_financing
 from core.forecast import forecast
+from core.lab import run_lab
 from core.loaders import load_case
+from core.readiness import DEFAULT_WEIGHTS, assess_readiness
+from core.readiness_pack import build_readiness_pack, verify_readiness_pack
 from data.generate_synthetic import CASES
 
 CASE_LABELS = {
@@ -24,6 +30,11 @@ DEFAULTS = {
 
 def _money(amount: float) -> str:
     return f"BDT {amount:,.0f}"
+
+
+@st.cache_data(show_spinner=False)
+def _cached_lab(case):
+    return run_lab(case)
 
 
 ui.load_styles()
@@ -104,4 +115,65 @@ st.markdown("**Information to confirm**")
 for item in result.missing_information:
     st.markdown(f"- {item}")
 st.caption("Capacity pressure labels are simple modelling thresholds, not lender rules. Invoice financing charges use the selected fee per 30 days; supplier credit cost is a one-time percentage. Credit line fees are applied to the drawn amount because a separate undrawn limit was not modelled.")
+
+analysis = analyze(case_data)
+lab_result = _cached_lab(case_data)
+with st.expander("Adjust readiness indicator weights", expanded=False):
+    weight_cols = st.columns(5)
+    readiness_weights = {
+        name: float(col.slider(f"{name.title()} weight", 0, 100, int(weight), key=f"readiness-weight-{case_name}-{name}"))
+        for col, (name, weight) in zip(weight_cols, DEFAULT_WEIGHTS.items())
+    }
+readiness = assess_readiness(case_data, analysis, projection, capacity_ratio=result.capacity_ratio,
+                             weights=readiness_weights)
+ui.section_title("Financing readiness indicator")
+st.caption("Readiness indicator, not a loan approval prediction. It is not a lender decision or real offer.")
+if readiness.score is None:
+    st.metric("Readiness indicator", "Not available")
+else:
+    st.metric("Readiness indicator", f"{readiness.score:.1f} / 100")
+st.dataframe(pd.DataFrame([{
+    "Component": item.name.title(), "Weight (%)": item.weight,
+    "Score (0-100)": round(item.score, 1) if item.score is not None else "Not available",
+    "Reason": item.reason,
+} for item in readiness.components]), width="stretch", hide_index=True)
+st.markdown("**Reasons and missing information**")
+for note in readiness.reasons:
+    st.markdown(f"- {note}")
+for note in readiness.missing_information:
+    st.markdown(f"- Missing: {note}")
+
+ui.section_title("Readiness Pack")
+st.caption("Integrity check only. Not a lender submission.")
+expiry = st.date_input("Pack expiry date", value=date.today() + pd.Timedelta(days=30),
+                       min_value=date.today(), key=f"readiness-expiry-{case_name}")
+consent = st.checkbox("I consent to generate this local readiness pack", key=f"readiness-consent-{case_name}")
+if st.button("Generate readiness pack", key=f"readiness-generate-{case_name}"):
+    plan = lab_result.plans[lab_result.best_plan_id]
+    assumptions = case_data.assumptions.model_dump()
+    assumptions.update({"financing template": template, "annual rate (%)": annual_rate,
+                       "fee / charge (%)": fee, "tenor (months)": int(tenor),
+                       "reserve (BDT)": projection.reserve})
+    try:
+        pack = build_readiness_pack(case_data, analysis, projection, readiness,
+            chosen_plan=f"{lab_result.best_plan_id} (remaining gap {_money(plan.remaining_gap)})",
+            assumptions=assumptions, expires_on=expiry, consent=consent)
+        st.session_state["readiness_pack_content"] = pack.content
+        st.session_state["readiness_pack_hash"] = pack.content_hash
+    except ValueError as exc:
+        st.error(str(exc))
+if st.session_state.get("readiness_pack_content"):
+    pack_content = st.session_state["readiness_pack_content"]
+    st.download_button("Download Markdown pack", data=pack_content,
+        file_name=f"{case_name}-readiness-pack.md", mime="text/markdown", key=f"readiness-download-{case_name}")
+    st.caption(f"SHA-256: {st.session_state['readiness_pack_hash']}")
+
+with st.expander("Verify a readiness pack"):
+    uploaded_pack = st.file_uploader("Upload Markdown or text pack", type=("md", "txt"), key=f"verify-upload-{case_name}")
+    pasted_pack = st.text_area("Or paste pack content", key=f"verify-paste-{case_name}")
+    if st.button("Verify pack hash", key=f"verify-pack-{case_name}"):
+        candidate = uploaded_pack.getvalue().decode("utf-8", errors="replace") if uploaded_pack else pasted_pack
+        verified, message = verify_readiness_pack(candidate)
+        st.success(message) if verified else st.error(message)
+    st.caption("Integrity check only. Not a lender submission.")
 ui.footer()

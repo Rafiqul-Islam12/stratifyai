@@ -44,6 +44,14 @@ Components (weights editable): repayment capacity 35, cash buffer 25, receivable
 ## Receivables watchlist (our own formula, explainable)
 Score 0 to 100 per customer, weights editable: overdue-amount share of the customer's open balance 40; weighted days overdue 30 (capped at 90 days); payment-delay trend 20 (recent delay versus earlier delay); concentration (customer share of total receivables) 10. Labels: below 30 normal, 30 to 60 watch, above 60 urgent (editable). Every score lists the invoice ids behind it.
 
+## T10 Business analysis and readiness
+- Analysis is a historical snapshot as of the latest transaction date. Income and expense totals come from recorded inflow/outflow transactions; weekly and monthly net cash flow is grouped from those same records.
+- Receivable aging uses open invoice amounts and days past due at the snapshot. Buckets are 0-30, 31-60, 61-90, and over 90 days (the final label is 90+). Four-week payables due includes overdue open bills and bills due within 28 days.
+- DSO = ending open receivables / invoice amounts issued during the transaction-history window x window days. DPO = ending open purchase-bill payables / purchase-bill amounts issued in that window x window days. Each is unavailable when its matching record denominator is absent. Gross margin is shown only when income and an explicitly categorized COGS/Inventory cost are present.
+- Weekly burn is the positive average net cash outflow over up to 13 recorded weeks; runway is latest recorded cash / burn and is unavailable if the history shows no net burn. Expense trend flags are categories with a >15% average weekly increase in the latest four recorded weeks versus the preceding four.
+- Readiness component scores are bounded 0-100: repayment capacity = capacity ratio / 1.25 x 100; cash buffer = latest cash / reserve x 100; receivable quality = 100 minus overdue share; completeness = present core data sources / 5; trend = 50 plus 50 x the latest-vs-prior four-week average net-cash change divided by the larger absolute average. Missing components are omitted and remaining weights normalized. Weights are 35/25/20/10/10 by default.
+- Readiness packs are Markdown snapshots. SHA-256 covers every content byte before the final hash line; verification checks integrity only. Consent and expiry are recorded, but the pack is never submitted externally.
+
 ## Runtime and distribution
 - One launcher: `python run.py` (setup, demo, start, test, eval, check, status, report).
 - Copilot llm mode (optional) uses a generic OpenAI-compatible endpoint from env (COPILOT_BASE_URL, COPILOT_MODEL, COPILOT_API_KEY); default is offline.

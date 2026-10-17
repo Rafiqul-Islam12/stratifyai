@@ -1,6 +1,6 @@
 # PROGRESS
 
-Current task: T10 (next)
+Current task: T11 (next)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
@@ -57,6 +57,11 @@ Last updated: 2026-10-18
   - Added seeded NumPy Monte Carlo with 2,000 runs, customer-level delay sampling, editable sales receipt variability and delay standard deviation, weekly P10/P50/P90 balances, reserve/zero probabilities, and any-week reserve-breach probability.
   - Added cached Cash Flow uncertainty output and the adjustable P10-P90 band; alerts report computed reserve-breach probability. Lab reruns each plan's changed collection, payable, and financing flows and displays computed probabilities and weekly risk.
   - Verified: `pytest -q` (110 passed), `ruff check .` (all checks passed), `scripts/show_lab.py` (case 3 facility/best-plan smoke passed), secret scan (no matches in 125 files).
+  - Local checkpoint commit: `e88c7f3`.
+- **T10 Business Analysis, receivables watchlist, readiness indicator and pack** (2026-10-18)
+  - Replaced placeholder Analysis UI with computed weekly/monthly income and expense summaries, aging, DSO/DPO when invoice data supports them, burn/runway, gross margin only with identified COGS, trend flags and an evidence-linked customer watchlist.
+  - Added weighted readiness scoring with component reasons/missing data, editable weights, and a consent/expiry-marked Markdown pack with SHA-256 verification tool on Financing. Labels explicitly say the indicator is not loan approval and pack integrity is not lender submission.
+  - Verified: `pytest -q` (117 passed, including all five Analysis and Financing cases), `ruff check .` (all checks passed), secret scan (no matches in 130 files).
   - Local checkpoint commit: pending.
 
 ## How to run

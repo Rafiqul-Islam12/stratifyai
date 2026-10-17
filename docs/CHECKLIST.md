@@ -12,7 +12,7 @@
 - [x] B-09 Lab answers the five key questions (T08) — structured answers rendered in `app/pages/lab.py`
 - [x] B-10 Forecast 8-13 weeks, shortage date and amount, configurable reserve, actual vs forecast distinct (T05) — core/forecast.py and tests/test_forecast.py
 - [x] B-11 Financing advisor: gap, capacity, templates, cost, schedule, risks, missing info, no approval claims (T06) — `app/pages/financing.py`, `core/financing.py`, `tests/test_financing.py`
-- [ ] B-12 Business analysis with reliable metrics only (T10)
+- [x] B-12 Business analysis with reliable metrics only (T10) — `core/analysis.py`, `app/pages/analysis.py`, `tests/test_analysis.py`; unsupported indicators carry explicit reasons
 - [ ] B-13 Grounded copilot, missing-data answers, untrusted input handling (T13)
 - [~] B-14 Security: validation, backend RBAC, owner approval, audit, env secrets, safe errors (T04, T11, T12) — upload validation and friendly parse errors implemented in T04; RBAC, owner approval and audit remain in T11/T12
 - [ ] B-15 No real payments, loans or bank claims (T12, T16)
