@@ -1,11 +1,10 @@
 # PROGRESS
 
-Current task: T05 (in progress)
+Current task: T06 (next)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-- T05: deterministic forecast engine and focused tests done (12 passed); all five qualitative case outcomes match expected.json. Strengthened delayed-payment case inputs to exercise its documented shortage outcome.
-- T05: Cash Flow page now renders the actual/forecast chart, weekly table, reserve input, assumptions, and computed shortage alerts; AppTest exercises all five cases and reserve recalculation.
+
 
 
 
@@ -32,6 +31,13 @@ Last updated: 2026-10-18
   - Verified good, missing-column and formula-cell uploads plus all five UI demo selections with Streamlit AppTest.
   - Verified: `pytest -q` (53 passed), `ruff check .` (all checks passed), `python scripts/check_secrets.py` (no matches).
   - Local checkpoint commits: `0b3e4d3`, `0417333`.
+- **T05 Forecast engine, shortage alerts and Cash Flow page** (2026-10-18)
+  - Added deterministic 13-week cash projections with actual history, unpaid receivables by expected date, unpaid bills by due date, last-eight-week category run rates and reserve/funding-gap summaries.
+  - Added first reserve-breach and below-zero weeks with none/watch/critical severity; added Cash Flow chart, weekly table, assumptions and interactive reserve input.
+  - Adjusted the delayed-customer synthetic case so its expected shortage outcome appears in the forecast (week 6 under defaults).
+  - Verified all five qualitative case expectations and the Cash Flow page for all five cases with AppTest.
+  - Verified: `pytest -q` (65 passed), `ruff check .` (all checks passed).
+  - Local checkpoint commits: `c542e2b`, `610e827`.
 
 ## How to run
 ```

@@ -10,7 +10,7 @@
 - [ ] B-07 Hypothetical actions never assumed real (T07, T08, T12)
 - [ ] B-08 Deterministic numbers; AI only explains (T07, T13)
 - [ ] B-09 Lab answers the five key questions (T08)
-- [ ] B-10 Forecast 8-13 weeks, shortage date and amount, configurable reserve, actual vs forecast distinct (T05)
+- [x] B-10 Forecast 8-13 weeks, shortage date and amount, configurable reserve, actual vs forecast distinct (T05) — core/forecast.py and tests/test_forecast.py
 - [ ] B-11 Financing advisor: gap, capacity, templates, cost, schedule, risks, missing info, no approval claims (T06)
 - [ ] B-12 Business analysis with reliable metrics only (T10)
 - [ ] B-13 Grounded copilot, missing-data answers, untrusted input handling (T13)
@@ -19,7 +19,7 @@
 - [ ] B-16 Import demo scenario and stress tests (sales -20%, costs +15%, late payments, FX) editable (T08)
 - [x] B-17 CSV/Excel upload and validation of dates, amounts, types, duplicates, missing values (T04) — tests in tests/test_validation.py
 - [ ] B-18 Synthetic data and illustrative terms labelled (T03, T06, T14)
-- [ ] B-19 Transparent formulas, no double counting, four layers separated (T05, T07, T14)
+- [~] B-19 Transparent formulas, no double counting, four layers separated (T05, T07, T14) — T05 actual and forecast are separate; matching invoice/bill categories are excluded from run rate; hypothetical and confirmed layers remain in T07/T14
 - [ ] B-20 No accuracy claim without backtest (T15)
 - [x] B-21 Five synthetic cases (T03) — five generated case folders, schema validation and deterministic hash test in tests/test_data.py
 - [ ] B-22 Required tests: gap, alerts, scenarios, financing cost, invalid data, unauthorized actions, audit tamper, AI grounding (T15)
@@ -39,7 +39,7 @@
 ## UI requests
 - [ ] U-01 Clean top-level UI (T02, T14)
 - [ ] U-02 Dynamic features: sliders, instant recalculation, click-through (T08, T14)
-- [ ] U-03 Beautiful charts (T05, T08, T09, T10)
+- [~] U-03 Beautiful charts (T05, T08, T09, T10) — Cash Flow actual/forecast chart added in T05; later chart pages remain
 - [ ] U-04 Colour grading and layer colours (T02)
 - [ ] U-05 Font and typography (T02)
 - [ ] U-06 Alignment and spacing (T02, T14, T18)
