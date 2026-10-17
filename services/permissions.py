@@ -23,7 +23,7 @@ ACTION_REGISTRY: dict[str, PermissionRule] = {
     "security.view": PermissionRule("READ", ROLES, "View security controls and system status"),
     "copilot.ask": PermissionRule("READ", ROLES, "Ask read-only questions about computed data"),
     "audit.view": PermissionRule("READ", ("owner", "auditor"), "View and verify audit events"),
-    "approvals.view": PermissionRule("READ", ("owner", "auditor"), "View the approval queue and audit log"),
+    "approvals.view": PermissionRule("READ", ("owner", "finance_ops", "auditor"), "View own drafts or the approval queue and audit log"),
     "lab.run": PermissionRule("DRAFT", ("owner", "finance_ops"), "Run or change a hypothetical scenario"),
     "scenario.change": PermissionRule("DRAFT", ("owner", "finance_ops"), "Save a changed hypothetical scenario"),
     "data.upload": PermissionRule("DRAFT", ("owner", "finance_ops"), "Upload and validate a data file"),

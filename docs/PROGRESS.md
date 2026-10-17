@@ -4,6 +4,7 @@ Current task: T12 (next)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
+- T12: added persistent draft records, deterministic escaped previews, status timeline, role-checked transitions, plan confirmation metadata, and an idempotent offline execution log; wiring UI and workflow tests next.
 
 ## Done
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)
