@@ -4,7 +4,7 @@ Current task: T08 (next)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-
+- T08 deterministic stress and case 4 import-scenario engines implemented; focused checks: 11 tests passed and Ruff passed.
 
 
 ## Done

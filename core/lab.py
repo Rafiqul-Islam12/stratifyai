@@ -13,6 +13,10 @@ from core.loaders import SyntheticCase
 
 @dataclass(frozen=True)
 class LabAssumptions:
+    reserve: float | None = None
+    reserve_weeks: float | None = None
+    funding_buffer_pct: float | None = None
+    horizon_weeks: int | None = None
     collection_pct: float | None = None
     collection_weeks: int | None = None
     collection_haircut_pct: float | None = None
@@ -312,7 +316,13 @@ def run_lab(case: SyntheticCase, assumptions: LabAssumptions | None = None) -> L
     if settings.financing_template not in TEMPLATES:
         raise ValueError("Unknown financing template.")
     resolved = _resolved_assumptions(case, settings)
-    projection = forecast(case)
+    projection = forecast(
+        case,
+        reserve=settings.reserve,
+        reserve_weeks=settings.reserve_weeks,
+        funding_buffer_pct=settings.funding_buffer_pct,
+        horizon_weeks=settings.horizon_weeks,
+    )
     base_in = [week.inflow for week in projection.forecast_weeks]
     base_out = [week.outflow for week in projection.forecast_weeks]
     dates = [week.week_start.isoformat() for week in projection.forecast_weeks]
