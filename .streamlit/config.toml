@@ -1,0 +1,61 @@
+# StratifyAI Streamlit configuration (T02)
+# Colours mirror the tokens in app/styles.css. No CDN, no external fonts,
+# no images. Charts get their colours from app/charts.py, never here.
+
+[server]
+headless = true
+port = 8501
+# Serve ./static so self-hosted fonts load locally instead of from a CDN.
+enableStaticServing = true
+
+[browser]
+gatherUsageStats = false
+
+[client]
+# Navigation is rendered in our own sidebar, so the built-in one is hidden by
+# st.navigation(position="hidden"), not here.
+showSidebarNavigation = false
+# Viewer mode keeps only the viewer controls: no deploy button, no rerun, no
+# clear-cache. The toolbar itself stays, because the collapsed sidebar is
+# reopened from it.
+toolbarMode = "viewer"
+
+[theme]
+base = "light"
+primaryColor = "#4F46E5"
+backgroundColor = "#F8FAFC"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#0F172A"
+font = "sans serif"
+
+# --- Inter (self-hosted, optional) -----------------------------------------
+# static/fonts/ has no Inter files yet, so the CSS fallback stack is in use.
+# To switch on Inter:
+#   1. Put Inter-Regular.woff2, Inter-Medium.woff2, Inter-SemiBold.woff2 in
+#      static/fonts/
+#   2. Change font = "sans serif" above to font = "Inter"
+#   3. Uncomment the [[theme.fontFaces]] blocks below
+#
+# [[theme.fontFaces]]
+# family = "Inter"
+# font-weight = 400
+# font-style = "normal"
+# font-display = "swap"
+# url = "static/fonts/Inter-Regular.woff2"
+# fallbacks = ["system-ui", "Segoe UI", "Helvetica Neue", "Arial", "sans-serif"]
+#
+# [[theme.fontFaces]]
+# family = "Inter"
+# font-weight = 500
+# font-style = "normal"
+# font-display = "swap"
+# url = "static/fonts/Inter-Medium.woff2"
+# fallbacks = ["system-ui", "Segoe UI", "Helvetica Neue", "Arial", "sans-serif"]
+#
+# [[theme.fontFaces]]
+# family = "Inter"
+# font-weight = 600
+# font-style = "normal"
+# font-display = "swap"
+# url = "static/fonts/Inter-SemiBold.woff2"
+# fallbacks = ["system-ui", "Segoe UI", "Helvetica Neue", "Arial", "sans-serif"]

@@ -1,10 +1,11 @@
 # PROGRESS
 
-Current task: T01 (done)
+Current task: T02 (in progress)
 Last updated: 2026-10-17
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-(none)
+- T02: design tokens + Inter setup done (fallback stack: no Inter files present)
+- T02: config.toml, styles.css, components.py, charts.py, shell done
 
 ## Done
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)

@@ -1,5 +1,29 @@
 [project]
 name = "stratifyai"
-version = "0.1.0"
+dynamic = ["version"]
 description = "StratifyAI: The Liquidity Decision Lab for SME Financial Intelligence"
 requires-python = ">=3.11"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = {attr = "app.version.__version__"}
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+# plotly exposes a dict() helper used throughout app/charts.py; requiring a
+# literal there would only add churn.
+ignore = ["C408"]
+
+[tool.ruff.lint.per-file-ignores]
+"app/**/*.py" = ["E501"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
