@@ -4,7 +4,7 @@ Current task: T06 (next)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-
+- T06 calculation engine and Financing page implemented; focused checks: 11 financing tests passed and Ruff passed.
 
 
 
