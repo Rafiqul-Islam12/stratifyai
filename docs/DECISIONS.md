@@ -24,6 +24,7 @@
 - Supplier credit: +30 days, cost 1.5% of invoice value.
 - Credit line: 16% p.a. on drawn amount, 0.5% commitment fee.
 - Total cost = interest + fees + explicit hypothetical costs (e.g. late fees).
+- Funding amount is rounded up to the next BDT 1,000 so the model does not underfund the forecast gap; invoice financing grosses this rounded net need up by the selected advance rate. Repayments are monthly; term loans amortize by annuity and invoice/supplier/credit-line principal is due at maturity. Credit-line fee is calculated on drawn amount because no undrawn limit is modelled.
 - Repayment capacity ratio = (average weekly net operating cash flow before debt service x weeks per period) / debt service per period. Labels: >= 1.25 comfortable, 1.0 to 1.25 tight, < 1.0 stressed (rules of thumb, editable, not lender rules).
 
 ## Best-plan rule (deterministic)

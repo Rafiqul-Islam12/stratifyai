@@ -1,10 +1,10 @@
 # PROGRESS
 
-Current task: T06 (next)
+Current task: T07 (next)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-- T06 calculation engine and Financing page implemented; focused checks: 11 financing tests passed and Ruff passed.
+
 
 
 
@@ -38,6 +38,12 @@ Last updated: 2026-10-18
   - Verified all five qualitative case expectations and the Cash Flow page for all five cases with AppTest.
   - Verified: `pytest -q` (65 passed), `ruff check .` (all checks passed).
   - Local checkpoint commits: `c542e2b`, `610e827`.
+- **T06 Financing module and Financing page** (2026-10-18)
+  - Added four editable illustrative templates, validated terms, monthly schedules, annuity calculations, costs, capacity labels, deterministic risks and missing-information notes; the funding-gap rounding and repayment assumptions are documented in DECISIONS.md.
+  - Built the interactive Financing page with case selection, editable rates/fees/tenor, schedule, cost chart, capacity summary and the required illustrative-terms banner.
+  - Verified hand-calculated 100,000 BDT annuity, zero rate/gap, invalid terms, all template calculations and case 3 page recalculation using AppTest.
+  - Verified: `pytest -q` (76 passed), `ruff check .` (all checks passed), secret scan (no matches in 115 files).
+  - Local checkpoint commit: `c38831e`.
 
 ## How to run
 ```

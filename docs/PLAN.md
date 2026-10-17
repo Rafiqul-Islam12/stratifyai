@@ -7,7 +7,7 @@ Legend: [ ] todo, [x] done. P1 must, P2 should, P3 cut first.
 - [x] T03 Synthetic data and schema, five cases (P1)
 - [x] T04 Upload, validation and Data Upload page (P1)
 - [x] T05 Forecast engine, shortage alerts, Cash Flow page (P1)
-- [ ] T06 Financing module and Financing page (P1)
+- [x] T06 Financing module and Financing page (P1)
 - [ ] T07 Decision Lab engine (P1)
 - [ ] T08 Decision Lab page, Assumptions, stress tests, import scenario (P1)
 - [ ] T09 Uncertainty bands P10/P50/P90 and shortage probability (P1)
