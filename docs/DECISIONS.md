@@ -33,7 +33,7 @@ Candidates: Option 0, A, B, C. Feasible = projected minimum balance >= reserve o
 - T07 exposes breach probability as null until T09 provides the uncertainty model; it must not substitute a fabricated or hard-coded probability.
 
 ## Uncertainty
-Monte Carlo, 2000 runs, fixed seed 42. Per-customer payment delay sampled from the empirical distribution (if at least 5 observations) else normal around the default delay with editable sd; sales variability coefficient editable. Outputs P10/P50/P90 closing balance per week and probability of falling below reserve and below zero. Every probability shown in the UI is computed, never hard-coded.
+Monte Carlo, 2000 runs, fixed seed 42. Per-customer payment delay sampled from the empirical distribution (if at least 5 paid invoices) else normal around the customer's default delay with editable sd; negative sampled delays are floored at zero. A mean-one log-normal multiplier with the editable sales variability coefficient applies to projected inflows as a sales-receipt amount proxy. Outputs P10/P50/P90 closing balance per week and probability of falling below reserve and below zero. Lab plans re-run the simulation with their adjusted weekly collection, payable and financing events. Every probability shown in the UI is computed, never hard-coded.
 
 ## Backtest
 Hold out the last 8 weeks (or last 25% of history), forecast from earlier data, compare with a naive baseline (average net cash flow of the last 4 weeks). Metrics: MAE and WAPE. Report real numbers with the synthetic-data caveat.

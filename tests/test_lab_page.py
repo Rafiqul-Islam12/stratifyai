@@ -16,6 +16,7 @@ def test_lab_page_renders_all_five_cases():
         assert not app.exception
         assert app.session_state["lab_case_name"] == case_name
         assert set(app.session_state["lab_result"].plans) >= {"Option 0", "Option A", "Option B", "Option C"}
+        assert all(plan.breach_probability is not None for plan in app.session_state["lab_result"].plans.values())
 
 
 def test_lab_sales_stress_recalculates_plan_results():
@@ -34,6 +35,15 @@ def test_lab_reserve_basis_slider_updates_reserve_and_cards():
     original = app.session_state["lab_result"].reserve
     app.slider(key="lab::high_expense_shortage::reserve_weeks").set_value(4.0).run(timeout=30)
     assert app.session_state["lab_result"].reserve > original
+
+
+def test_lab_sales_variability_edit_recomputes_plan_probabilities():
+    app = AppTest.from_file(LAB_PAGE, default_timeout=30).run()
+    before = app.session_state["lab_result"].plans["Option 0"].breach_probability
+    app.slider(key="lab::high_expense_shortage::sales_variability_cv").set_value(0.5).run(timeout=30)
+    after = app.session_state["lab_result"].plans["Option 0"].breach_probability
+    assert after is not None and before is not None
+    assert app.session_state["lab_result"].plans["Option 0"].breach_probability_by_week
 
 
 def test_lab_case_four_fx_and_deposit_edits_change_import_events():

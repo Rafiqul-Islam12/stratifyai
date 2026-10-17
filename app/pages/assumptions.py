@@ -60,6 +60,12 @@ updates["funding_buffer_pct"] = columns[3].slider("Funding gap buffer (%)", 0.0,
     float(values["funding_buffer_pct"]), step=1.0, key=_key(case_name, "funding_buffer_pct"))
 
 ui.section_title("Decision Lab levers")
+columns = st.columns(2)
+updates["sales_variability_cv"] = columns[0].slider("Sales variability (CV)", 0.0, 1.0,
+    float(values["sales_variability_cv"]), step=0.05, key=_key(case_name, "sales_variability_cv"),
+    help="Coefficient of variation for weekly cash receipts in the uncertainty model.")
+updates["customer_delay_sd_days"] = columns[1].slider("Customer delay SD (days)", 0, 90,
+    int(values["customer_delay_sd_days"]), key=_key(case_name, "customer_delay_sd_days"))
 columns = st.columns(4)
 updates["collection_pct"] = columns[0].slider("L1 collection (%)", 0, 100, int(values["collection_pct"]), key=_key(case_name, "collection_pct"))
 updates["collection_weeks"] = columns[1].slider("L1 timing (weeks)", 1, 13, int(values["collection_weeks"]), key=_key(case_name, "collection_weeks"))

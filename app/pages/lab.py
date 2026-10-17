@@ -11,6 +11,7 @@ from core.forecast import forecast
 from core.import_scenario import ImportInputs, build_import_scenario
 from core.lab import run_lab
 from core.loaders import load_case
+from core.montecarlo import simulate
 from core.stress import apply_stress
 from data.generate_synthetic import CASES
 
@@ -28,6 +29,18 @@ def _money(value: float) -> str:
 
 def _shortage(value: int | None) -> str:
     return f"Week {value}" if value is not None else "None"
+
+
+@st.cache_data(show_spinner=False)
+def _cached_lab(case, assumptions):
+    return run_lab(case, assumptions)
+
+
+@st.cache_data(show_spinner=False)
+def _cached_plan_mc(case, projection, inflow_delta, outflow_delta, adjustments, reserve, cv, delay_sd):
+    return simulate(case, projection=projection, inflow_adjustments=inflow_delta, outflow_adjustments=outflow_delta,
+                    balance_adjustments=adjustments, reserve=reserve,
+                    sales_variability_cv=cv, customer_delay_sd_days=delay_sd)
 
 
 def _render_controls(case_name: str, case, values: dict) -> dict:
@@ -51,6 +64,12 @@ def _render_controls(case_name: str, case, values: dict) -> dict:
             key=f"lab::{case_name}::horizon_weeks")
         updates["funding_buffer_pct"] = cols[3].slider("Funding gap buffer (%)", 0.0, 50.0,
             float(values["funding_buffer_pct"]), step=1.0, key=f"lab::{case_name}::funding_buffer_pct")
+        cols = st.columns(2)
+        updates["sales_variability_cv"] = cols[0].slider("Sales variability (CV)", 0.0, 1.0,
+            float(values["sales_variability_cv"]), step=0.05, key=f"lab::{case_name}::sales_variability_cv",
+            help="Coefficient of variation for weekly cash receipts; 0 removes sales amount volatility.")
+        updates["customer_delay_sd_days"] = cols[1].slider("Customer delay SD (days)", 0, 90,
+            int(values["customer_delay_sd_days"]), key=f"lab::{case_name}::customer_delay_sd_days")
 
         ui.section_title("Option A levers")
         cols = st.columns(4)
@@ -123,7 +142,7 @@ if case.profile.import_scenario and values["include_import_scenario"]:
     )
     import_result = build_import_scenario(scenario_case, import_inputs)
     scenario_case = import_result.scenario_case
-lab_result = run_lab(scenario_case, to_lab_assumptions(values))
+lab_result = _cached_lab(scenario_case, to_lab_assumptions(values))
 st.session_state["lab_result"] = lab_result
 st.session_state["lab_case_name"] = case_name
 st.session_state["lab_scenario_case"] = scenario_case
@@ -171,6 +190,7 @@ for col, name in zip(cols, PLAN_ORDER):
         ("Gap before finance", _money(plan.funding_gap)),
         ("Remaining gap", _money(plan.remaining_gap)),
         ("First shortage", _shortage(plan.shortage_week)),
+        ("Reserve breach probability", f"{plan.breach_probability:.1%}" if plan.breach_probability is not None else "Unavailable"),
         ("Shortage date", shortage_date),
         ("Facility", _money(plan.financing_amount)),
         ("Financing cost", _money(plan.financing_cost)),
@@ -189,6 +209,15 @@ for name in PLAN_ORDER:
     plan = lab_result.plans[name]
     layer = "HYPOTHETICAL" if name != "Option 0" or scenario_active else "FORECAST"
     charts.line(figure, week_labels, [point.closing_balance for point in plan.balance_series_after], layer=layer, name=name)
+    plan_projection = forecast(scenario_case, reserve=lab_result.reserve)
+    base_inflows = tuple(week.inflow for week in plan_projection.forecast_weeks)
+    base_outflows = tuple(week.outflow for week in plan_projection.forecast_weeks)
+    mc = _cached_plan_mc(scenario_case, plan_projection,
+        tuple(a - b for a, b in zip(plan.simulation_inflows, base_inflows)),
+        tuple(a - b for a, b in zip(plan.simulation_outflows, base_outflows)), plan.simulation_adjustments,
+        lab_result.reserve, float(values["sales_variability_cv"]), float(values["customer_delay_sd_days"]))
+    if name == "Option 0":
+        charts.band(figure, week_labels, mc.p10, mc.p90)
 charts.reserve(figure, week_labels, lab_result.reserve)
 st.plotly_chart(figure, width="stretch")
 ui.layer_legend()
@@ -243,8 +272,11 @@ for name in PLAN_ORDER:
         right.markdown("**Next steps**")
         for item in plan.next_steps:
             right.markdown(f"- {item}")
-        if plan.breach_probability is None:
-            st.caption("Reserve-breach probability is not available until the uncertainty model is implemented.")
+        if plan.breach_probability_by_week:
+            peak_week = max(range(len(plan.breach_probability_by_week)), key=plan.breach_probability_by_week.__getitem__)
+            st.caption(f"Probability of falling below reserve in week {peak_week + 1}: "
+                       f"{plan.breach_probability_by_week[peak_week]:.1%}; "
+                       f"chance of any reserve breach: {plan.breach_probability:.1%}.")
 
 with st.expander("Stress assumptions and sources", expanded=False):
     stress_frame = pd.DataFrame(stress.assumptions)

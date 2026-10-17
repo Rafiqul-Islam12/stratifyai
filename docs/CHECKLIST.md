@@ -31,7 +31,7 @@
 - [ ] A-01 Agent action drafts with owner approval (T12)
 - [ ] A-02 Security tiers, hash-chained audit, known-risk list, self-assessment report (T11, T16)
 - [ ] A-03 Backtest vs naive baseline (T15)
-- [ ] A-04 P10/P50/P90 band (T09)
+- [x] A-04 P10/P50/P90 band and computed shortage probabilities (T09) — `core/montecarlo.py`, Cash Flow and Lab uncertainty displays, `tests/test_montecarlo.py`
 - [x] A-05 Deterministic best-plan rule, Option 0, separate levers (T07) — `core/lab.py`, `tests/test_lab.py`
 - [x] A-06 Financing templates and repayment-capacity formula (T06) — `core/financing.py`, `tests/test_financing.py`
 - [ ] A-07 Deliverables and schedule (T16, T18)
@@ -39,7 +39,7 @@
 ## UI requests
 - [ ] U-01 Clean top-level UI (T02, T14)
 - [~] U-02 Dynamic features: sliders, instant recalculation, click-through (T08, T14) — Lab sliders recalculate immediately; cross-page navigation polish remains in T14
-- [~] U-03 Beautiful charts (T05, T08, T09, T10) — Cash Flow actual/forecast chart added in T05; later chart pages remain
+- [~] U-03 Beautiful charts (T05, T08, T09, T10) — Cash Flow actual/forecast and P10-P90 band; later chart pages remain
 - [ ] U-04 Colour grading and layer colours (T02)
 - [ ] U-05 Font and typography (T02)
 - [ ] U-06 Alignment and spacing (T02, T14, T18)

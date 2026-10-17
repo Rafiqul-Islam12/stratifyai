@@ -110,6 +110,9 @@ def test_cashflow_page_renders_for_all_five_demo_cases():
         assert not app.exception
         assert app.session_state["active_synthetic_case"] == case_name
         assert app.session_state["cash_flow_forecast"].forecast_weeks
+        uncertainty = app.session_state["cash_flow_uncertainty"]
+        assert len(uncertainty.p10) == len(app.session_state["cash_flow_forecast"].forecast_weeks)
+        assert all(low <= high for low, high in zip(uncertainty.p10, uncertainty.p90))
 
 
 def test_cashflow_reserve_input_recalculates_shortage_week():
@@ -117,3 +120,13 @@ def test_cashflow_reserve_input_recalculates_shortage_week():
     assert app.session_state["cash_flow_forecast"].shortage_week is None
     app.number_input[0].set_value(6_000_000).run(timeout=20)
     assert app.session_state["cash_flow_forecast"].shortage_week == 1
+
+
+def test_cashflow_sales_variability_widens_uncertainty_band():
+    app = AppTest.from_file(CASHFLOW_PAGE, default_timeout=30).run()
+    before = app.session_state["cash_flow_uncertainty"]
+    before_width = max(hi - lo for lo, hi in zip(before.p10, before.p90))
+    app.slider[0].set_value(0.8).run(timeout=30)
+    after = app.session_state["cash_flow_uncertainty"]
+    after_width = max(hi - lo for lo, hi in zip(after.p10, after.p90))
+    assert after_width > before_width

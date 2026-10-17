@@ -85,7 +85,8 @@ def test_result_is_deterministic_serializable_and_hypothetical():
     assert rendered["best_plan_id"] == left.best_plan_id
     assert len(rendered["key_answers"]) == 5
     assert all(plan.layer_tags == ("HYPOTHETICAL",) for plan in left.plans.values())
-    assert all(plan.breach_probability is None for plan in left.plans.values())
+    assert all(0 <= plan.breach_probability <= 1 for plan in left.plans.values())
+    assert all(len(plan.breach_probability_by_week) == len(plan.simulation_inflows) for plan in left.plans.values())
 
 
 @pytest.mark.parametrize("settings", [

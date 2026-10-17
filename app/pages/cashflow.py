@@ -8,6 +8,7 @@ from app import charts
 from app import components as ui
 from core.forecast import ForecastResult, forecast
 from core.loaders import load_case
+from core.montecarlo import MonteCarloResult, simulate
 from data.generate_synthetic import CASES
 
 CASE_LABELS = {
@@ -23,21 +24,31 @@ def _money(value: float) -> str:
     return f"BDT {value:,.0f}"
 
 
-def _alert(result: ForecastResult) -> tuple[str, str, str]:
+@st.cache_data(show_spinner=False)
+def _cached_simulation(case, projection, cv: float, delay_sd: float) -> MonteCarloResult:
+    return simulate(case, projection=projection, sales_variability_cv=cv,
+                    customer_delay_sd_days=delay_sd)
+
+
+def _alert(result: ForecastResult, uncertainty: MonteCarloResult) -> tuple[str, str, str]:
+    probability_week = (result.shortage_week - 1) if result.shortage_week else max(
+        range(len(uncertainty.probability_below_reserve)), key=uncertainty.probability_below_reserve.__getitem__)
+    probability = uncertainty.probability_below_reserve[probability_week]
+    probability_text = f"Computed chance of falling below reserve in week {probability_week + 1}: {probability:.1%}."
     if result.shortage_week is None:
-        return "info", "No projected reserve breach", "The projected closing balance stays at or above the minimum reserve throughout the forecast."
+        return "info", "No projected reserve breach", f"The P50 closing balance stays at or above reserve. {probability_text}"
     when = result.shortage_date.isoformat() if result.shortage_date else ""
     week_detail = f"Week {result.shortage_week} ({when})"
     if result.severity == "critical":
         return (
             "critical",
             "Projected cash falls below zero",
-            f"The first reserve breach is {week_detail}; the forecast also falls below zero in week {result.below_zero_week}.",
+            f"The first reserve breach is {week_detail}; the forecast also falls below zero in week {result.below_zero_week}. {probability_text}",
         )
     return (
         "warning",
         "Projected reserve breach",
-        f"The first reserve breach is {week_detail}. The minimum projected balance is {_money(result.minimum_balance)}.",
+        f"The first reserve breach is {week_detail}. The minimum projected balance is {_money(result.minimum_balance)}. {probability_text}",
     )
 
 
@@ -73,8 +84,13 @@ reserve_value = st.number_input(
     help="Default reserve equals the configured reserve weeks multiplied by average fixed weekly outflows.",
 )
 result = forecast(case_data, reserve=float(reserve_value))
+variability = st.slider("Sales variability (CV)", 0.0, 1.0,
+    float(case_data.assumptions.sales_variability_cv), step=0.05,
+    help="Coefficient of variation for weekly cash receipts; raise it to widen the uncertainty band.")
+uncertainty = _cached_simulation(case_data, result, float(variability), float(case_data.assumptions.customer_delay_sd_days))
 st.session_state["cash_flow_forecast"] = result
-tone, title, body = _alert(result)
+st.session_state["cash_flow_uncertainty"] = uncertainty
+tone, title, body = _alert(result, uncertainty)
 ui.alert_banner(tone, title, body)
 
 first_shortage = f"Week {result.shortage_week}" if result.shortage_week is not None else "None"
@@ -101,6 +117,7 @@ actual_x = [week.week_start.isoformat() for week in result.actual_weeks]
 forecast_x = [week.week_start.isoformat() for week in result.forecast_weeks]
 charts.line(figure, actual_x, [week.closing_balance for week in result.actual_weeks], layer="ACTUAL", name="Actual closing balance")
 charts.line(figure, forecast_x, [week.closing_balance for week in result.forecast_weeks], layer="FORECAST", name="Forecast closing balance")
+charts.band(figure, forecast_x, uncertainty.p10, uncertainty.p90)
 charts.reserve(figure, actual_x + forecast_x, result.reserve)
 if result.shortage_week is not None:
     breach_x = forecast_x[result.shortage_week - 1]

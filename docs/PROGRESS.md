@@ -1,10 +1,9 @@
 # PROGRESS
 
-Current task: T09 (next)
+Current task: T10 (next)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-
 
 ## Done
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)
@@ -45,7 +44,7 @@ Last updated: 2026-10-18
 - **T07 Decision Lab engine** (2026-10-18)
   - Added deterministic Option 0, isolated L1/L2/L3, combined Option A and financing Options B/C with repayment schedule, cost, capacity, risks, assumptions/sources, plan explanations and five structured answers.
   - Added a hand-built known-number mini scenario covering no-double-counted collections, combined-lever impact, best-plan/no-feasible selection, B/C facility comparison, serialization, determinism and hypothetical layer tags.
-  - The case 3 comparison confirms Option C uses the rounded original gap (BDT 6,890,000 for a BDT 6,889,777 gap), Option B is smaller, and prints the best-plan reason. Breach probabilities remain null until T09 implements uncertainty.
+  - The case 3 comparison confirms Option C uses the rounded original gap (BDT 6,890,000 for a BDT 6,889,777 gap), Option B is smaller, and prints the best-plan reason.
   - Verified: `pytest -q` (87 passed), `ruff check .` (all checks passed), `scripts/show_lab.py` (case 3 output and Option B/C facility assertions passed), secret scan (no matches in 118 files).
   - Local checkpoint commit: `4a8c54a`.
 - **T08 Decision Lab page, Assumptions, stress and import scenario** (2026-10-18)
@@ -54,6 +53,11 @@ Last updated: 2026-10-18
   - Verified AppTest across all five cases; sales and lever slider recalculation; reserve changes; case 4 FX/deposit edits; assumption reset; and saving three scenarios.
   - Verified: `pytest -q` (105 passed), `ruff check .` (all checks passed), `scripts/show_lab.py` (case 3 comparison passed), secret scan (no matches in 123 files).
   - Local checkpoint commits: `5cabc5c`, `4d81140`.
+- **T09 Uncertainty bands and shortage probability** (2026-10-18)
+  - Added seeded NumPy Monte Carlo with 2,000 runs, customer-level delay sampling, editable sales receipt variability and delay standard deviation, weekly P10/P50/P90 balances, reserve/zero probabilities, and any-week reserve-breach probability.
+  - Added cached Cash Flow uncertainty output and the adjustable P10-P90 band; alerts report computed reserve-breach probability. Lab reruns each plan's changed collection, payable, and financing flows and displays computed probabilities and weekly risk.
+  - Verified: `pytest -q` (110 passed), `ruff check .` (all checks passed), `scripts/show_lab.py` (case 3 facility/best-plan smoke passed), secret scan (no matches in 125 files).
+  - Local checkpoint commit: pending.
 
 ## How to run
 ```
@@ -74,7 +78,6 @@ Secret scan: `python scripts/check_secrets.py` (exit 0 = clean).
 - The competition PDF in docs/inputs/ could not be read on this machine (no poppler, no PDF library; the file has no /ToUnicode CMap). docs/COMPETITION.md is therefore unverified against the PDF - verify by hand before submission.
 - `python run.py start` leaves the server running in its terminal (normal Streamlit behaviour); stop with Ctrl-C.
 - `python run.py status` reports the passing test count but then errors in `scripts/status.py` because `result.stdout` is `None`.
-- T07 publishes `breach_probability: null` until the uncertainty model is built in T09; no probability is estimated or hard-coded.
 - T08 import sales ramp uses recent actual weekly inflows as its deterministic proxy; shipment costs, duties/taxes and timings remain user-editable hypothetical assumptions.
 - evidence/ holds only .gitkeep until related later tasks; static/fonts/ has no Inter files, so the system fallback stack is active.
 

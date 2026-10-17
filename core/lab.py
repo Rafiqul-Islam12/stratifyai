@@ -9,6 +9,7 @@ from typing import Any
 from core.financing import TEMPLATES, FinancingTerms, calculate_financing
 from core.forecast import ForecastResult, forecast
 from core.loaders import SyntheticCase
+from core.montecarlo import simulate
 
 
 @dataclass(frozen=True)
@@ -17,6 +18,8 @@ class LabAssumptions:
     reserve_weeks: float | None = None
     funding_buffer_pct: float | None = None
     horizon_weeks: int | None = None
+    sales_variability_cv: float | None = None
+    customer_delay_sd_days: float | None = None
     collection_pct: float | None = None
     collection_weeks: int | None = None
     collection_haircut_pct: float | None = None
@@ -50,7 +53,11 @@ class Plan:
     capacity_ratio: float | None
     capacity_label: str
     is_feasible: bool
-    breach_probability: None
+    breach_probability: float | None
+    breach_probability_by_week: tuple[float, ...]
+    simulation_inflows: tuple[float, ...]
+    simulation_outflows: tuple[float, ...]
+    simulation_adjustments: tuple[float, ...]
     risks: tuple[str, ...]
     assumptions_with_sources: tuple[dict[str, str | float | int], ...]
     pros: tuple[str, ...]
@@ -302,9 +309,11 @@ def _make_plan(
         cons = tuple(risks) or ("The projected reserve is not maintained throughout the forecast horizon.",)
         next_steps = ("Review the remaining shortfall and test other assumptions; this plan does not fully maintain reserve.",)
     assumption_count = len(plan_assumptions)
+    adjustments = [after - before for after, before in zip(after_balances, lever_balances)]
     return Plan(
         name, before, after, lever_gap, remaining_gap, shortage, amount, cost, schedule,
-        ratio, label, feasible, None, tuple(dict.fromkeys(risks)), tuple(plan_assumptions), pros, cons,
+        ratio, label, feasible, None, (), tuple(inflows), tuple(outflows), tuple(adjustments),
+        tuple(dict.fromkeys(risks)), tuple(plan_assumptions), pros, cons,
         next_steps, ("HYPOTHETICAL",), assumption_count,
     )
 
@@ -383,6 +392,18 @@ def run_lab(case: SyntheticCase, assumptions: LabAssumptions | None = None) -> L
         "borrowing_necessary": {"question": "Is borrowing necessary in this model?", "answer": borrowing_necessary},
         "main_risk": {"question": "What should be checked before acting?", "answer": best.risks[0] if best.risks else "No plan-specific risk flag; validate the source data and assumptions."},
     }
-    # Probability is intentionally unavailable until the later uncertainty task;
-    # each plan exposes null instead of implying a computed probability.
+    # Re-run each plan's adjusted weekly cash events through the same seeded model.
+    cv = case.assumptions.sales_variability_cv if settings.sales_variability_cv is None else settings.sales_variability_cv
+    delay_sd = case.assumptions.customer_delay_sd_days if settings.customer_delay_sd_days is None else settings.customer_delay_sd_days
+    for key, plan in plans.items():
+        mc = simulate(
+            case, projection=projection,
+            inflow_adjustments=tuple(a - b for a, b in zip(plan.simulation_inflows, base_in)),
+            outflow_adjustments=tuple(a - b for a, b in zip(plan.simulation_outflows, base_out)),
+            balance_adjustments=plan.simulation_adjustments,
+            opening_cash=projection.opening_cash, reserve=projection.reserve,
+            sales_variability_cv=cv, customer_delay_sd_days=delay_sd,
+        )
+        plans[key] = replace(plan, breach_probability=mc.probability_any_reserve_breach,
+                             breach_probability_by_week=mc.probability_below_reserve)
     return LabResult(plans, selected.plan_id, reason, borrowing_necessary, borrowing_reason, key_answers, projection.reserve)
