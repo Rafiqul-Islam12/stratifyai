@@ -167,5 +167,5 @@ def test_full_finance_ops_to_owner_ui_flow(monkeypatch, stores):
     assert get_draft(owner, plan_draft.draft_id, db_path=db_path).payload["assumptions_layer"] == "CONFIRMED"
     finance_app.switch_page("pages/lab.py").run()
     assert not finance_app.exception
-    assert any("Confirmed ·" in trace.name for chart in finance_app.get("plotly_chart")
-               for trace in chart.proto.figure.data)
+    assert any("Confirmed ·" in trace.get("name", "") for chart in finance_app.get("plotly_chart")
+               for trace in json.loads(chart.proto.spec)["data"])
