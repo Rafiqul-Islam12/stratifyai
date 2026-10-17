@@ -14,10 +14,10 @@
 - [ ] B-11 Financing advisor: gap, capacity, templates, cost, schedule, risks, missing info, no approval claims (T06)
 - [ ] B-12 Business analysis with reliable metrics only (T10)
 - [ ] B-13 Grounded copilot, missing-data answers, untrusted input handling (T13)
-- [ ] B-14 Security: validation, backend RBAC, owner approval, audit, env secrets, safe errors (T04, T11, T12)
+- [~] B-14 Security: validation, backend RBAC, owner approval, audit, env secrets, safe errors (T04, T11, T12) — upload validation and friendly parse errors implemented in T04; RBAC, owner approval and audit remain in T11/T12
 - [ ] B-15 No real payments, loans or bank claims (T12, T16)
 - [ ] B-16 Import demo scenario and stress tests (sales -20%, costs +15%, late payments, FX) editable (T08)
-- [ ] B-17 CSV/Excel upload and validation of dates, amounts, types, duplicates, missing values (T04)
+- [x] B-17 CSV/Excel upload and validation of dates, amounts, types, duplicates, missing values (T04) — tests in tests/test_validation.py
 - [ ] B-18 Synthetic data and illustrative terms labelled (T03, T06, T14)
 - [ ] B-19 Transparent formulas, no double counting, four layers separated (T05, T07, T14)
 - [ ] B-20 No accuracy claim without backtest (T15)
@@ -46,7 +46,7 @@
 - [ ] U-07 Overview shows all key details (T14)
 - [ ] U-08 Sidebar, header, footer, navigation (T02)
 - [ ] U-09 Loading, empty and error states (T02, T14)
-- [ ] U-10 Load demo business button (T04, T14)
+- [~] U-10 Load demo business button (T04, T14) — Data Upload loads all five cases; Overview entry point remains in T14
 - [ ] U-11 Decision report download (T15)
 - [ ] U-12 English UI (all)
 

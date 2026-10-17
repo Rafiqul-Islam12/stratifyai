@@ -1,11 +1,10 @@
 # PROGRESS
 
-Current task: T04 (in progress)
+Current task: T05 (next)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-- T04: CSV/XLSX validation service and focused tests done (20 passed): required fields, row limits, duplicates, dates, amounts, enum, currencies, text limits, and formula neutralisation.
-- T04: Data Upload page, downloadable templates, validation preview/report, session storage, and five demo-case loading done; AppTest covers good, broken and formula-cell uploads and each demo case.
+
 
 
 ## Done
@@ -25,6 +24,12 @@ Last updated: 2026-10-18
   - Generated all five cases; validated each case through the typed loader and confirmed repeat generation produces identical hashes.
   - Verified: `pytest -q` (33 passed), `python scripts/check_secrets.py` (no matches in 109 files); focused data tests (7 passed).
   - Local checkpoint commit: `10c8c6c`.
+- **T04 Upload, validation and Data Upload page** (2026-10-18)
+  - Added CSV/XLSX validation with 5 MB and 50,000-row limits, required columns, dates, amounts, transaction types, duplicate detection, currency consistency, text limits, and formula neutralisation.
+  - Added row-level reports, preview, downloadable templates, validated session storage, and a selector that loads all five demo cases.
+  - Verified good, missing-column and formula-cell uploads plus all five UI demo selections with Streamlit AppTest.
+  - Verified: `pytest -q` (53 passed), `ruff check .` (all checks passed), `python scripts/check_secrets.py` (no matches).
+  - Local checkpoint commits: `0b3e4d3`, `0417333`.
 
 ## How to run
 ```
@@ -44,6 +49,7 @@ Secret scan: `python scripts/check_secrets.py` (exit 0 = clean).
 - T02 visual follow-up deferred at the user's direction: font sizing, alignment, vertical text placement, and card text/layout need review and correction during T14 cross-page UI polish. T02 shell is implemented; the user confirmed all 10 pages are clickable and show content, with these visual issues remaining.
 - The competition PDF in docs/inputs/ could not be read on this machine (no poppler, no PDF library; the file has no /ToUnicode CMap). docs/COMPETITION.md is therefore unverified against the PDF - verify by hand before submission.
 - `python run.py start` leaves the server running in its terminal (normal Streamlit behaviour); stop with Ctrl-C.
+- `python run.py status` reports the passing test count but then errors in `scripts/status.py` because `result.stdout` is `None`.
 - evidence/ holds only .gitkeep until related later tasks; static/fonts/ has no Inter files, so the system fallback stack is active.
 
 ## Decisions or assumptions changed (details in DECISIONS.md)

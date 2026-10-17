@@ -5,7 +5,7 @@ Legend: [ ] todo, [x] done. P1 must, P2 should, P3 cut first.
 - [x] T01 Scaffold, tooling, run.py launcher, CI, status script (P1)
 - [x] T02 Design system and app shell (P1; visual follow-up deferred to T14 per user direction)
 - [x] T03 Synthetic data and schema, five cases (P1)
-- [ ] T04 Upload, validation and Data Upload page (P1)
+- [x] T04 Upload, validation and Data Upload page (P1)
 - [ ] T05 Forecast engine, shortage alerts, Cash Flow page (P1)
 - [ ] T06 Financing module and Financing page (P1)
 - [ ] T07 Decision Lab engine (P1)
