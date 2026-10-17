@@ -72,7 +72,7 @@
   ],
   "import_scenario": {},
   "industry": "Synthetic wholesale and distribution",
-  "opening_cash": 1000000,
+  "opening_cash": 200000,
   "suppliers": [
     {
       "name": "Synthetic Supplier 01",

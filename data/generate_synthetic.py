@@ -40,7 +40,7 @@ def generate_case(case: str, output_dir: Path, seed: int = BASE_SEED) -> Path:
 
     scenario = {
         "stable_healthy": {"cash": 1_800_000, "sales": 280_000, "cost": 190_000, "delay": 8, "ramp": 1.0},
-        "delayed_customer_payments": {"cash": 1_000_000, "sales": 260_000, "cost": 205_000, "delay": 48, "ramp": 1.0},
+        "delayed_customer_payments": {"cash": 200_000, "sales": 260_000, "cost": 235_000, "delay": 48, "ramp": 1.0},
         "high_expense_shortage": {"cash": 480_000, "sales": 245_000, "cost": 310_000, "delay": 15, "ramp": 1.0},
         "import_financing": {"cash": 900_000, "sales": 260_000, "cost": 215_000, "delay": 17, "ramp": 1.0},
         "sales_drop_cost_rise": {"cash": 800_000, "sales": 275_000, "cost": 210_000, "delay": 16, "ramp": 0.66},
