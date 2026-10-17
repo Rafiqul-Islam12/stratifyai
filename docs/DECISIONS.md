@@ -17,6 +17,7 @@
 - L3 Expense reduction: reduce discretionary categories by x% (default 10) from week w (default 1).
 - Each lever is evaluated in isolation and combined.
 - Option B finances only the remaining gap after Option A (0 means no financing needed). Option C finances the original gap.
+- T08 import assumptions convert product/shipping costs from foreign units using the editable FX rate; duties/taxes have no country default, and the sales ramp uses recent actual weekly inflows as its explicit proxy. Stress FX affects import-linked cost categories only when the case includes import assumptions.
 
 ## Financing templates (ILLUSTRATIVE, not real lender terms; label in UI)
 - Term loan: 14% p.a., 1% fee, 6 months, equal monthly instalments (annuity).

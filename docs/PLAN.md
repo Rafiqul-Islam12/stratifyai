@@ -9,7 +9,7 @@ Legend: [ ] todo, [x] done. P1 must, P2 should, P3 cut first.
 - [x] T05 Forecast engine, shortage alerts, Cash Flow page (P1)
 - [x] T06 Financing module and Financing page (P1)
 - [x] T07 Decision Lab engine (P1)
-- [ ] T08 Decision Lab page, Assumptions, stress tests, import scenario (P1)
+- [x] T08 Decision Lab page, Assumptions, stress tests, import scenario (P1)
 - [ ] T09 Uncertainty bands P10/P50/P90 and shortage probability (P1)
 - [ ] T10 Business Analysis, receivables watchlist, financing readiness, readiness pack (P2)
 - [ ] T11 Security core, roles, audit chain, Approvals/Audit and Security pages (P1)

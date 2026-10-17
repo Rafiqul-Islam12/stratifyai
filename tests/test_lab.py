@@ -96,3 +96,10 @@ def test_result_is_deterministic_serializable_and_hypothetical():
 def test_invalid_lab_assumptions_are_rejected(settings):
     with pytest.raises(ValueError):
         run_lab(_case(), settings)
+
+
+def test_custom_reserve_and_funding_buffer_are_used_for_facility_gap():
+    result = run_lab(_case(), LabAssumptions(reserve=5_000, funding_buffer_pct=20))
+    # Baseline minimum is -500 BDT, so raw deficit 5,500 BDT gets a 20% buffer.
+    assert result.plans["Option 0"].funding_gap == pytest.approx(6_600)
+    assert result.reserve == 5_000

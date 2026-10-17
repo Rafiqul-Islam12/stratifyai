@@ -72,6 +72,7 @@ class LabResult:
     borrowing_necessary: bool
     borrowing_reason: str
     key_answers: dict[str, dict[str, str | float | bool | None]]
+    reserve: float
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -81,6 +82,7 @@ class LabResult:
             "borrowing_necessary": self.borrowing_necessary,
             "borrowing_reason": self.borrowing_reason,
             "key_answers": self.key_answers,
+            "reserve": self.reserve,
         }
 
 
@@ -240,7 +242,8 @@ def _make_plan(
     for inflow, outflow in zip(inflows, outflows):
         running += inflow - outflow
         lever_balances.append(running)
-    lever_gap = max(0.0, reserve - min(lever_balances, default=running))
+    raw_gap = max(0.0, reserve - min(lever_balances, default=running))
+    lever_gap = raw_gap * (1 + base_projection.funding_buffer_pct / 100)
     finance_result = None
     amount = cost = 0.0
     ratio = None
@@ -382,4 +385,4 @@ def run_lab(case: SyntheticCase, assumptions: LabAssumptions | None = None) -> L
     }
     # Probability is intentionally unavailable until the later uncertainty task;
     # each plan exposes null instead of implying a computed probability.
-    return LabResult(plans, selected.plan_id, reason, borrowing_necessary, borrowing_reason, key_answers)
+    return LabResult(plans, selected.plan_id, reason, borrowing_necessary, borrowing_reason, key_answers, projection.reserve)

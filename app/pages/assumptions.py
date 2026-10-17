@@ -6,6 +6,7 @@ import streamlit as st
 
 from app import components as ui
 from app.assumptions_store import get_values, reset_values, save_values
+from core.forecast import forecast
 from core.loaders import load_case
 from data.generate_synthetic import CASES
 
@@ -32,10 +33,9 @@ ui.page_header("Assumptions", "Edit and review the values shared by forecasts, L
                business=case.profile.business_name, scenario=CASE_LABELS[case_name])
 ui.alert_banner("warning", "Editable modelling assumptions",
                 "Values are synthetic starting points and remain hypothetical. Financing terms are templates, not real offers.")
-prefix = f"assumptions::{case_name}::"
 if st.button("Reset this case to defaults", key=f"assumptions-reset-{case_name}"):
     for state_key in list(st.session_state):
-        if state_key.startswith(prefix):
+        if state_key.startswith((f"assumptions::{case_name}::", f"lab::{case_name}::")):
             del st.session_state[state_key]
     reset_values(case_name, case)
     st.rerun()
@@ -43,10 +43,17 @@ if st.button("Reset this case to defaults", key=f"assumptions-reset-{case_name}"
 updates = dict(values)
 ui.section_title("Forecast")
 columns = st.columns(4)
-updates["reserve_bdt"] = columns[0].number_input("Minimum reserve (BDT)", min_value=0, max_value=100_000_000,
-    step=10_000, value=int(values["reserve_bdt"]), key=_key(case_name, "reserve_bdt"))
-updates["reserve_weeks"] = columns[1].slider("Reserve basis (weeks)", 0.0, 13.0,
-    float(values["reserve_weeks"]), step=0.5, key=_key(case_name, "reserve_weeks"))
+updates["reserve_mode"] = columns[0].selectbox("Reserve method", ("Reserve weeks", "Fixed BDT"),
+    index=("Reserve weeks", "Fixed BDT").index(values["reserve_mode"]), key=_key(case_name, "reserve_mode"))
+if updates["reserve_mode"] == "Fixed BDT":
+    updates["reserve_bdt"] = columns[1].number_input("Minimum reserve (BDT)", min_value=0, max_value=100_000_000,
+        step=10_000, value=int(values["reserve_bdt"]), key=_key(case_name, "reserve_bdt"))
+else:
+    updates["reserve_weeks"] = columns[1].slider("Reserve basis (weeks)", 0.0, 13.0,
+        float(values["reserve_weeks"]), step=0.5, key=_key(case_name, "reserve_weeks"))
+    updates["reserve_bdt"] = round(forecast(case, reserve_weeks=float(updates["reserve_weeks"]),
+        horizon_weeks=int(values["horizon_weeks"])).reserve)
+    columns[1].caption(f"Derived reserve: BDT {updates['reserve_bdt']:,.0f}")
 updates["horizon_weeks"] = columns[2].slider("Forecast horizon (weeks)", 8, 13,
     int(values["horizon_weeks"]), key=_key(case_name, "horizon_weeks"))
 updates["funding_buffer_pct"] = columns[3].slider("Funding gap buffer (%)", 0.0, 50.0,
@@ -65,7 +72,7 @@ updates["discretionary_start_week"] = columns[2].slider("L3 starts in week", 1, 
 
 ui.section_title("Financing template")
 columns = st.columns(4)
-templates = list({"Term loan": None, "Invoice financing": None, "Supplier credit": None, "Credit line": None})
+templates = ("Term loan", "Invoice financing", "Supplier credit", "Credit line")
 updates["financing_template"] = columns[0].selectbox("Template", templates,
     index=templates.index(values["financing_template"]), key=_key(case_name, "financing_template"))
 updates["annual_rate_pct"] = columns[1].number_input("Annual rate (%)", min_value=0.0, max_value=100.0,

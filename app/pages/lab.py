@@ -7,6 +7,7 @@ import streamlit as st
 from app import charts
 from app import components as ui
 from app.assumptions_store import get_values, save_values, to_lab_assumptions, to_stress_inputs
+from core.forecast import forecast
 from core.import_scenario import ImportInputs, build_import_scenario
 from core.lab import run_lab
 from core.loaders import load_case
@@ -34,12 +35,21 @@ def _render_controls(case_name: str, case, values: dict) -> dict:
     with st.expander("Adjust assumptions, levers and stress", expanded=True):
         st.caption("Controls save to the session assumption store and recalculate this comparison immediately.")
         ui.section_title("Reserve and horizon")
-        cols = st.columns(3)
-        updates["reserve_bdt"] = cols[0].number_input("Minimum reserve (BDT)", min_value=0, max_value=100_000_000,
-            value=int(values["reserve_bdt"]), step=10_000, key=f"lab::{case_name}::reserve_bdt")
-        updates["horizon_weeks"] = cols[1].slider("Forecast horizon (weeks)", 8, 13, int(values["horizon_weeks"]),
+        cols = st.columns(4)
+        updates["reserve_mode"] = cols[0].selectbox("Reserve method", ("Reserve weeks", "Fixed BDT"),
+            index=("Reserve weeks", "Fixed BDT").index(values["reserve_mode"]), key=f"lab::{case_name}::reserve_mode")
+        if updates["reserve_mode"] == "Fixed BDT":
+            updates["reserve_bdt"] = cols[1].number_input("Minimum reserve (BDT)", min_value=0, max_value=100_000_000,
+                value=int(values["reserve_bdt"]), step=10_000, key=f"lab::{case_name}::reserve_bdt")
+        else:
+            updates["reserve_weeks"] = cols[1].slider("Reserve basis (weeks)", 0.0, 13.0,
+                float(values["reserve_weeks"]), step=0.5, key=f"lab::{case_name}::reserve_weeks")
+            updates["reserve_bdt"] = round(forecast(case, reserve_weeks=float(updates["reserve_weeks"]),
+                horizon_weeks=int(values["horizon_weeks"])).reserve)
+            cols[1].caption(f"Derived reserve: BDT {updates['reserve_bdt']:,.0f}")
+        updates["horizon_weeks"] = cols[2].slider("Forecast horizon (weeks)", 8, 13, int(values["horizon_weeks"]),
             key=f"lab::{case_name}::horizon_weeks")
-        updates["funding_buffer_pct"] = cols[2].slider("Funding gap buffer (%)", 0.0, 50.0,
+        updates["funding_buffer_pct"] = cols[3].slider("Funding gap buffer (%)", 0.0, 50.0,
             float(values["funding_buffer_pct"]), step=1.0, key=f"lab::{case_name}::funding_buffer_pct")
 
         ui.section_title("Option A levers")
@@ -129,7 +139,7 @@ ui.alert_banner(
 )
 first_shortage = _shortage(baseline.shortage_week)
 ui.kpi_row([
-    ("Original funding gap", _money(baseline.funding_gap), "Reserve minus the lowest projected balance before levers or financing."),
+    ("Scenario funding gap", _money(baseline.funding_gap), "Reserve minus the lowest projected balance under the current case and stress settings, before levers or financing."),
     ("Baseline shortage", first_shortage, "First forecast week that closes below the selected reserve."),
     ("Recommended plan", lab_result.best_plan_id, lab_result.best_plan_reason),
     ("Borrowing necessary?", "Yes" if lab_result.borrowing_necessary else "No", lab_result.borrowing_reason),
@@ -155,15 +165,18 @@ cols = st.columns(4)
 for col, name in zip(cols, PLAN_ORDER):
     plan = lab_result.plans[name]
     min_balance = min(point.closing_balance for point in plan.balance_series_after)
+    shortage_date = plan.balance_series_after[plan.shortage_week - 1].week_start if plan.shortage_week else "None"
     ui.plan_card(col, name, [
         ("Minimum balance", _money(min_balance)),
         ("Gap before finance", _money(plan.funding_gap)),
         ("Remaining gap", _money(plan.remaining_gap)),
         ("First shortage", _shortage(plan.shortage_week)),
+        ("Shortage date", shortage_date),
         ("Facility", _money(plan.financing_amount)),
         ("Financing cost", _money(plan.financing_cost)),
         ("Capacity", f"{plan.capacity_ratio:.2f}x · {plan.capacity_label}" if plan.capacity_ratio is not None else plan.capacity_label),
         ("Status", "Feasible" if plan.is_feasible else "Gap remains"),
+        ("Layer", ", ".join(plan.layer_tags)),
     ], recommended=name == lab_result.best_plan_id)
 
 ui.section_title("Balance by plan")
@@ -176,7 +189,7 @@ for name in PLAN_ORDER:
     plan = lab_result.plans[name]
     layer = "HYPOTHETICAL" if name != "Option 0" or scenario_active else "FORECAST"
     charts.line(figure, week_labels, [point.closing_balance for point in plan.balance_series_after], layer=layer, name=name)
-charts.reserve(figure, week_labels, float(values["reserve_bdt"]))
+charts.reserve(figure, week_labels, lab_result.reserve)
 st.plotly_chart(figure, width="stretch")
 ui.layer_legend()
 
@@ -257,6 +270,19 @@ if cols[1].button("Save scenario", disabled=len(saved_scenarios) >= 3, key=f"lab
         "stress cost increase (%)": values["stress_cost_increase_pct"],
         "stress delay (days)": values["stress_delay_days"],
         "FX shock (%)": values["stress_fx_shock_pct"],
+        "L1 collection (%)": values["collection_pct"],
+        "L2 deferral (weeks)": values["deferral_weeks"],
+        "L3 reduction (%)": values["discretionary_reduction_pct"],
+        "reserve mode": values["reserve_mode"],
+        "reserve (BDT)": lab_result.reserve,
+        "financing template": values["financing_template"],
+        "annual rate (%)": values["annual_rate_pct"],
+        "fee (%)": values["fee_pct"],
+        "tenor (months)": values["tenor_months"],
+        "import included": bool(import_result),
+        "import FX rate": values["import_fx_rate"] if import_result else None,
+        "import FX shock (%)": values["import_fx_shock_pct"] if import_result else None,
+        "import deposit (%)": values["import_deposit_pct"] if import_result else None,
     }
     saved_scenarios.append(snapshot)
     st.rerun()

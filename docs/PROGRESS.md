@@ -1,11 +1,9 @@
 # PROGRESS
 
-Current task: T08 (next)
+Current task: T09 (next)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-- T08 deterministic stress and case 4 import-scenario engines implemented; focused checks: 11 tests passed and Ruff passed.
-- T08 interactive Lab and shared Assumptions pages implemented; AppTest checks passed for all demo cases, recalculation, case 4 edits, reset, and three saved scenarios.
 
 
 ## Done
@@ -50,6 +48,12 @@ Last updated: 2026-10-18
   - The case 3 comparison confirms Option C uses the rounded original gap (BDT 6,890,000 for a BDT 6,889,777 gap), Option B is smaller, and prints the best-plan reason. Breach probabilities remain null until T09 implements uncertainty.
   - Verified: `pytest -q` (87 passed), `ruff check .` (all checks passed), `scripts/show_lab.py` (case 3 output and Option B/C facility assertions passed), secret scan (no matches in 118 files).
   - Local checkpoint commit: `4a8c54a`.
+- **T08 Decision Lab page, Assumptions, stress and import scenario** (2026-10-18)
+  - Added deterministic sales, operating cost, customer-delay and import-linked FX stress inputs; built editable case 4 deposit, landed-cost and sales-collection events from user-entered assumptions.
+  - Added a shared per-case session assumption store with validated ranges and reset; wired the Lab page with five answers, four plan cards, balance/cost/lever charts, stress and import controls, plan details, and up to three saved comparisons. Proposal saving remains disabled until the draft service is built.
+  - Verified AppTest across all five cases; sales and lever slider recalculation; reserve changes; case 4 FX/deposit edits; assumption reset; and saving three scenarios.
+  - Verified: `pytest -q` (105 passed), `ruff check .` (all checks passed), `scripts/show_lab.py` (case 3 comparison passed), secret scan (no matches in 123 files).
+  - Local checkpoint commits: `5cabc5c`, `4d81140`.
 
 ## How to run
 ```
@@ -71,6 +75,7 @@ Secret scan: `python scripts/check_secrets.py` (exit 0 = clean).
 - `python run.py start` leaves the server running in its terminal (normal Streamlit behaviour); stop with Ctrl-C.
 - `python run.py status` reports the passing test count but then errors in `scripts/status.py` because `result.stdout` is `None`.
 - T07 publishes `breach_probability: null` until the uncertainty model is built in T09; no probability is estimated or hard-coded.
+- T08 import sales ramp uses recent actual weekly inflows as its deterministic proxy; shipment costs, duties/taxes and timings remain user-editable hypothetical assumptions.
 - evidence/ holds only .gitkeep until related later tasks; static/fonts/ has no Inter files, so the system fallback stack is active.
 
 ## Decisions or assumptions changed (details in DECISIONS.md)

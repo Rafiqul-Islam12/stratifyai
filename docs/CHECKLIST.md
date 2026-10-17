@@ -3,20 +3,20 @@
 ## Master brief
 - [ ] B-01 General SME copilot, not import-only (T03, T05, T08)
 - [x] B-02 Lab Option 0 baseline (T07) — `core/lab.py`, `tests/test_lab.py`
-- [x] B-03 Option A with three separate levers L1/L2/L3 (T07, T08) — isolated and combined plans in `core/lab.py`; UI remains in T08
+- [x] B-03 Option A with three separate levers L1/L2/L3 (T07, T08) — isolated and combined plans in `core/lab.py`, controls in `app/pages/lab.py`
 - [x] B-04 Option B partial financing (T07) — remaining gap after A, tested against C in `tests/test_lab.py`
 - [x] B-05 Option C full financing (T07) — based on original gap with documented T06 rounding
-- [x] B-06 Per-plan display: before/after balance, gap and shortage date, financing amount and cost, repayment capacity, risks, assumptions and sources, pros, cons, next steps (T07, T08) — serializable plan output in `core/lab.py`; UI remains in T08
-- [~] B-07 Hypothetical actions never assumed real (T07, T08, T12) — all T07 plan layer tags are HYPOTHETICAL; UI confirmation treatment remains in T08/T12
+- [x] B-06 Per-plan display: before/after balance, gap and shortage date, financing amount and cost, repayment capacity, risks, assumptions and sources, pros, cons, next steps (T07, T08) — `core/lab.py`, `app/pages/lab.py`
+- [~] B-07 Hypothetical actions never assumed real (T07, T08, T12) — T07 plan layer tags and T08 scenario outputs are HYPOTHETICAL; owner approval/execution rules remain in T12
 - [~] B-08 Deterministic numbers; AI only explains (T07, T13) — Decision Lab engine is deterministic; copilot rules remain in T13
-- [ ] B-09 Lab answers the five key questions (T08)
+- [x] B-09 Lab answers the five key questions (T08) — structured answers rendered in `app/pages/lab.py`
 - [x] B-10 Forecast 8-13 weeks, shortage date and amount, configurable reserve, actual vs forecast distinct (T05) — core/forecast.py and tests/test_forecast.py
 - [x] B-11 Financing advisor: gap, capacity, templates, cost, schedule, risks, missing info, no approval claims (T06) — `app/pages/financing.py`, `core/financing.py`, `tests/test_financing.py`
 - [ ] B-12 Business analysis with reliable metrics only (T10)
 - [ ] B-13 Grounded copilot, missing-data answers, untrusted input handling (T13)
 - [~] B-14 Security: validation, backend RBAC, owner approval, audit, env secrets, safe errors (T04, T11, T12) — upload validation and friendly parse errors implemented in T04; RBAC, owner approval and audit remain in T11/T12
 - [ ] B-15 No real payments, loans or bank claims (T12, T16)
-- [ ] B-16 Import demo scenario and stress tests (sales -20%, costs +15%, late payments, FX) editable (T08)
+- [x] B-16 Import demo scenario and stress tests (sales -20%, costs +15%, late payments, FX) editable (T08) — `core/stress.py`, `core/import_scenario.py`, and Lab controls
 - [x] B-17 CSV/Excel upload and validation of dates, amounts, types, duplicates, missing values (T04) — tests in tests/test_validation.py
 - [x] B-18 Synthetic data and illustrative terms labelled (T03, T06, T14) — Financing page banner and synthetic-case context; T14 cross-page review remains
 - [~] B-19 Transparent formulas, no double counting, four layers separated (T05, T07, T14) — T05 actual and forecast are separate; matching invoice/bill categories are excluded from run rate; T07 tags simulated plans HYPOTHETICAL; cross-page layer review remains in T14
@@ -38,7 +38,7 @@
 
 ## UI requests
 - [ ] U-01 Clean top-level UI (T02, T14)
-- [ ] U-02 Dynamic features: sliders, instant recalculation, click-through (T08, T14)
+- [~] U-02 Dynamic features: sliders, instant recalculation, click-through (T08, T14) — Lab sliders recalculate immediately; cross-page navigation polish remains in T14
 - [~] U-03 Beautiful charts (T05, T08, T09, T10) — Cash Flow actual/forecast chart added in T05; later chart pages remain
 - [ ] U-04 Colour grading and layer colours (T02)
 - [ ] U-05 Font and typography (T02)

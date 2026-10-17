@@ -24,6 +24,16 @@ def test_lab_sales_stress_recalculates_plan_results():
     app.slider(key="lab::high_expense_shortage::stress_sales_drop_pct").set_value(20).run(timeout=30)
     after = app.session_state["lab_result"].plans["Option 0"].funding_gap
     assert after > before
+    gap_before_lever_edit = app.session_state["lab_result"].plans["Option A"].remaining_gap
+    app.slider(key="lab::high_expense_shortage::discretionary_reduction_pct").set_value(40).run(timeout=30)
+    assert app.session_state["lab_result"].plans["Option A"].remaining_gap < gap_before_lever_edit
+
+
+def test_lab_reserve_basis_slider_updates_reserve_and_cards():
+    app = AppTest.from_file(LAB_PAGE, default_timeout=30).run()
+    original = app.session_state["lab_result"].reserve
+    app.slider(key="lab::high_expense_shortage::reserve_weeks").set_value(4.0).run(timeout=30)
+    assert app.session_state["lab_result"].reserve > original
 
 
 def test_lab_case_four_fx_and_deposit_edits_change_import_events():

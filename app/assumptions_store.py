@@ -42,6 +42,7 @@ def defaults_for_case(case: SyntheticCase) -> dict[str, Any]:
     rate, fee, tenor, advance = FINANCING_DEFAULTS["Term loan"]
     imported = default_import_inputs(case)
     return {
+        "reserve_mode": "Reserve weeks",
         "reserve_bdt": round(projection.reserve),
         "reserve_weeks": assumptions.minimum_reserve_weeks,
         "horizon_weeks": assumptions.forecast_horizon_weeks,
@@ -98,6 +99,8 @@ def validate_values(values: dict[str, Any]) -> dict[str, Any]:
         } else float(value)
     if checked.get("financing_template") not in FINANCING_DEFAULTS:
         raise ValueError("Choose one of the four financing templates.")
+    if checked.get("reserve_mode") not in ("Reserve weeks", "Fixed BDT"):
+        raise ValueError("Choose reserve weeks or a fixed BDT amount.")
     if not isinstance(checked.get("include_import_scenario"), bool):
         raise TypeError("Import scenario toggle must be true or false.")
     return checked
@@ -118,7 +121,7 @@ def reset_values(case_name: str, case: SyntheticCase) -> dict[str, Any]:
 def to_lab_assumptions(values: dict[str, Any]) -> LabAssumptions:
     settings = validate_values(values)
     return LabAssumptions(
-        reserve=float(settings["reserve_bdt"]),
+        reserve=float(settings["reserve_bdt"]) if settings["reserve_mode"] == "Fixed BDT" else None,
         reserve_weeks=float(settings["reserve_weeks"]),
         funding_buffer_pct=float(settings["funding_buffer_pct"]),
         horizon_weeks=int(settings["horizon_weeks"]),
