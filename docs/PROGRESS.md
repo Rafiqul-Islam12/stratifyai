@@ -1,10 +1,9 @@
 # PROGRESS
 
-Current task: T07 (next)
+Current task: T08 (next)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-- T07 deterministic comparison engine and known-number mini-scenario tests implemented; focused checks: 6 tests passed and Ruff passed.
 
 
 
@@ -44,6 +43,12 @@ Last updated: 2026-10-18
   - Verified hand-calculated 100,000 BDT annuity, zero rate/gap, invalid terms, all template calculations and case 3 page recalculation using AppTest.
   - Verified: `pytest -q` (76 passed), `ruff check .` (all checks passed), secret scan (no matches in 115 files).
   - Local checkpoint commit: `c38831e`.
+- **T07 Decision Lab engine** (2026-10-18)
+  - Added deterministic Option 0, isolated L1/L2/L3, combined Option A and financing Options B/C with repayment schedule, cost, capacity, risks, assumptions/sources, plan explanations and five structured answers.
+  - Added a hand-built known-number mini scenario covering no-double-counted collections, combined-lever impact, best-plan/no-feasible selection, B/C facility comparison, serialization, determinism and hypothetical layer tags.
+  - The case 3 comparison confirms Option C uses the rounded original gap (BDT 6,890,000 for a BDT 6,889,777 gap), Option B is smaller, and prints the best-plan reason. Breach probabilities remain null until T09 implements uncertainty.
+  - Verified: `pytest -q` (87 passed), `ruff check .` (all checks passed), `scripts/show_lab.py` (case 3 output and Option B/C facility assertions passed), secret scan (no matches in 118 files).
+  - Local checkpoint commit: `4a8c54a`.
 
 ## How to run
 ```
@@ -64,6 +69,7 @@ Secret scan: `python scripts/check_secrets.py` (exit 0 = clean).
 - The competition PDF in docs/inputs/ could not be read on this machine (no poppler, no PDF library; the file has no /ToUnicode CMap). docs/COMPETITION.md is therefore unverified against the PDF - verify by hand before submission.
 - `python run.py start` leaves the server running in its terminal (normal Streamlit behaviour); stop with Ctrl-C.
 - `python run.py status` reports the passing test count but then errors in `scripts/status.py` because `result.stdout` is `None`.
+- T07 publishes `breach_probability: null` until the uncertainty model is built in T09; no probability is estimated or hard-coded.
 - evidence/ holds only .gitkeep until related later tasks; static/fonts/ has no Inter files, so the system fallback stack is active.
 
 ## Decisions or assumptions changed (details in DECISIONS.md)

@@ -29,6 +29,7 @@
 
 ## Best-plan rule (deterministic)
 Candidates: Option 0, A, B, C. Feasible = projected minimum balance >= reserve on the P50 (deterministic) path; also report breach probability from the uncertainty model. Choose the feasible plan with the lowest total cost; ties broken by lower repayment pressure, then fewer unconfirmed assumptions. If none is feasible, say "no plan fully closes the gap" and recommend the plan with the smallest remaining gap. Also output "Is borrowing necessary?" with the reason.
+- T07 exposes breach probability as null until T09 provides the uncertainty model; it must not substitute a fabricated or hard-coded probability.
 
 ## Uncertainty
 Monte Carlo, 2000 runs, fixed seed 42. Per-customer payment delay sampled from the empirical distribution (if at least 5 observations) else normal around the default delay with editable sd; sales variability coefficient editable. Outputs P10/P50/P90 closing balance per week and probability of falling below reserve and below zero. Every probability shown in the UI is computed, never hard-coded.

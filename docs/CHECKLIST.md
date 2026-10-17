@@ -2,13 +2,13 @@
 
 ## Master brief
 - [ ] B-01 General SME copilot, not import-only (T03, T05, T08)
-- [ ] B-02 Lab Option 0 baseline (T07)
-- [ ] B-03 Option A with three separate levers L1/L2/L3 (T07, T08)
-- [ ] B-04 Option B partial financing (T07)
-- [ ] B-05 Option C full financing (T07)
-- [ ] B-06 Per-plan display: before/after balance, gap and shortage date, financing amount and cost, repayment capacity, risks, assumptions and sources, pros, cons, next steps (T07, T08)
-- [ ] B-07 Hypothetical actions never assumed real (T07, T08, T12)
-- [ ] B-08 Deterministic numbers; AI only explains (T07, T13)
+- [x] B-02 Lab Option 0 baseline (T07) — `core/lab.py`, `tests/test_lab.py`
+- [x] B-03 Option A with three separate levers L1/L2/L3 (T07, T08) — isolated and combined plans in `core/lab.py`; UI remains in T08
+- [x] B-04 Option B partial financing (T07) — remaining gap after A, tested against C in `tests/test_lab.py`
+- [x] B-05 Option C full financing (T07) — based on original gap with documented T06 rounding
+- [x] B-06 Per-plan display: before/after balance, gap and shortage date, financing amount and cost, repayment capacity, risks, assumptions and sources, pros, cons, next steps (T07, T08) — serializable plan output in `core/lab.py`; UI remains in T08
+- [~] B-07 Hypothetical actions never assumed real (T07, T08, T12) — all T07 plan layer tags are HYPOTHETICAL; UI confirmation treatment remains in T08/T12
+- [~] B-08 Deterministic numbers; AI only explains (T07, T13) — Decision Lab engine is deterministic; copilot rules remain in T13
 - [ ] B-09 Lab answers the five key questions (T08)
 - [x] B-10 Forecast 8-13 weeks, shortage date and amount, configurable reserve, actual vs forecast distinct (T05) — core/forecast.py and tests/test_forecast.py
 - [x] B-11 Financing advisor: gap, capacity, templates, cost, schedule, risks, missing info, no approval claims (T06) — `app/pages/financing.py`, `core/financing.py`, `tests/test_financing.py`
@@ -19,7 +19,7 @@
 - [ ] B-16 Import demo scenario and stress tests (sales -20%, costs +15%, late payments, FX) editable (T08)
 - [x] B-17 CSV/Excel upload and validation of dates, amounts, types, duplicates, missing values (T04) — tests in tests/test_validation.py
 - [x] B-18 Synthetic data and illustrative terms labelled (T03, T06, T14) — Financing page banner and synthetic-case context; T14 cross-page review remains
-- [~] B-19 Transparent formulas, no double counting, four layers separated (T05, T07, T14) — T05 actual and forecast are separate; matching invoice/bill categories are excluded from run rate; hypothetical and confirmed layers remain in T07/T14
+- [~] B-19 Transparent formulas, no double counting, four layers separated (T05, T07, T14) — T05 actual and forecast are separate; matching invoice/bill categories are excluded from run rate; T07 tags simulated plans HYPOTHETICAL; cross-page layer review remains in T14
 - [ ] B-20 No accuracy claim without backtest (T15)
 - [x] B-21 Five synthetic cases (T03) — five generated case folders, schema validation and deterministic hash test in tests/test_data.py
 - [ ] B-22 Required tests: gap, alerts, scenarios, financing cost, invalid data, unauthorized actions, audit tamper, AI grounding (T15)
@@ -32,7 +32,7 @@
 - [ ] A-02 Security tiers, hash-chained audit, known-risk list, self-assessment report (T11, T16)
 - [ ] A-03 Backtest vs naive baseline (T15)
 - [ ] A-04 P10/P50/P90 band (T09)
-- [ ] A-05 Deterministic best-plan rule, Option 0, separate levers (T07)
+- [x] A-05 Deterministic best-plan rule, Option 0, separate levers (T07) — `core/lab.py`, `tests/test_lab.py`
 - [x] A-06 Financing templates and repayment-capacity formula (T06) — `core/financing.py`, `tests/test_financing.py`
 - [ ] A-07 Deliverables and schedule (T16, T18)
 

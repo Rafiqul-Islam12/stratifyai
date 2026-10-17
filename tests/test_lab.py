@@ -1,4 +1,5 @@
 """Known-number and selection tests for the deterministic Decision Lab engine."""
+import json
 from datetime import date, timedelta
 
 import pytest
@@ -80,7 +81,18 @@ def test_result_is_deterministic_serializable_and_hypothetical():
     right = run_lab(_case())
     assert left == right
     rendered = left.to_dict()
+    json.dumps(rendered)
     assert rendered["best_plan_id"] == left.best_plan_id
     assert len(rendered["key_answers"]) == 5
     assert all(plan.layer_tags == ("HYPOTHETICAL",) for plan in left.plans.values())
     assert all(plan.breach_probability is None for plan in left.plans.values())
+
+
+@pytest.mark.parametrize("settings", [
+    LabAssumptions(collection_pct=101), LabAssumptions(collection_weeks=0),
+    LabAssumptions(deferral_weeks=1.5), LabAssumptions(discretionary_reduction_pct=-1),
+    LabAssumptions(financing_template="Unknown"),
+])
+def test_invalid_lab_assumptions_are_rejected(settings):
+    with pytest.raises(ValueError):
+        run_lab(_case(), settings)

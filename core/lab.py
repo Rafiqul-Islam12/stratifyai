@@ -102,7 +102,7 @@ def _resolved_assumptions(case: SyntheticCase, values: LabAssumptions) -> dict[s
     _bounded(float(resolved["late_fee_pct"]), 0, 100, "Late fee percentage")
     _bounded(float(resolved["discretionary_reduction_pct"]), 0, 100, "Discretionary reduction")
     for key in ("collection_weeks", "deferral_weeks", "discretionary_start_week"):
-        if int(resolved[key]) < 1:
+        if int(resolved[key]) < 1 or float(resolved[key]) != int(resolved[key]):
             raise ValueError(f"{key.replace('_', ' ').capitalize()} must be at least 1.")
     return resolved
 
@@ -147,8 +147,16 @@ def _build_cash_series(
             for invoice, collected, expected_index in eligible:
                 if expected_index < horizon:
                     collection_delta[expected_index] -= collected
-            provenance.append({"assumption": "L1 collections", "value": total,
-                               "source": "Open receivables due before forecast start; configured collection %, timing and haircut"})
+            provenance.extend([
+                {"assumption": "L1 collected amount", "value": total,
+                 "source": "Open receivables due before forecast start, after collection percentage and haircut"},
+                {"assumption": "L1 collection percentage", "value": float(assumptions["collection_pct"]),
+                 "source": "Configured assumption; docs/DECISIONS.md"},
+                {"assumption": "L1 collection timing (weeks)", "value": weeks_to_collect,
+                 "source": "Configured assumption; docs/DECISIONS.md"},
+                {"assumption": "L1 haircut percentage", "value": float(assumptions["collection_haircut_pct"]),
+                 "source": "Configured assumption; docs/DECISIONS.md"},
+            ])
             risks.append("Collection timing and amount are hypothetical; customer payment is unconfirmed.")
 
     for bill in case.payables:
@@ -168,8 +176,14 @@ def _build_cash_series(
         if "L2" in active and bill.deferrable:
             if shifted_index < horizon:
                 outflows[shifted_index] += outstanding + late_cost
-            provenance.append({"assumption": "L2 payable deferral", "value": int(assumptions["deferral_weeks"]),
-                               "source": f"Deferrable bills in case data; late fee {assumptions['late_fee_pct']:g}%"})
+            provenance.extend([
+                {"assumption": f"L2 bill {bill.bill_id} outstanding", "value": outstanding,
+                 "source": f"Deferrable bill in case data; moved from week {original_index + 1} to week {shifted_index + 1}"},
+                {"assumption": "L2 deferral (weeks)", "value": int(assumptions["deferral_weeks"]),
+                 "source": "Configured assumption; docs/DECISIONS.md"},
+                {"assumption": "L2 late fee percentage", "value": float(assumptions["late_fee_pct"]),
+                 "source": "Configured assumption; docs/DECISIONS.md"},
+            ])
             if shifted_index >= horizon:
                 risks.append("Deferred payable falls beyond this forecast horizon and remains an outstanding obligation.")
 
@@ -186,8 +200,14 @@ def _build_cash_series(
                 outflows[due_index] -= reduction
                 reduction_total += reduction
         if reduction_total:
-            provenance.append({"assumption": "L3 discretionary expense reduction", "value": reduction_total,
-                               "source": f"Discretionary payables from week {from_week}; configured reduction percentage"})
+            provenance.extend([
+                {"assumption": "L3 estimated expense reduction", "value": reduction_total,
+                 "source": "Discretionary payable records in case data"},
+                {"assumption": "L3 reduction percentage", "value": float(assumptions["discretionary_reduction_pct"]),
+                 "source": "Configured assumption; docs/DECISIONS.md"},
+                {"assumption": "L3 starts in week", "value": from_week,
+                 "source": "Configured assumption; docs/DECISIONS.md"},
+            ])
             risks.append("Expense reductions may disrupt operations; the selected spend is not verified as avoidable.")
 
     # Enforce non-negative event buckets within floating-point tolerance.
@@ -223,6 +243,7 @@ def _make_plan(
     label = "No repayment"
     schedule: tuple[dict[str, float | int], ...] = ()
     after_balances = lever_balances.copy()
+    plan_assumptions = list(provenance)
     if finance:
         adjusted_weeks = [replace(row, inflow=inflow, outflow=outflow, net=inflow - outflow)
                           for row, inflow, outflow in zip(base_projection.forecast_weeks, inflows, outflows)]
@@ -233,6 +254,22 @@ def _make_plan(
         ratio = finance_result.capacity_ratio
         label = finance_result.pressure_label
         schedule = tuple(asdict(payment) for payment in finance_result.schedule)
+        if amount > 0:
+            plan_assumptions.append({"assumption": "Financing template", "value": financing_template,
+                                     "source": "Selected illustrative template; docs/DECISIONS.md"})
+            if financing_template in ("Term loan", "Credit line"):
+                plan_assumptions.append({"assumption": "Annual interest rate (%)", "value": financing_terms.annual_rate_pct,
+                                         "source": "Editable illustrative term; docs/DECISIONS.md"})
+            fee_label = "Fee per 30 days (%)" if financing_template == "Invoice financing" else "Cost percentage" if financing_template == "Supplier credit" else "Fee percentage"
+            plan_assumptions.extend([
+                {"assumption": fee_label, "value": financing_terms.fee_pct,
+                 "source": "Editable illustrative term; docs/DECISIONS.md"},
+                {"assumption": "Tenor (months)", "value": financing_terms.tenor_months,
+                 "source": "Editable illustrative term; docs/DECISIONS.md"},
+            ])
+            if financing_template == "Invoice financing":
+                plan_assumptions.append({"assumption": "Advance percentage", "value": financing_terms.advance_pct,
+                                         "source": "Editable illustrative term; docs/DECISIONS.md"})
         net_proceeds = amount * financing_terms.advance_pct / 100 if financing_template == "Invoice financing" else amount
         if after_balances:
             after_balances[0] += net_proceeds
@@ -257,10 +294,10 @@ def _make_plan(
         pros = (f"Reduces the projected reserve shortfall; remaining gap is BDT {remaining_gap:,.0f}.",)
         cons = tuple(risks) or ("The projected reserve is not maintained throughout the forecast horizon.",)
         next_steps = ("Review the remaining shortfall and test other assumptions; this plan does not fully maintain reserve.",)
-    assumption_count = len(provenance) + (1 if finance and amount > 0 else 0)
+    assumption_count = len(plan_assumptions)
     return Plan(
         name, before, after, lever_gap, remaining_gap, shortage, amount, cost, schedule,
-        ratio, label, feasible, None, tuple(dict.fromkeys(risks)), tuple(provenance), pros, cons,
+        ratio, label, feasible, None, tuple(dict.fromkeys(risks)), tuple(plan_assumptions), pros, cons,
         next_steps, ("HYPOTHETICAL",), assumption_count,
     )
 
