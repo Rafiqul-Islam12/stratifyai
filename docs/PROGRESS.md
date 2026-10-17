@@ -4,7 +4,6 @@ Current task: T12 (next)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-- T11 follow-up: added four labelled demo quick-sign-in buttons while retaining the password form; testing each role entry and documenting the demo-only bypass.
 
 ## Done
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)
@@ -67,8 +66,8 @@ Last updated: 2026-10-18
 - **T11 Security core, roles, audit chain, Approvals/Audit and Security pages** (2026-10-18)
   - Added demo PBKDF2 authentication with server-issued session tokens, backend action tiers and role checks, and an always-denied MONEY_MOVEMENT action.
   - Added sanitized append-only SQLite audit events with hash-chain verification and update/delete triggers; wired login, denials, validated uploads, scenario changes, drafts, approvals, and simulated execution to authorized service entry points.
-  - Added role-filtered app navigation, Approvals/Audit with filters and Verify chain, and Security controls, role matrix, and system status. Documented DEMO defaults and local audit storage; ignored SQLite artifacts.
-  - Verified: `pytest -q` (122 passed, including role matrix, denial logging, role forgery, money movement denial, tamper detection and login AppTest), `ruff check .` (all checks passed), secret scan (no matches in 136 files).
+  - Added role-filtered app navigation, Approvals/Audit with filters and Verify chain, and Security controls, role matrix, and system status. The sign-in page retains username/password login and provides four labelled demo quick-sign-in buttons; the password-free shortcut is documented as demo-only.
+  - Verified: `pytest -q` (126 passed, including role matrix, denial logging, role forgery, money movement denial, tamper detection, password login and all four demo buttons), `ruff check .` (all checks passed), secret scan (no matches in 136 files).
 
 ## How to run
 ```
