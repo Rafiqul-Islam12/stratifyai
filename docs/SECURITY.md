@@ -22,6 +22,11 @@
 ## Controls (baseline)
 Backend authorize() on privileged service calls; hash-chained append-only audit log with verify function; upload validation including spreadsheet formula-injection sanitising; untrusted-text handling for copilot; secrets only in .env; safe error messages; no real integrations. Pure parsing and deterministic calculation helpers do not mutate protected state.
 
+## Agent action drafts (T12)
+- finance_ops may create and inspect their own structured drafts; owners may review any pending draft. Draft payloads use deterministic templates and escape submitted free text.
+- Owner approval/rejection and simulated execution are state-checked and idempotent. Execution writes only to the local `evidence/sandbox_log.jsonl` and audit chain; it does not contact external services. MONEY_MOVEMENT remains denied for every role.
+- Approved Lab proposals are marked CONFIRMED as owner-asserted assumptions; this is a scenario annotation, not a verified business fact.
+
 ## Known risks (initial list; keep honest and extend)
 Demo authentication only (no MFA, seeded demo accounts); SQLite file is inside the trust boundary (a database administrator can edit it; chain makes edits detectable, not impossible); optional LLM mode sends masked evidence to an external provider; Streamlit CSS customisation depends on library version; single-process prototype; all data synthetic; financing terms illustrative.
 

@@ -61,6 +61,23 @@ def _create_action_form(user) -> None:
             st.error("The draft could not be saved. No external action was taken.")
 
 
+@st.dialog("Review action draft")
+def _review_dialog(user, draft_id: str, decision: str) -> None:
+    verb = "approve" if decision == "approve" else "reject"
+    st.write(f"Confirm that you want to {verb} draft `{draft_id[:8]}`.")
+    comment = st.text_area("Owner review comment", key=f"review-comment-{draft_id}", max_chars=1000)
+    if st.button(f"Confirm {verb}", type="primary", key=f"confirm-{decision}-{draft_id}"):
+        try:
+            review_draft(user, draft_id, decision, comment)
+            st.session_state.pop("agent_review_dialog", None)
+            st.rerun()
+        except (PermissionDenied, InvalidTransition, KeyError, ValueError) as exc:
+            st.error(str(exc))
+        except Exception:  # noqa: BLE001 - keep persistence details out of the UI
+            outcome = "approved" if decision == "approve" else "rejected"
+            st.error(f"The draft could not be {outcome}. No external action was taken.")
+
+
 def _render_owner_queue(user, drafts) -> None:
     ui.section_title("Pending approvals")
     reviewable = drafts
@@ -74,25 +91,14 @@ def _render_owner_queue(user, drafts) -> None:
             for draft in reviewable if draft.draft_id == value))
     draft = next(item for item in reviewable if item.draft_id == selected_id)
     st.json(draft.payload)
+    if draft.review_comment:
+        st.caption(f"Owner review comment: {draft.review_comment}")
     if draft.status == "pending_approval":
-        comment = st.text_area("Owner review comment", key=f"review-comment-{draft.draft_id}", max_chars=1000)
         approve_col, reject_col = st.columns(2)
         if approve_col.button("Approve draft", type="primary", key=f"approve-{draft.draft_id}"):
-            try:
-                review_draft(user, draft.draft_id, "approve", comment)
-                st.rerun()
-            except (PermissionDenied, InvalidTransition, KeyError, ValueError) as exc:
-                st.error(str(exc))
-            except Exception:  # noqa: BLE001 - keep persistence details out of the UI
-                st.error("The draft could not be approved. Confirm it is still pending and try again.")
+            st.session_state["agent_review_dialog"] = {"draft_id": draft.draft_id, "decision": "approve"}
         if reject_col.button("Reject draft", key=f"reject-{draft.draft_id}"):
-            try:
-                review_draft(user, draft.draft_id, "reject", comment)
-                st.rerun()
-            except (PermissionDenied, InvalidTransition, KeyError, ValueError) as exc:
-                st.error(str(exc))
-            except Exception:  # noqa: BLE001 - keep persistence details out of the UI
-                st.error("The draft could not be rejected. Confirm it is still pending and try again.")
+            st.session_state["agent_review_dialog"] = {"draft_id": draft.draft_id, "decision": "reject"}
     elif draft.status == "approved":
         st.info("Approved by the owner. Simulated execution writes only to the local sandbox log.")
         if st.button("Record simulated execution", type="primary", key=f"execute-{draft.draft_id}"):
@@ -107,6 +113,9 @@ def _render_owner_queue(user, drafts) -> None:
         st.info(f"This draft is {draft.status}; no further action is available.")
     st.markdown("**Status timeline**")
     st.dataframe(pd.DataFrame(draft.timeline), width="stretch", hide_index=True)
+    pending_dialog = st.session_state.get("agent_review_dialog")
+    if pending_dialog and pending_dialog.get("draft_id") == draft.draft_id:
+        _review_dialog(user, draft.draft_id, pending_dialog["decision"])
 
 
 ui.load_styles()

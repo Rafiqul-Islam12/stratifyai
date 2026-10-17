@@ -10,8 +10,8 @@ from streamlit.testing.v1 import AppTest
 from core.audit import list_events
 from services.agent_actions import (
     InvalidTransition,
-    create_draft,
     confirmed_plans,
+    create_draft,
     get_draft,
     list_drafts,
     review_draft,
@@ -146,12 +146,24 @@ def test_full_finance_ops_to_owner_ui_flow(monkeypatch, stores):
     owner_app.run().switch_page("pages/approvals.py").run()
     assert not owner_app.exception
     next(button for button in owner_app.button if button.key == f"approve-{draft.draft_id}").click().run()
+    next(button for button in owner_app.button if button.key == f"confirm-approve-{draft.draft_id}").click().run()
     assert not owner_app.exception
     assert get_draft(owner, draft.draft_id, db_path=db_path).status == "approved"
     next(button for button in owner_app.button if button.key == f"execute-{draft.draft_id}").click().run()
     assert not owner_app.exception
     assert get_draft(owner, draft.draft_id, db_path=db_path).status == "simulated_executed"
     assert len(sandbox.read_text(encoding="utf-8").splitlines()) == 1
+
+    rejected = create_draft(finance, "supplier_deferral_request", {
+        "supplier": "Supplier Demo", "invoice": "BILL-UI-2", "amount": 2000,
+        "current_due_date": "2026-10-10", "requested_due_date": "2026-10-20",
+    }, db_path=db_path)
+    submit_draft(finance, rejected.draft_id, db_path=db_path)
+    owner_app.switch_page("pages/approvals.py").run()
+    next(widget for widget in owner_app.selectbox if widget.label == "Choose a draft").set_value(rejected.draft_id).run()
+    next(button for button in owner_app.button if button.key == f"reject-{rejected.draft_id}").click().run()
+    next(button for button in owner_app.button if button.key == f"confirm-reject-{rejected.draft_id}").click().run()
+    assert get_draft(owner, rejected.draft_id, db_path=db_path).status == "rejected"
 
     finance_app.switch_page("pages/lab.py").run()
     assert not finance_app.exception
@@ -163,6 +175,7 @@ def test_full_finance_ops_to_owner_ui_flow(monkeypatch, stores):
     owner_app.switch_page("pages/approvals.py").run()
     next(widget for widget in owner_app.selectbox if widget.label == "Choose a draft").set_value(plan_draft.draft_id).run()
     next(button for button in owner_app.button if button.key == f"approve-{plan_draft.draft_id}").click().run()
+    next(button for button in owner_app.button if button.key == f"confirm-approve-{plan_draft.draft_id}").click().run()
     assert not owner_app.exception
     assert get_draft(owner, plan_draft.draft_id, db_path=db_path).payload["assumptions_layer"] == "CONFIRMED"
     finance_app.switch_page("pages/lab.py").run()

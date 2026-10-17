@@ -28,6 +28,7 @@ ACTION_REGISTRY: dict[str, PermissionRule] = {
     "scenario.change": PermissionRule("DRAFT", ("owner", "finance_ops"), "Save a changed hypothetical scenario"),
     "data.upload": PermissionRule("DRAFT", ("owner", "finance_ops"), "Upload and validate a data file"),
     "draft.create": PermissionRule("DRAFT", ("owner", "finance_ops"), "Create an action draft"),
+    "draft.view": PermissionRule("READ", ("owner", "finance_ops"), "View draft contents within role scope"),
     "assumptions.manage": PermissionRule("DRAFT", ("owner",), "Edit shared assumptions"),
     "draft.approve": PermissionRule("APPROVAL_REQUIRED", ("owner",), "Approve an action draft"),
     "draft.reject": PermissionRule("APPROVAL_REQUIRED", ("owner",), "Reject an action draft"),

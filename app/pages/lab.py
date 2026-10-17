@@ -16,7 +16,7 @@ from core.stress import apply_stress
 from data.generate_synthetic import CASES
 from services.actions import record_scenario_change
 from services.actions import run_lab as run_authorized_lab
-from services.agent_actions import create_draft, confirmed_plans, submit_draft
+from services.agent_actions import confirmed_plans, create_draft, submit_draft
 from services.auth import current_user
 
 CASE_LABELS = {

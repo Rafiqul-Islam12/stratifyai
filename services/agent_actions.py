@@ -160,6 +160,12 @@ def _append_event(connection: sqlite3.Connection, draft_id: str, actor: str, act
         (draft_id, _now(), actor, action, json.dumps(detail or {}, sort_keys=True, separators=(",", ":"))))
 
 
+def _deny_scope(actor: AuthenticatedUser, action: str, db_path: str | Path | None) -> None:
+    log_event(actor.username, actor.role, "authorization.denied", action,
+              {"requested_action": action}, db_path=db_path)
+    raise PermissionDenied("You are not allowed to view or change this draft.")
+
+
 def _load(connection: sqlite3.Connection, row: sqlite3.Row) -> Draft:
     events = connection.execute("SELECT ts, actor, action FROM agent_draft_events WHERE draft_id=? ORDER BY id",
                                (row["draft_id"],)).fetchall()
@@ -190,22 +196,27 @@ def submit_draft(user: AuthenticatedUser | None, draft_id: str, *,
                  db_path: str | Path | None = None) -> Draft:
     actor = authorize(user, "draft.create", db_path=str(db_path) if db_path else None)
     _init(db_path)
+    out_of_scope = False
     with _connect(db_path) as connection:
+        connection.execute("BEGIN IMMEDIATE")
         row = connection.execute("SELECT * FROM agent_drafts WHERE draft_id=?", (draft_id,)).fetchone()
         if row is None:
             raise KeyError("Draft was not found.")
         if row["created_by"] != actor.username:
-            raise PermissionDenied("You can only submit drafts you created.")
-        if row["status"] == "pending_approval":
+            out_of_scope = True
+        elif row["status"] == "pending_approval":
             return _load(connection, row)
-        if row["status"] != "draft":
+        elif row["status"] != "draft":
             raise InvalidTransition("Only a draft can be submitted for approval.")
-        now = _now()
-        connection.execute("UPDATE agent_drafts SET status='pending_approval', updated_at=? WHERE draft_id=?",
-                           (now, draft_id))
-        _append_event(connection, draft_id, actor.username, "submitted")
-        row = connection.execute("SELECT * FROM agent_drafts WHERE draft_id=?", (draft_id,)).fetchone()
-        result = _load(connection, row)
+        else:
+            now = _now()
+            connection.execute("UPDATE agent_drafts SET status='pending_approval', updated_at=? WHERE draft_id=?",
+                               (now, draft_id))
+            _append_event(connection, draft_id, actor.username, "submitted")
+            row = connection.execute("SELECT * FROM agent_drafts WHERE draft_id=?", (draft_id,)).fetchone()
+            result = _load(connection, row)
+    if out_of_scope:
+        _deny_scope(actor, "draft.submit", db_path)
     log_event(actor.username, actor.role, "draft.submitted", draft_id, db_path=db_path)
     return result
 
@@ -233,17 +244,22 @@ def list_drafts(user: AuthenticatedUser | None, *, status: str | None = None,
 
 def get_draft(user: AuthenticatedUser | None, draft_id: str, *,
               db_path: str | Path | None = None) -> Draft:
-    actor = authorize(user, "approvals.view", db_path=str(db_path) if db_path else None)
+    actor = authorize(user, "draft.view", db_path=str(db_path) if db_path else None)
     _init(db_path)
+    denied = False
+    result = None
     with _connect(db_path) as connection:
         row = connection.execute("SELECT * FROM agent_drafts WHERE draft_id=?", (draft_id,)).fetchone()
         if row is None:
             raise KeyError("Draft was not found.")
-        if actor.role == "auditor":
-            raise PermissionDenied("Auditors can review the audit trail, not draft contents.")
-        if actor.role == "finance_ops" and row["created_by"] != actor.username:
-            raise PermissionDenied("You can only view drafts you created.")
-        return _load(connection, row)
+        if actor.role == "auditor" or actor.role == "finance_ops" and row["created_by"] != actor.username:
+            denied = True
+        else:
+            result = _load(connection, row)
+    if denied:
+        _deny_scope(actor, "draft.view", db_path)
+    assert result is not None
+    return result
 
 
 def review_draft(user: AuthenticatedUser | None, draft_id: str, decision: str, comment: str = "", *,
@@ -255,6 +271,7 @@ def review_draft(user: AuthenticatedUser | None, draft_id: str, decision: str, c
     target = "approved" if decision == "approve" else "rejected"
     _init(db_path)
     with _connect(db_path) as connection:
+        connection.execute("BEGIN IMMEDIATE")
         row = connection.execute("SELECT * FROM agent_drafts WHERE draft_id=?", (draft_id,)).fetchone()
         if row is None:
             raise KeyError("Draft was not found.")
@@ -285,6 +302,7 @@ def simulate_execution(user: AuthenticatedUser | None, draft_id: str, *,
     actor = authorize(user, "execution.simulate", db_path=str(db_path) if db_path else None)
     _init(db_path)
     with _connect(db_path) as connection:
+        connection.execute("BEGIN IMMEDIATE")
         row = connection.execute("SELECT * FROM agent_drafts WHERE draft_id=?", (draft_id,)).fetchone()
         if row is None:
             raise KeyError("Draft was not found.")

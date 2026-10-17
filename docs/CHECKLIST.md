@@ -7,14 +7,14 @@
 - [x] B-04 Option B partial financing (T07) — remaining gap after A, tested against C in `tests/test_lab.py`
 - [x] B-05 Option C full financing (T07) — based on original gap with documented T06 rounding
 - [x] B-06 Per-plan display: before/after balance, gap and shortage date, financing amount and cost, repayment capacity, risks, assumptions and sources, pros, cons, next steps (T07, T08) — `core/lab.py`, `app/pages/lab.py`
-- [~] B-07 Hypothetical actions never assumed real (T07, T08, T12) — T07 plan layer tags and T08 scenario outputs are HYPOTHETICAL; owner approval/execution rules remain in T12
+- [x] B-07 Hypothetical actions never assumed real (T07, T08, T12) — plan layers are labelled; T12 requires owner approval and simulated execution only (`services/agent_actions.py`)
 - [~] B-08 Deterministic numbers; AI only explains (T07, T13) — Decision Lab engine is deterministic; copilot rules remain in T13
 - [x] B-09 Lab answers the five key questions (T08) — structured answers rendered in `app/pages/lab.py`
 - [x] B-10 Forecast 8-13 weeks, shortage date and amount, configurable reserve, actual vs forecast distinct (T05) — core/forecast.py and tests/test_forecast.py
 - [x] B-11 Financing advisor: gap, capacity, templates, cost, schedule, risks, missing info, no approval claims (T06) — `app/pages/financing.py`, `core/financing.py`, `tests/test_financing.py`
 - [x] B-12 Business analysis with reliable metrics only (T10) — `core/analysis.py`, `app/pages/analysis.py`, `tests/test_analysis.py`; unsupported indicators carry explicit reasons
 - [ ] B-13 Grounded copilot, missing-data answers, untrusted input handling (T13)
-- [~] B-14 Security: validation, backend RBAC, owner approval, audit, env secrets, safe errors (T04, T11, T12) — upload validation, role checks, login and hash-chained audit are implemented; draft approval workflow is T12
+- [x] B-14 Security: validation, backend RBAC, owner approval, audit, env secrets, safe errors (T04, T11, T12) — upload validation, backend role checks, owner-only approval, audit chain, env secrets and safe errors are implemented (`services/agent_actions.py`, `services/permissions.py`)
 - [ ] B-15 No real payments, loans or bank claims (T12, T16)
 - [x] B-16 Import demo scenario and stress tests (sales -20%, costs +15%, late payments, FX) editable (T08) — `core/stress.py`, `core/import_scenario.py`, and Lab controls
 - [x] B-17 CSV/Excel upload and validation of dates, amounts, types, duplicates, missing values (T04) — tests in tests/test_validation.py
@@ -28,7 +28,7 @@
 - [ ] B-25 Title and tagline correct everywhere (T02, T16)
 
 ## Seven additions
-- [ ] A-01 Agent action drafts with owner approval (T12)
+- [x] A-01 Agent action drafts with owner approval (T12) — persistent draft state machine and owner review tested in `tests/test_agent_actions.py`
 - [~] A-02 Security tiers, hash-chained audit and known-risk list are displayed in T11; self-assessment report is T16
 - [ ] A-03 Backtest vs naive baseline (T15)
 - [x] A-04 P10/P50/P90 band and computed shortage probabilities (T09) — `core/montecarlo.py`, Cash Flow and Lab uncertainty displays, `tests/test_montecarlo.py`
@@ -56,7 +56,7 @@
 - [ ] C-03 Demo script for max 5 minutes (T16)
 - [~] C-04 Source, README, deployment instructions, tests, GitHub (T01, T16, T18) — source, README stub and tests done (T01); deployment instructions are T17, no GitHub remote yet
 - [ ] C-05 Security self-assessment (T16)
-- [ ] C-06 Execution evidence logs (T12, T15)
+- [~] C-06 Execution evidence logs (T12, T15) — T12 sandbox execution and audit events are logged; consolidated evaluation evidence remains in T15
 - [ ] C-07 Integrity: no copied code, licences respected (T18)
 - [ ] C-08 English everywhere (all)
 

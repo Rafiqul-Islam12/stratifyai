@@ -13,7 +13,7 @@ Legend: [ ] todo, [x] done. P1 must, P2 should, P3 cut first.
 - [x] T09 Uncertainty bands P10/P50/P90 and shortage probability (P1)
 - [x] T10 Business Analysis, receivables watchlist, financing readiness, readiness pack (P2)
 - [x] T11 Security core, roles, audit chain, Approvals/Audit and Security pages (P1)
-- [ ] T12 Agent action drafts, approval workflow, simulated execution (P1)
+- [x] T12 Agent action drafts, approval workflow, simulated execution (P1)
 - [ ] T13 Grounded copilot, injection protection, offline mode, receipt (P1)
 - [ ] T14 Overview page and cross-page polish (P1; include T02 font sizing, alignment, card text/layout, and vertical text placement fixes)
 - [ ] T15 Evaluation, task-completion suite, evidence, report builder, decision report (P1)

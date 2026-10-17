@@ -1,10 +1,9 @@
 # PROGRESS
 
-Current task: T12 (in progress)
+Current task: T13
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-- T12: persistent draft state machine, finance_ops draft creation, owner review, simulated execution, Lab proposal submission, and CONFIRMED chart overlay are wired. Focused workflow tests pass (4); running full verification next.
 
 ## Done
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)
@@ -69,6 +68,11 @@ Last updated: 2026-10-18
   - Added sanitized append-only SQLite audit events with hash-chain verification and update/delete triggers; wired login, denials, validated uploads, scenario changes, drafts, approvals, and simulated execution to authorized service entry points.
   - Added role-filtered app navigation, Approvals/Audit with filters and Verify chain, and Security controls, role matrix, and system status. The sign-in page retains username/password login and provides four labelled demo quick-sign-in buttons; the password-free shortcut is documented as demo-only. Sidebar links now use registered `st.Page` objects, fixing auditor navigation to Approvals.
   - Verified: `pytest -q` (126 passed, including role matrix, denial logging, role forgery, money movement denial, tamper detection, password login, all four demo buttons and auditor Approvals navigation), `ruff check .` (all checks passed), `run.py check` (health check passed), secret scan (no matches in 136 files).
+- **T12 Agent action drafts, approval workflow, simulated execution** (2026-10-18)
+  - Added persistent, idempotent drafts for collection reminders, supplier deferrals, financing packs and Lab proposals. finance_ops can create and view own drafts; only owner can approve/reject and simulate execution. Approvals includes payload previews, comments and status timeline; Lab proposals carry owner-confirmed assumptions into the chart layer.
+  - Simulated execution is local-only, audited and appended to `evidence/sandbox_log.jsonl`; MONEY_MOVEMENT remains denied. Untrusted draft text is escaped in deterministic templates.
+  - Verified: `pytest -q` (130 passed, including full UI approval/rejection/execution and Lab confirmation flow), `ruff check .` (all checks passed), `run.py check` (health passed), secret scan (no matches in 138 files).
+  - Commit: `T12: agent drafts and approval workflow`.
 
 ## How to run
 ```
