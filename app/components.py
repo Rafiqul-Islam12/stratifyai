@@ -106,7 +106,7 @@ def wordmark() -> None:
     _md(_badge("Synthetic data", "warning"))
 
 
-def sidebar_top() -> None:
+def sidebar_top(pages: list[tuple[str, str, str]] | None = None) -> None:
     """Sidebar top: brand, then the navigation rendered from PAGES.
 
     Navigation is emitted with ``st.page_link`` here instead of by
@@ -119,7 +119,7 @@ def sidebar_top() -> None:
     """
     with st.sidebar:
         wordmark()
-        for title, path, icon in PAGES:
+        for title, path, icon in (pages if pages is not None else PAGES):
             st.page_link(path, label=title, icon=icon)
 
 

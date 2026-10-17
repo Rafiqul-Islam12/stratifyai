@@ -7,6 +7,9 @@ import streamlit as st
 from app import components as ui
 from core.loaders import load_case
 from data.generate_synthetic import CASES
+from services.actions import record_upload
+from services.auth import current_user
+from services.permissions import PermissionDenied
 from services.validation import REQUIRED_COLUMNS, ValidationIssue, ValidationReport, template_csv, validate_upload
 
 DEMO_LABELS = {
@@ -84,13 +87,21 @@ if uploaded is not None:
         ui.section_title("Preview (first 100 rows)")
         st.dataframe(pd.DataFrame(report.cleaned_data[:100]), use_container_width=True, hide_index=True)
     if st.button("Use this dataset", type="primary", disabled=not report.is_valid):
-        st.session_state["uploaded_dataset"] = {
-            "kind": report.kind,
-            "filename": uploaded.name,
-            "rows": report.cleaned_data,
-            "stats": report.stats,
-        }
-        st.success(f"Validated {len(report.cleaned_data):,} rows and saved them for this session.")
+        try:
+            user = current_user()
+            if user:
+                record_upload(user, uploaded.name, len(report.cleaned_data))
+            st.session_state["uploaded_dataset"] = {
+                "kind": report.kind,
+                "filename": uploaded.name,
+                "rows": report.cleaned_data,
+                "stats": report.stats,
+            }
+            st.success(f"Validated {len(report.cleaned_data):,} rows and saved them for this session.")
+        except PermissionDenied as exc:
+            st.error(str(exc))
+        except Exception:  # noqa: BLE001 - keep parser and storage details out of the UI
+            st.error("The validated dataset could not be saved. The attempt was recorded safely.")
 
 ui.section_title("Load a demo business")
 demo_case = st.selectbox("Synthetic case", options=CASES, format_func=lambda value: DEMO_LABELS[value])

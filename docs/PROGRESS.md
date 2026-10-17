@@ -1,6 +1,6 @@
 # PROGRESS
 
-Current task: T11 (next)
+Current task: T12 (next)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
@@ -63,6 +63,11 @@ Last updated: 2026-10-18
   - Added weighted readiness scoring with component reasons/missing data, editable weights, and a consent/expiry-marked Markdown pack with SHA-256 verification tool on Financing. Labels explicitly say the indicator is not loan approval and pack integrity is not lender submission.
   - Verified: `pytest -q` (117 passed, including all five Analysis and Financing cases), `ruff check .` (all checks passed), secret scan (no matches in 130 files).
   - Local checkpoint commit: `280a988`.
+- **T11 Security core, roles, audit chain, Approvals/Audit and Security pages** (2026-10-18)
+  - Added demo PBKDF2 authentication with server-issued session tokens, backend action tiers and role checks, and an always-denied MONEY_MOVEMENT action.
+  - Added sanitized append-only SQLite audit events with hash-chain verification and update/delete triggers; wired login, denials, validated uploads, scenario changes, drafts, approvals, and simulated execution to authorized service entry points.
+  - Added role-filtered app navigation, Approvals/Audit with filters and Verify chain, and Security controls, role matrix, and system status. Documented DEMO defaults and local audit storage; ignored SQLite artifacts.
+  - Verified: `pytest -q` (122 passed, including role matrix, denial logging, role forgery, money movement denial, tamper detection and login AppTest), `ruff check .` (all checks passed), secret scan (no matches in 136 files).
 
 ## How to run
 ```

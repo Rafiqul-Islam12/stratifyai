@@ -14,6 +14,9 @@ from core.loaders import load_case
 from core.montecarlo import simulate
 from core.stress import apply_stress
 from data.generate_synthetic import CASES
+from services.actions import record_scenario_change
+from services.actions import run_lab as run_authorized_lab
+from services.auth import current_user
 
 CASE_LABELS = {
     "stable_healthy": "Stable and healthy", "delayed_customer_payments": "Delayed customer payments",
@@ -128,6 +131,13 @@ ui.page_header("Liquidity Decision Lab", "Compare baseline cash, operational lev
 st.caption("Synthetic data · BDT · deterministic projections; proposed changes remain HYPOTHETICAL.")
 values = get_values(case_name, case)
 values = _render_controls(case_name, case, values)
+user = current_user()
+snapshot_key = f"lab_authorized_snapshot::{case_name}"
+previous_values = st.session_state.get(snapshot_key, {})
+changed_fields = sorted(key for key, value in values.items() if previous_values.get(key) != value)
+if user and changed_fields:
+    record_scenario_change(user, case_name, changed_fields)
+st.session_state[snapshot_key] = dict(values)
 
 stress = apply_stress(case, to_stress_inputs(values))
 scenario_case = stress.case
@@ -142,7 +152,8 @@ if case.profile.import_scenario and values["include_import_scenario"]:
     )
     import_result = build_import_scenario(scenario_case, import_inputs)
     scenario_case = import_result.scenario_case
-lab_result = _cached_lab(scenario_case, to_lab_assumptions(values))
+lab_assumptions = to_lab_assumptions(values)
+lab_result = run_authorized_lab(user, scenario_case, lab_assumptions) if user else _cached_lab(scenario_case, lab_assumptions)
 st.session_state["lab_result"] = lab_result
 st.session_state["lab_case_name"] = case_name
 st.session_state["lab_scenario_case"] = scenario_case

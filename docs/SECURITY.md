@@ -12,8 +12,14 @@
 - viewer: READ only
 - auditor: READ plus view audit log and verify the audit chain
 
+## Demo authentication (T11)
+- Usernames are `owner`, `finance_ops`, `viewer`, and `auditor`; the role is resolved from the server-side user record.
+- The local synthetic-data demo defaults are `DEMO-owner-123`, `DEMO-finance-123`, `DEMO-viewer-123`, and `DEMO-auditor-123`. Replace them with `DEMO_OWNER_PASSWORD`, `DEMO_FINANCE_OPS_PASSWORD`, `DEMO_VIEWER_PASSWORD`, and `DEMO_AUDITOR_PASSWORD` in the ignored `.env` file for a local run.
+- Passwords are held as salted PBKDF2-HMAC-SHA256 hashes in process memory. This is a demo authentication boundary, not a production identity provider.
+- The SQLite audit database is `data/audit.sqlite3` by default; set `STRATIFY_AUDIT_DB` to select a different local path. Rows are sanitized, append-only under SQLite triggers, and linked by SHA-256 hashes.
+
 ## Controls (baseline)
-Backend authorize() on every service call; hash-chained append-only audit log with verify function; upload validation including spreadsheet formula-injection sanitising; untrusted-text handling for copilot; secrets only in .env; safe error messages; no real integrations.
+Backend authorize() on privileged service calls; hash-chained append-only audit log with verify function; upload validation including spreadsheet formula-injection sanitising; untrusted-text handling for copilot; secrets only in .env; safe error messages; no real integrations. Pure parsing and deterministic calculation helpers do not mutate protected state.
 
 ## Known risks (initial list; keep honest and extend)
 Demo authentication only (no MFA, seeded demo accounts); SQLite file is inside the trust boundary (a database administrator can edit it; chain makes edits detectable, not impossible); optional LLM mode sends masked evidence to an external provider; Streamlit CSS customisation depends on library version; single-process prototype; all data synthetic; financing terms illustrative.

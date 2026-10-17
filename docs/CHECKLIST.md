@@ -14,7 +14,7 @@
 - [x] B-11 Financing advisor: gap, capacity, templates, cost, schedule, risks, missing info, no approval claims (T06) — `app/pages/financing.py`, `core/financing.py`, `tests/test_financing.py`
 - [x] B-12 Business analysis with reliable metrics only (T10) — `core/analysis.py`, `app/pages/analysis.py`, `tests/test_analysis.py`; unsupported indicators carry explicit reasons
 - [ ] B-13 Grounded copilot, missing-data answers, untrusted input handling (T13)
-- [~] B-14 Security: validation, backend RBAC, owner approval, audit, env secrets, safe errors (T04, T11, T12) — upload validation and friendly parse errors implemented in T04; RBAC, owner approval and audit remain in T11/T12
+- [~] B-14 Security: validation, backend RBAC, owner approval, audit, env secrets, safe errors (T04, T11, T12) — upload validation, role checks, login and hash-chained audit are implemented; draft approval workflow is T12
 - [ ] B-15 No real payments, loans or bank claims (T12, T16)
 - [x] B-16 Import demo scenario and stress tests (sales -20%, costs +15%, late payments, FX) editable (T08) — `core/stress.py`, `core/import_scenario.py`, and Lab controls
 - [x] B-17 CSV/Excel upload and validation of dates, amounts, types, duplicates, missing values (T04) — tests in tests/test_validation.py
@@ -29,7 +29,7 @@
 
 ## Seven additions
 - [ ] A-01 Agent action drafts with owner approval (T12)
-- [ ] A-02 Security tiers, hash-chained audit, known-risk list, self-assessment report (T11, T16)
+- [~] A-02 Security tiers, hash-chained audit and known-risk list are displayed in T11; self-assessment report is T16
 - [ ] A-03 Backtest vs naive baseline (T15)
 - [x] A-04 P10/P50/P90 band and computed shortage probabilities (T09) — `core/montecarlo.py`, Cash Flow and Lab uncertainty displays, `tests/test_montecarlo.py`
 - [x] A-05 Deterministic best-plan rule, Option 0, separate levers (T07) — `core/lab.py`, `tests/test_lab.py`
@@ -66,7 +66,7 @@
 - [ ] W-03 One task per turn, stop and check (all)
 
 ## Added differentiators (our own designs)
-- [ ] D-01 System status panel on the Security page (T11)
+- [x] D-01 System status panel on the Security page (T11) — version, synthetic data mode, copilot mode, audit chain, test evidence, and local fonts status
 - [ ] D-02 Copilot Receipt per answer (T13)
 - [ ] D-03 Receivables watchlist (T10)
 - [ ] D-04 Verifiable readiness pack with hash check (T10)

@@ -20,6 +20,41 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app import components as ui
+from services.auth import AuthenticationError, current_user, login, logout
+from services.permissions import can_user
+
+PAGE_ACTIONS = {
+    "pages/lab.py": "lab.run",
+    "pages/upload.py": "data.upload",
+    "pages/assumptions.py": "assumptions.manage",
+    "pages/approvals.py": "approvals.view",
+}
+
+
+def _login_panel() -> None:
+    st.title("StratifyAI sign in")
+    st.caption("DEMO authentication for the synthetic-data prototype. Use credentials configured in .env or the labelled demo defaults.")
+    with st.form("login-form"):
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        submitted = st.form_submit_button("Sign in")
+    if submitted:
+        try:
+            login(username, password)
+            st.rerun()
+        except AuthenticationError as exc:
+            st.error(str(exc))
+        except Exception:  # noqa: BLE001 - hide database/provider details from the login screen
+            st.error("Sign in could not be completed. Check the local audit service and try again.")
+    with st.expander("DEMO accounts"):
+        st.markdown("""
+        These defaults are only for local synthetic-data demonstrations. Set the matching `DEMO_*_PASSWORD` values in the ignored `.env` file to replace them.
+
+        - `owner` / `DEMO-owner-123`
+        - `finance_ops` / `DEMO-finance-123`
+        - `viewer` / `DEMO-viewer-123`
+        - `auditor` / `DEMO-auditor-123`
+        """)
 
 
 def run() -> None:
@@ -31,13 +66,22 @@ def run() -> None:
         initial_sidebar_state="expanded",
     )
     ui.load_styles()
-    ui.sidebar_top()
+    user = current_user()
+    if user is None:
+        _login_panel()
+        return
+    visible = [page for page in ui.PAGES if page[1] not in PAGE_ACTIONS or can_user(user, PAGE_ACTIONS[page[1]])]
+    ui.sidebar_top(visible)
+    ui.sidebar_bottom(user.display_name, user.role)
+    with st.sidebar:
+        if st.button("Log out", key="auth-logout"):
+            logout()
+            st.rerun()
     pages = [
         st.Page(path, title=title, icon=icon, default=path == ui.PAGES[0][1])
-        for title, path, icon in ui.PAGES
+        for title, path, icon in visible
     ]
     pg = st.navigation(pages, position="hidden")
-    ui.sidebar_bottom("Not signed in", "viewer")
     pg.run()
 
 

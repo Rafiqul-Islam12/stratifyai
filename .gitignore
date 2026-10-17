@@ -11,6 +11,8 @@ __pycache__/
 
 # Runtime state
 *.db
+*.sqlite3
+.sqlite3-*
 .runtime/
 
 # Build output
