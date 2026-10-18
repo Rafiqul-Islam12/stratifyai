@@ -35,6 +35,21 @@ def test_style_sheet_is_under_line_budget() -> None:
     assert len(lines) <= 160, f"styles.css has {len(lines)} lines, budget is about 150"
 
 
+def test_shared_typography_and_cards_wrap_without_truncation() -> None:
+    styles = STYLES.read_text(encoding="utf-8")
+    assert ".sa-header {" in styles and "align-items: center" in styles
+    assert ".sa-kpi-title { min-height: 2.7em; line-height: 1.35; }" in styles
+    kpi_rules = re.search(r"\.sa-kpi-value\s*\{([^}]+)\}", styles)
+    assert kpi_rules is not None
+    assert "overflow-wrap: anywhere" in kpi_rules.group(1)
+    assert "white-space: normal" in kpi_rules.group(1)
+    assert "text-overflow" not in kpi_rules.group(1)
+    plan_value_rules = re.search(r"\.sa-plan-row span:last-child\s*\{([^}]+)\}", styles)
+    assert plan_value_rules is not None
+    assert "text-align: right" in plan_value_rules.group(1)
+    assert "overflow-wrap: anywhere" in plan_value_rules.group(1)
+
+
 def test_no_hardcoded_colours_outside_tokens() -> None:
     """Colour literals belong in styles.css and charts.py, not in the pages."""
     violations: dict[str, list[str]] = {}

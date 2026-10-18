@@ -49,8 +49,6 @@ selected_case = st.selectbox("Synthetic demo case", options=CASES,
     index=CASES.index(active) if active in CASES else 0,
     format_func=lambda value: CASE_LABELS[value], key="overview-case-select")
 with st.container():
-    ui.page_header("Overview", "Business health, cash forecast and the recommended plan in one view.",
-        business=CASE_LABELS[selected_case], scenario="Forecast baseline")
     source_col, load_col = st.columns([3, 1])
     with source_col:
         ui.badge("Synthetic data", "warning")

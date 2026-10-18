@@ -73,9 +73,9 @@ def run() -> None:
         page_icon=ui.PAGES[0][2],
         initial_sidebar_state="expanded",
     )
-    ui.load_styles()
     user = current_user()
     if user is None:
+        ui.load_styles()
         _login_panel()
         return
     visible = [page for page in ui.PAGES if page[1] not in PAGE_ACTIONS or can_user(user, PAGE_ACTIONS[page[1]])]

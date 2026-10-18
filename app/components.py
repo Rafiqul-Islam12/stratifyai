@@ -98,14 +98,11 @@ def _badge(text: str, tone: str = "muted") -> str:
 
 
 def load_styles() -> None:
-    """Inject the design system into the current page.
+    """Inject the design system for this Streamlit run.
 
-    Guarded by ``st.session_state``: pages call this themselves, the shell
-    already calls it, and each call would otherwise append another <style>.
+    Streamlit clears rendered elements on rerun while preserving session state,
+    so a session-state guard would leave later runs without the stylesheet.
     """
-    if st.session_state.get("_sa_styles"):
-        return
-    st.session_state["_sa_styles"] = True
     _md("<style>" + _STYLES.read_text(encoding="utf-8") + "</style>")
 
 

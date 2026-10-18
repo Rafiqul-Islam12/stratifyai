@@ -42,7 +42,7 @@
 - [~] U-03 Beautiful charts (T05, T08, T09, T10) — Cash Flow actual/forecast and P10-P90 band; later chart pages remain
 - [ ] U-04 Colour grading and layer colours (T02)
 - [ ] U-05 Font and typography (T02)
-- [~] U-06 Alignment and spacing (T02, T14, T18) — shared grid and 1280px content cap reviewed; verify full-screen rendering by HUMAN CHECK
+- [x] U-06 Alignment and spacing (T02, T14, T18) — shared gutters, header/card baselines and six-card Overview grid verified in a 1440px browser capture
 - [x] U-07 Overview shows all key details (T14) — alert, six KPIs, forecast band, recommended plan, readiness, aging, approvals, audit and source
 - [x] U-08 Sidebar, header, footer, navigation (T02) — shared business/scenario selectors and role badge in the shell
 - [x] U-09 Loading, empty and error states (T02, T14) — shared page spinner and safe error boundary, consistent no-data guards, plus page-specific empty states

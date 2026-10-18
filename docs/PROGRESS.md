@@ -4,6 +4,7 @@ Current task: T15 (awaiting user `next`)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
+- T02 visual follow-up checkpoint: fixed stylesheet reinjection after reruns, 1440px content gutters and KPI grid, header/card vertical alignment, and wrapping for KPI/plan values; browser computed styles and Overview screenshot verified.
 
 ## Done
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)
