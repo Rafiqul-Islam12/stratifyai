@@ -9,7 +9,7 @@ from core.loaders import load_case
 from data.generate_synthetic import CASES
 from services.actions import record_upload
 from services.auth import current_user
-from services.permissions import PermissionDenied
+from services.permissions import PermissionDenied, can_user
 from services.validation import REQUIRED_COLUMNS, ValidationIssue, ValidationReport, template_csv, validate_upload
 
 DEMO_LABELS = {
@@ -22,6 +22,11 @@ DEMO_LABELS = {
 DATA_LABELS = {"transactions": "Transactions", "receivables": "Receivables / invoices", "payables": "Payables / bills"}
 
 ui.load_styles()
+user = current_user()
+if user is not None and not can_user(user, "data.upload"):
+    st.warning("Your role cannot upload business data.")
+    ui.footer()
+    st.stop()
 active_case_name = st.session_state.get("active_synthetic_case")
 active_case = st.session_state.get("synthetic_case_data")
 business = active_case.profile.business_name if active_case else "Select a demo business"

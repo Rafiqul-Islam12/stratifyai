@@ -53,6 +53,8 @@ def _alert(result: ForecastResult, uncertainty: MonteCarloResult) -> tuple[str, 
 
 
 ui.load_styles()
+if ui.no_data_state("Cash Flow", "Weekly actuals, forecast and reserve risk."):
+    st.stop()
 active_case_name = st.session_state.get("active_synthetic_case")
 default_case_index = CASES.index(active_case_name) if active_case_name in CASES else 0
 case_name = st.selectbox(

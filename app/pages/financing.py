@@ -38,6 +38,8 @@ def _cached_lab(case):
 
 
 ui.load_styles()
+if ui.no_data_state("Financing", "Compare illustrative funding costs and repayment capacity."):
+    st.stop()
 initial_case = st.session_state.get("active_synthetic_case", "high_expense_shortage")
 case_index = CASES.index(initial_case) if initial_case in CASES else CASES.index("high_expense_shortage")
 case_name = st.selectbox("Synthetic demo case", CASES, index=case_index,
@@ -71,7 +73,8 @@ with left:
 with right:
     advance = st.number_input("Advance rate (%)", min_value=1.0, max_value=100.0,
                               value=default_advance, step=1.0, key=f"financing-advance-{template}") if template == "Invoice financing" else default_advance
-    st.metric("Forecast funding gap", _money(gap))
+    st.metric("Forecast funding gap", _money(gap),
+              help="Reserve shortfall plus the configured buffer from the deterministic cash forecast.")
 
 terms = FinancingTerms(float(annual_rate), float(fee), int(tenor), float(advance))
 result = calculate_financing(template, gap, terms, projection)
@@ -129,9 +132,11 @@ readiness = assess_readiness(case_data, analysis, projection, capacity_ratio=res
 ui.section_title("Financing readiness indicator")
 st.caption("Readiness indicator, not a loan approval prediction. It is not a lender decision or real offer.")
 if readiness.score is None:
-    st.metric("Readiness indicator", "Not available")
+    st.metric("Readiness indicator", "Not available",
+              help="Evidence-weighted business data indicator; it is not a loan approval prediction.")
 else:
-    st.metric("Readiness indicator", f"{readiness.score:.1f} / 100")
+    st.metric("Readiness indicator", f"{readiness.score:.1f} / 100",
+              help="Evidence-weighted business data indicator; it is not a loan approval prediction.")
 st.dataframe(pd.DataFrame([{
     "Component": item.name.title(), "Weight (%)": item.weight,
     "Score (0-100)": round(item.score, 1) if item.score is not None else "Not available",

@@ -18,6 +18,7 @@ from services.actions import record_scenario_change
 from services.actions import run_lab as run_authorized_lab
 from services.agent_actions import confirmed_plans, create_draft, submit_draft
 from services.auth import current_user
+from services.permissions import can_user
 
 CASE_LABELS = {
     "stable_healthy": "Stable and healthy", "delayed_customer_payments": "Delayed customer payments",
@@ -120,6 +121,13 @@ def _render_controls(case_name: str, case, values: dict) -> dict:
 
 
 ui.load_styles()
+user = current_user()
+if user is not None and not can_user(user, "lab.run"):
+    st.warning("Your role cannot run Decision Lab scenarios.")
+    ui.footer()
+    st.stop()
+if ui.no_data_state("Liquidity Decision Lab", "Compare baseline cash, levers and financing."):
+    st.stop()
 active = st.session_state.get("active_synthetic_case", "high_expense_shortage")
 case_name = st.selectbox("Synthetic demo case", CASES,
                          index=CASES.index(active) if active in CASES else CASES.index("high_expense_shortage"),
@@ -132,7 +140,6 @@ ui.page_header("Liquidity Decision Lab", "Compare baseline cash, operational lev
 st.caption("Synthetic data · BDT · deterministic projections; proposed changes remain HYPOTHETICAL.")
 values = get_values(case_name, case)
 values = _render_controls(case_name, case, values)
-user = current_user()
 snapshot_key = f"lab_authorized_snapshot::{case_name}"
 previous_values = st.session_state.get(snapshot_key, {})
 changed_fields = sorted(key for key, value in values.items() if previous_values.get(key) != value)

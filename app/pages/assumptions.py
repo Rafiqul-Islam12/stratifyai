@@ -9,6 +9,8 @@ from app.assumptions_store import get_values, reset_values, save_values
 from core.forecast import forecast
 from core.loaders import load_case
 from data.generate_synthetic import CASES
+from services.auth import current_user
+from services.permissions import can_user
 
 CASE_LABELS = {
     "stable_healthy": "Stable and healthy", "delayed_customer_payments": "Delayed customer payments",
@@ -21,6 +23,13 @@ def _key(case_name: str, name: str) -> str:
     return f"assumptions::{case_name}::{name}"
 
 ui.load_styles()
+user = current_user()
+if user is not None and not can_user(user, "assumptions.manage"):
+    st.warning("Your role cannot edit modelling assumptions.")
+    ui.footer()
+    st.stop()
+if ui.no_data_state("Assumptions", "Edit values shared by forecasts and Decision Lab."):
+    st.stop()
 active = st.session_state.get("active_synthetic_case", "high_expense_shortage")
 case_name = st.selectbox("Synthetic demo case", CASES,
                          index=CASES.index(active) if active in CASES else CASES.index("high_expense_shortage"),

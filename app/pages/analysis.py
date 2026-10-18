@@ -29,6 +29,8 @@ def _metric(metric: Metric, suffix: str = "") -> str:
 
 
 ui.load_styles()
+if ui.no_data_state("Business Analysis", "Recorded income, expenses and working capital."):
+    st.stop()
 active = st.session_state.get("active_synthetic_case", "high_expense_shortage")
 case_name = st.selectbox("Synthetic demo case", CASES,
     index=CASES.index(active) if active in CASES else CASES.index("high_expense_shortage"),

@@ -25,6 +25,8 @@ user = current_user()
 if user is None:
     st.warning("Sign in to ask the read-only Copilot.")
     st.stop()
+if ui.no_data_state("Copilot", "Ask about computed business and forecast evidence."):
+    st.stop()
 
 active = st.session_state.get("active_synthetic_case", "high_expense_shortage")
 case_name = st.selectbox("Synthetic demo case", CASES,

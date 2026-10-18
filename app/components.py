@@ -143,9 +143,9 @@ def sidebar_bottom(user: str = "Not signed in", role: str = "viewer") -> None:
 
 def _sync_business_selection() -> None:
     selected = st.session_state.get("global-business-selector")
+    st.session_state["active_synthetic_case"] = selected
     if selected not in CASES:
         return
-    st.session_state["active_synthetic_case"] = selected
     for key in _CASE_WIDGET_KEYS:
         if key in st.session_state:
             st.session_state[key] = selected
@@ -153,10 +153,12 @@ def _sync_business_selection() -> None:
 
 def global_context_bar(user: Any) -> None:
     """Render the shared business and scenario selectors on every app page."""
-    active = st.session_state.get("active_synthetic_case", "high_expense_shortage")
+    active = st.session_state.get("active_synthetic_case")
     if active in CASES and st.session_state.get("global-business-selector") != active:
         st.session_state["global-business-selector"] = active
-    st.session_state.setdefault("active_synthetic_case", active)
+    elif active not in CASES and st.session_state.get("global-business-selector") is not None:
+        st.session_state["global-business-selector"] = None
+    st.session_state.setdefault("active_synthetic_case", None)
     selected_scenario = st.session_state.get("global-scenario-selector", "Forecast baseline")
     scenario_options = ("Forecast baseline", "Option 0", "Option A", "Option B", "Option C")
     if selected_scenario not in scenario_options:
@@ -165,7 +167,8 @@ def global_context_bar(user: Any) -> None:
     with st.container():
         business_col, scenario_col, role_col = st.columns([2, 2, 1], vertical_alignment="bottom")
         with business_col:
-            st.selectbox("Business", CASES, format_func=lambda value: CASE_LABELS[value],
+            st.selectbox("Business", (None, *CASES), format_func=lambda value:
+                "No data loaded" if value is None else CASE_LABELS[value],
                 key="global-business-selector", on_change=_sync_business_selection,
                 help="Choose one of the labelled synthetic demo businesses.")
         with scenario_col:
@@ -174,6 +177,20 @@ def global_context_bar(user: Any) -> None:
         with role_col:
             st.caption("Signed in as")
             badge(f"{user.display_name} · {user.role}", "info")
+
+
+def no_data_state(title: str, purpose: str) -> bool:
+    """Render a consistent empty state when the shell has no active business."""
+    if "active_synthetic_case" not in st.session_state or st.session_state["active_synthetic_case"] is not None:
+        return False
+    page_header(title, purpose, business="No business selected", scenario="No data loaded")
+    if empty_state("No data loaded", "Select a synthetic business above or load the default demo business.",
+                   "Load demo business", key=f"empty-load-{title.casefold().replace(' ', '-')}"):
+        selected = st.session_state.get("global-business-selector")
+        st.session_state["active_synthetic_case"] = selected if selected in CASES else CASES[0]
+        st.rerun()
+    footer()
+    return True
 
 
 def badge(text: str, tone: str = "muted") -> None:
@@ -345,14 +362,15 @@ def plan_card(
         )
 
 
-def empty_state(caption: str, body: str, call_to_action: str, *, disabled: bool = False) -> None:
+def empty_state(caption: str, body: str, call_to_action: str, *, disabled: bool = False,
+                key: str | None = None) -> bool:
     """A dashed empty state with a call to action."""
     _md(
         '<div class="sa-empty">'
         '<div class="sa-empty-title">' + _e(caption) + "</div>"
         '<div class="sa-empty-body">' + _e(body) + "</div></div>"
     )
-    st.button(call_to_action, disabled=disabled)
+    return st.button(call_to_action, disabled=disabled, key=key)
 
 
 def layer_legend() -> None:
