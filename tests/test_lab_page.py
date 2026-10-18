@@ -19,6 +19,20 @@ def test_lab_page_renders_all_five_cases():
         assert all(plan.breach_probability is not None for plan in app.session_state["lab_result"].plans.values())
 
 
+def test_lab_decision_report_is_downloadable_and_uses_current_results():
+    app = AppTest.from_file(LAB_PAGE, default_timeout=30).run()
+    assert not app.exception
+    buttons = app.get("download_button")
+    assert len(buttons) == 1
+    assert buttons[0].label == "Download decision report (Markdown)"
+    report = app.session_state["lab_decision_report"]
+    assert "Synthetic data" in report
+    assert "ACTUAL records, FORECAST outputs, HYPOTHETICAL plan changes" in report
+    assert app.session_state["lab_result"].best_plan_id in report
+    assert "scenario.changed event" in report
+    assert "not a lender decision" in report
+
+
 def test_lab_sales_stress_recalculates_plan_results():
     app = AppTest.from_file(LAB_PAGE, default_timeout=30).run()
     before = app.session_state["lab_result"].plans["Option 0"].funding_gap

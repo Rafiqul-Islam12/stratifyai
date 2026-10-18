@@ -113,3 +113,4 @@ Secret scan: `python scripts/check_secrets.py` (exit 0 = clean).
 - Streamlit pinned to 1.66.0 rather than ">= 1.45" so the demo is reproducible (>= 1.45 was the stated floor for self-hosted fonts).
 - T15 checkpoint: reviewed the task requirements, existing evaluation entry points, security services and coverage matrix; implementation scope confirmed.
 - T15 checkpoint: implemented synthetic holdout backtest, decision-quality and security evaluation, full pytest evidence capture, 13 scripted service tasks, consolidated report builder, and Markdown Lab report download.
+- T15 checkpoint: task suite passes 13/13 service workflows; evaluation data handling now uses actual case IDs, reports poor backtest comparisons plainly, evaluates ten poisoned customer-name cases, and Lab report download has regression coverage.

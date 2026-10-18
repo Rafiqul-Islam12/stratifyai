@@ -206,7 +206,9 @@ def _decision_report() -> str:
                   "ACTUAL records, FORECAST outputs, HYPOTHETICAL plan changes and CONFIRMED owner-approved assumptions remain separate. Plan changes are hypothetical until owner approval. This report is based on synthetic case data; financing terms are illustrative. It is not a lender decision or an approval, and it does not assume customer payment, supplier agreement or real-world execution."])
     return "\n".join(lines) + "\n"
 
-st.download_button("Download decision report (Markdown)", data=_decision_report(),
+decision_report = _decision_report()
+st.session_state["lab_decision_report"] = decision_report
+st.download_button("Download decision report (Markdown)", data=decision_report,
                    file_name=f"stratifyai-decision-report-{case_name}.md", mime="text/markdown",
                    key=f"lab-decision-report-{case_name}")
 ui.alert_banner(
