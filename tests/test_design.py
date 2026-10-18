@@ -93,3 +93,16 @@ def test_components_load_when_streamlit_is_present() -> None:
 
         pytest.skip("streamlit is not installed")
     importlib.import_module("app.components")
+
+
+def test_styles_are_reinjected_after_a_streamlit_rerun() -> None:
+    if importlib.util.find_spec("streamlit") is None:
+        import pytest
+
+        pytest.skip("streamlit is not installed")
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file(str(APP / "pages" / "overview.py"))
+    at.session_state["_sa_styles"] = True  # Stale session state from a prior run must not suppress CSS.
+    at.run()
+    assert any("--fs-caption" in element.value for element in at.markdown)
