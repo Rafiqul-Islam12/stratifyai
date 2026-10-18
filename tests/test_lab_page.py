@@ -3,6 +3,8 @@ from pathlib import Path
 
 from streamlit.testing.v1 import AppTest
 
+from services.auth import AUTH_SESSION_KEY, DEMO_PASSWORD_DEFAULTS, login
+
 LAB_PAGE = Path(__file__).resolve().parents[1] / "app" / "pages" / "lab.py"
 ASSUMPTIONS_PAGE = Path(__file__).resolve().parents[1] / "app" / "pages" / "assumptions.py"
 
@@ -19,8 +21,14 @@ def test_lab_page_renders_all_five_cases():
         assert all(plan.breach_probability is not None for plan in app.session_state["lab_result"].plans.values())
 
 
-def test_lab_decision_report_is_downloadable_and_uses_current_results():
-    app = AppTest.from_file(LAB_PAGE, default_timeout=30).run()
+def test_lab_decision_report_is_downloadable_and_uses_current_results(monkeypatch, tmp_path):
+    audit_db = tmp_path / "audit.sqlite3"
+    monkeypatch.setenv("STRATIFY_AUDIT_DB", str(audit_db))
+    state = {}
+    login("owner", DEMO_PASSWORD_DEFAULTS["owner"], session_state=state, db_path=audit_db)
+    app = AppTest.from_file(LAB_PAGE, default_timeout=30)
+    app.session_state[AUTH_SESSION_KEY] = state[AUTH_SESSION_KEY]
+    app.run()
     assert not app.exception
     buttons = app.get("download_button")
     assert len(buttons) == 1
@@ -31,6 +39,8 @@ def test_lab_decision_report_is_downloadable_and_uses_current_results():
     assert app.session_state["lab_result"].best_plan_id in report
     assert "scenario.changed event" in report
     assert "not a lender decision" in report
+    buttons[0].click().run()
+    assert app.get("download_button")[0].value is True
 
 
 def test_lab_sales_stress_recalculates_plan_results():

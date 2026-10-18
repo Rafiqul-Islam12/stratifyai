@@ -20,27 +20,34 @@ def _read(name: str) -> str:
 
 def build() -> tuple[str, str]:
     plan = (ROOT / "docs" / "PLAN.md").read_text(encoding="utf-8")
-    statuses = re.findall(r"^- \[([ x])\] T\d{2} ", plan, re.M)
+    checklist = (ROOT / "docs" / "CHECKLIST.md").read_text(encoding="utf-8")
+    statuses = re.findall(r"^- \[([ x])\] T\d{2} ", plan, re.MULTILINE)
     done = statuses.count("x")
     total = len(statuses)
+    coverage = re.findall(r"^- \[([ x~])\] ", checklist, re.MULTILINE)
+    coverage_summary = f"Coverage checklist: {coverage.count('x')} done, {coverage.count('~')} partial, {coverage.count(' ')} open of {len(coverage)} items."
     decision_text = _read("decision_quality.json")
     try:
         decisions = json.loads(decision_text)
         decision_summary = [f"- {row['case']}: {row['recommended_plan']}; reserve maintained: {row['keeps_reserve']}; minimum BDT {row['minimum_balance_bdt']:,.2f} vs reserve BDT {row['reserve_bdt']:,.2f}; breach probability {row['breach_probability']:.2%}." for row in decisions]
+        maintained = sum(bool(row["keeps_reserve"]) for row in decisions)
+        decision_explanation = (f"Reserve check passed for {maintained}/{len(decisions)} cases. In the other {len(decisions) - maintained} case(s), no candidate maintained reserve through the horizon; the Lab's documented rule selects the smallest-gap plan and reports its computed breach probability. These outcomes are not hidden as successful recommendations."
+                               if maintained < len(decisions) else f"All {maintained} cases maintained reserve on the recomputed deterministic path; breach probabilities remain separately reported.")
     except (json.JSONDecodeError, KeyError, TypeError, ValueError):
         decision_summary = ["Decision-quality evidence is unavailable or invalid; rerun the evaluation."]
+        decision_explanation = "Decision-quality evidence could not be summarized."
     test_text = _read("test_results.txt")
-    exit_match = re.search(r"^Exit code: (\d+)$", test_text, re.M)
+    exit_match = re.search(r"^Exit code: (\d+)$", test_text, re.MULTILINE)
     task_text = _read("task_suite_results.md")
     sections = [
         "# StratifyAI evaluation report", "", f"Generated: {datetime.now(UTC).isoformat(timespec='seconds')}", "",
         "## Scope and caveat", "", "This report uses synthetic case data only. Forecast and decision-quality metrics are an offline evaluation, not a claim of live or production accuracy. Financing terms and scenario changes are illustrative and hypothetical.", "",
         "## Backtest against naive baseline", "", _read("backtest_results.md"), "",
-        "## Decision quality", "", *decision_summary, "",
+        "## Decision quality", "", *decision_summary, "", decision_explanation, "",
         "## Security evaluation", "", _read("security_eval.md"), "",
         "## Scripted task suite", "", task_text, "",
         "## Test suite", "", f"Recorded pytest exit code: {exit_match.group(1) if exit_match else 'not available'}", "", "```text", test_text, "```", "",
-        "## Checklist status", "", f"Tasks complete: {done}/{total} ({done / total:.1%})" if total else "Task checklist unavailable.", "",
+        "## Checklist status", "", f"Tasks complete: {done}/{total} ({done / total:.1%})" if total else "Task checklist unavailable.", coverage_summary, "",
         "## Evidence files", "", "- `evidence/backtest_results.csv` and `.md`", "- `evidence/decision_quality.json`", "- `evidence/security_eval.md`", "- `evidence/task_suite_results.md`", "- `evidence/test_results.txt`", "",
         "## Limitations", "", "The backtest is based on a small synthetic holdout set; results may be poor and should be read alongside the naive baseline. The decision-quality check recomputes the selected Lab plan using the same deterministic engines and reports the seeded uncertainty estimate. No result implies a lender decision, customer payment, supplier agreement, or real-world execution."
     ]
