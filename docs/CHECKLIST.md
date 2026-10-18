@@ -8,12 +8,12 @@
 - [x] B-05 Option C full financing (T07) — based on original gap with documented T06 rounding
 - [x] B-06 Per-plan display: before/after balance, gap and shortage date, financing amount and cost, repayment capacity, risks, assumptions and sources, pros, cons, next steps (T07, T08) — `core/lab.py`, `app/pages/lab.py`
 - [x] B-07 Hypothetical actions never assumed real (T07, T08, T12) — plan layers are labelled; T12 requires owner approval and simulated execution only (`services/agent_actions.py`)
-- [~] B-08 Deterministic numbers; AI only explains (T07, T13) — Decision Lab engine is deterministic; copilot rules remain in T13
+- [x] B-08 Deterministic numbers; AI only explains (T07, T13) — Copilot evidence IDs, numeric validator, offline fallback and grounding tests in `services/copilot.py`, `tests/test_copilot.py`
 - [x] B-09 Lab answers the five key questions (T08) — structured answers rendered in `app/pages/lab.py`
 - [x] B-10 Forecast 8-13 weeks, shortage date and amount, configurable reserve, actual vs forecast distinct (T05) — core/forecast.py and tests/test_forecast.py
 - [x] B-11 Financing advisor: gap, capacity, templates, cost, schedule, risks, missing info, no approval claims (T06) — `app/pages/financing.py`, `core/financing.py`, `tests/test_financing.py`
 - [x] B-12 Business analysis with reliable metrics only (T10) — `core/analysis.py`, `app/pages/analysis.py`, `tests/test_analysis.py`; unsupported indicators carry explicit reasons
-- [ ] B-13 Grounded copilot, missing-data answers, untrusted input handling (T13)
+- [x] B-13 Grounded copilot, missing-data answers, untrusted input handling (T13) — ten injection payloads, masked IDs, missing-data and permission coverage in `tests/test_copilot.py`
 - [x] B-14 Security: validation, backend RBAC, owner approval, audit, env secrets, safe errors (T04, T11, T12) — upload validation, backend role checks, owner-only approval, audit chain, env secrets and safe errors are implemented (`services/agent_actions.py`, `services/permissions.py`)
 - [ ] B-15 No real payments, loans or bank claims (T12, T16)
 - [x] B-16 Import demo scenario and stress tests (sales -20%, costs +15%, late payments, FX) editable (T08) — `core/stress.py`, `core/import_scenario.py`, and Lab controls
@@ -67,7 +67,7 @@
 
 ## Added differentiators (our own designs)
 - [x] D-01 System status panel on the Security page (T11) — version, synthetic data mode, copilot mode, audit chain, test evidence, and local fonts status
-- [ ] D-02 Copilot Receipt per answer (T13)
+- [x] D-02 Copilot Receipt per answer (T13) — rendered under every response and stored with hashed-query audit event in `app/pages/copilot.py`, `services/copilot.py`
 - [ ] D-03 Receivables watchlist (T10)
 - [ ] D-04 Verifiable readiness pack with hash check (T10)
 - [ ] D-05 Scripted task-completion suite with results (T15)
