@@ -144,7 +144,8 @@ snapshot_key = f"lab_authorized_snapshot::{case_name}"
 previous_values = st.session_state.get(snapshot_key, {})
 changed_fields = sorted(key for key, value in values.items() if previous_values.get(key) != value)
 if user and changed_fields:
-    record_scenario_change(user, case_name, changed_fields)
+    audit_reference = record_scenario_change(user, case_name, changed_fields)
+    st.session_state.setdefault("lab_audit_references", {}).setdefault(case_name, []).append(audit_reference)
 st.session_state[snapshot_key] = dict(values)
 
 stress = apply_stress(case, to_stress_inputs(values))
@@ -171,6 +172,43 @@ st.session_state["lab_import_result"] = import_result
 
 baseline = lab_result.plans["Option 0"]
 selected = lab_result.plans[lab_result.best_plan_id]
+
+def _decision_report() -> str:
+    """Build a downloadable snapshot from the exact case and Lab result on screen."""
+    from datetime import UTC, datetime
+
+    lines = [
+        "# Liquidity Decision Lab report", "", f"Generated: {datetime.now(UTC).isoformat(timespec='seconds')}",
+        f"Business: {case.profile.business_name}", f"Case: {case_name}", f"Currency: {case.profile.currency}",
+        "Data label: Synthetic data", "", "## Assumptions and sources", "",
+        f"- Minimum reserve: BDT {lab_result.reserve:,.2f} (from the forecast and current Lab assumptions).",
+        f"- Forecast horizon: {len(baseline.balance_series_after)} weeks.",
+        f"- Financing template: {values['financing_template']} (illustrative and editable).",
+        f"- Scenario levers: collection {values['collection_pct']}%; deferral {values['deferral_weeks']} weeks; discretionary reduction {values['discretionary_reduction_pct']}%.",
+        "- Detailed plan assumptions and source descriptions are listed in the comparison below.", "",
+        "## Recommendation under the deterministic rule", "",
+        f"- Selected: {lab_result.best_plan_id}.", f"- Reason: {lab_result.best_plan_reason}",
+        f"- Borrowing necessary in this model: {lab_result.borrowing_necessary}. {lab_result.borrowing_reason}", "",
+        "## Plan comparison", "", "| Plan | Layer | Minimum balance (BDT) | Reserve gap (BDT) | Financing (BDT) | Cost (BDT) | Repayment capacity | Reserve breach probability |", "|---|---|---:|---:|---:|---:|---|---:|"
+    ]
+    for plan_name, plan in lab_result.plans.items():
+        minimum = min((point.closing_balance for point in plan.balance_series_after), default=0.0)
+        breach = "unavailable" if plan.breach_probability is None else f"{plan.breach_probability:.2%}"
+        capacity = "unavailable" if plan.capacity_ratio is None else f"{plan.capacity_ratio:.2f} ({plan.capacity_label})"
+        lines.append(f"| {plan_name} | {', '.join(plan.layer_tags)} | {minimum:,.2f} | {plan.remaining_gap:,.2f} | {plan.financing_amount:,.2f} | {plan.financing_cost:,.2f} | {capacity} | {breach} |")
+    lines.extend(["", "## Weekly balance table", "", "| Week | Date | Option 0 forecast (BDT) | Selected plan (BDT) | Layer |", "|---:|---|---:|---:|---|"])
+    best = lab_result.plans[lab_result.best_plan_id]
+    for base_point, best_point in zip(baseline.balance_series_after, best.balance_series_after):
+        lines.append(f"| {base_point.week} | {base_point.week_start} | {base_point.closing_balance:,.2f} | {best_point.closing_balance:,.2f} | {best_point.layer} |")
+    refs = st.session_state.get("lab_audit_references", {}).get(case_name, [])
+    lines.extend(["", "## Audit references", "", ", ".join(f"scenario.changed event {event_id}" for event_id in refs[-20:]) if refs else "No scenario-change audit event ID was recorded for these settings in this session.",
+                  "", "## Layers and limitations", "",
+                  "ACTUAL records, FORECAST outputs, HYPOTHETICAL plan changes and CONFIRMED owner-approved assumptions remain separate. Plan changes are hypothetical until owner approval. This report is based on synthetic case data; financing terms are illustrative. It is not a lender decision or an approval, and it does not assume customer payment, supplier agreement or real-world execution."])
+    return "\n".join(lines) + "\n"
+
+st.download_button("Download decision report (Markdown)", data=_decision_report(),
+                   file_name=f"stratifyai-decision-report-{case_name}.md", mime="text/markdown",
+                   key=f"lab-decision-report-{case_name}")
 ui.alert_banner(
     "success" if selected.is_feasible else "warning",
     f"Recommended plan: {lab_result.best_plan_id}" if selected.is_feasible else f"No plan fully closes the gap · smallest gap: {lab_result.best_plan_id}",

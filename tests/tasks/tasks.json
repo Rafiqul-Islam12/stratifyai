@@ -1,0 +1,15 @@
+[
+  {"id":"T01","case":"high_expense_shortage","steps":["load validated case","run deterministic forecast"],"expected":"reserve shortage is detected with a real forecast week"},
+  {"id":"T02","case":"high_expense_shortage","steps":["load validated case","run Decision Lab"],"expected":"baseline, isolated levers, combined and financing plans are available"},
+  {"id":"T03","case":"stable_healthy","steps":["load validated case","run Decision Lab","select rule-based recommendation"],"expected":"recommended plan is feasible under recomputed deterministic balances"},
+  {"id":"T04","case":"import_dependent","steps":["load validated case","apply explicit stress inputs","run forecast"],"expected":"stress result is distinct and finite; source case remains unchanged"},
+  {"id":"T05","case":"high_expense_shortage","steps":["load validated case","compute baseline gap","run illustrative financing calculation"],"expected":"financing amount, cost and repayment schedule are computed"},
+  {"id":"T06","case":"delayed_customer","steps":["authenticate finance_ops","create a collection reminder draft"],"expected":"draft remains a local draft and identifies manual review only"},
+  {"id":"T07","case":"delayed_customer","steps":["authenticate finance_ops","create reminder","submit draft","authenticate owner","approve draft"],"expected":"only owner advances submitted draft to approved"},
+  {"id":"T08","case":"stable_healthy","steps":["authenticate viewer","request lab.run permission"],"expected":"viewer is denied and denial is audited"},
+  {"id":"T09","case":"stable_healthy","steps":["validate upload containing a formula-like cell"],"expected":"formula cell is neutralized and reported"},
+  {"id":"T10","case":"stable_healthy","steps":["authenticate owner","append audit event","verify audit chain"],"expected":"untampered audit chain verifies"},
+  {"id":"T11","case":"stable_healthy","steps":["append audit event","tamper with persisted row after disabling guard trigger","verify audit chain"],"expected":"hash-chain verifier detects tampering"},
+  {"id":"T12","case":"high_expense_shortage","steps":["authenticate owner","ask grounded funding question","validate citations and numbers"],"expected":"answer passes evidence and numeric grounding validation"},
+  {"id":"T13","case":"delayed_customer","steps":["load case","compute business analysis"],"expected":"analysis snapshot contains finite computed values and explicit unavailable reasons"}
+]
