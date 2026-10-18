@@ -13,7 +13,7 @@ from typing import Any
 
 from core.analysis import analyze
 from core.audit import log_event
-from core.forecast import forecast
+from core.forecast import ForecastResult, forecast
 from core.lab import LabAssumptions, run_lab
 from core.loaders import SyntheticCase
 from core.readiness import assess_readiness
@@ -23,7 +23,7 @@ from services.permissions import authorize
 MAX_QUESTION_LENGTH = 500
 _CITATION = re.compile(r"\[(E\d+)\]")
 _NUMBER = re.compile(r"(?<![A-Za-z])[-+]?\d[\d,]*(?:\.\d+)?%?(?:x)?", re.IGNORECASE)
-_INJECTION = re.compile(r"\b(ignore|override|disregard)\b.{0,60}\b(instruction|prompt|payment|approve|system)\b", re.I)
+_INJECTION = re.compile(r"\b(ignore|override|disregard)\b.{0,60}\b(instruction|prompt|payment|approve|system)\b", re.IGNORECASE)
 
 
 @dataclass(frozen=True)
@@ -45,7 +45,7 @@ class CopilotAnswer:
 
 def _sanitize_question(question: str) -> str:
     if not isinstance(question, str):
-        raise ValueError("Enter a question as text.")
+        raise TypeError("Enter a question as text.")
     question = " ".join("".join(ch for ch in question if ch.isprintable()).split())
     if not question:
         raise ValueError("Enter a question.")
@@ -54,13 +54,22 @@ def _sanitize_question(question: str) -> str:
     return question
 
 
-def _number(value: float | int | None) -> float | int | None:
+def _number(value: float | None) -> float | None:
     if value is None:
         return None
     number = float(value)
     if not math.isfinite(number):
         return None
     return round(number, 4)
+
+
+def _project(case: SyntheticCase, assumptions: LabAssumptions | None = None, *,
+             payment_delays: dict[str, float] | None = None) -> ForecastResult:
+    """Use selected, validated forecast assumptions for read-only projections."""
+    chosen = assumptions or LabAssumptions()
+    return forecast(case, horizon_weeks=chosen.horizon_weeks,
+        reserve=chosen.reserve, reserve_weeks=chosen.reserve_weeks,
+        funding_buffer_pct=chosen.funding_buffer_pct, payment_delays=payment_delays)
 
 
 def build_evidence_pack(
@@ -72,10 +81,11 @@ def build_evidence_pack(
 ) -> dict[str, Any]:
     """Compute a compact evidence pack; never include uploaded free text or names."""
     authorize(user, "copilot.ask", db_path=db_path)
-    projection = forecast(case)
+    projection = _project(case, assumptions)
     lab = run_lab(case, assumptions)
     analysis = analyze(case)
-    readiness = assess_readiness(case, analysis, projection)
+    readiness = assess_readiness(case, analysis, projection,
+        capacity_ratio=lab.plans["Option B"].capacity_ratio)
     names = [item.name for item in (*case.profile.customers, *case.profile.suppliers) if item.name]
     plans = {
         name: {
@@ -90,10 +100,19 @@ def build_evidence_pack(
         }
         for name, plan in lab.plans.items()
     }
+    selected = assumptions or LabAssumptions()
+    source = case.assumptions
     assumptions_used = {
         "reserve_bdt": _number(lab.reserve),
         "horizon_weeks": projection.horizon_weeks,
         "funding_buffer_pct": _number(projection.funding_buffer_pct),
+        "collection_pct": _number(source.collection_pct if selected.collection_pct is None else selected.collection_pct),
+        "collection_weeks": source.collection_weeks if selected.collection_weeks is None else selected.collection_weeks,
+        "collection_haircut_pct": _number(source.collection_haircut_pct if selected.collection_haircut_pct is None else selected.collection_haircut_pct),
+        "deferral_weeks": source.deferral_weeks if selected.deferral_weeks is None else selected.deferral_weeks,
+        "late_fee_pct": _number(source.late_fee_pct if selected.late_fee_pct is None else selected.late_fee_pct),
+        "discretionary_reduction_pct": _number(source.discretionary_reduction_pct if selected.discretionary_reduction_pct is None else selected.discretionary_reduction_pct),
+        "discretionary_start_week": source.discretionary_start_week if selected.discretionary_start_week is None else selected.discretionary_start_week,
         "lab_scenario_layer": "HYPOTHETICAL",
     }
     quality = {
@@ -278,11 +297,11 @@ def answer_question(
     pack = build_evidence_pack(trusted, case, assumptions, db_path=db_path)
     intent = _intent(clean_question)
     if intent == "what_if":
-        delay_match = re.search(r"(?:delay|late|payment delay)[^\d]{0,30}(\d{1,3})\s*days?", clean_question, re.I)
+        delay_match = re.search(r"(?:delay|late|payment delay)[^\d]{0,30}(\d{1,3})\s*days?", clean_question, re.IGNORECASE)
         if delay_match and 1 <= int(delay_match.group(1)) <= 365:
             increase = int(delay_match.group(1))
             delays = {item.customer_id: float(item.typical_delay_days + increase) for item in case.profile.customers}
-            projection = forecast(case, payment_delays=delays)
+            projection = _project(case, assumptions, payment_delays=delays)
             pack["evidence"].append({"id": "E6", "topic": "whitelisted_customer_delay_what_if",
                 "source": "core.forecast.forecast with bounded customer payment-delay overrides", "values": {
                     "delay_increase_days": increase, "funding_gap_bdt": _number(projection.funding_gap),
@@ -295,7 +314,8 @@ def answer_question(
     mode, external_call, validator = "offline", False, "passed"
     response = _offline_answer(clean_question, intent, pack)
     if requested_mode == "llm" and intent != "unsupported":
-        external_call = True
+        external_call = bool(llm_callable or (os.getenv("COPILOT_BASE_URL", "").strip()
+            and os.getenv("COPILOT_MODEL", "").strip() and os.getenv("COPILOT_API_KEY", "").strip()))
         try:
             candidate = (llm_callable or _llm_answer)(clean_question, pack)
             valid, citations, validator = validate_answer(candidate, pack)

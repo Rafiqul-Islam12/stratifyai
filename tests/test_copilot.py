@@ -8,6 +8,7 @@ import pytest
 from streamlit.testing.v1 import AppTest
 
 from core.audit import list_events
+from core.lab import LabAssumptions
 from core.loaders import load_case
 from services.auth import AUTH_SESSION_KEY, DEMO_PASSWORD_DEFAULTS, login
 from services.copilot import answer_question, build_evidence_pack, validate_answer
@@ -55,13 +56,13 @@ def test_unknown_question_returns_missing_data_and_question_limits_are_enforced(
 def test_whitelisted_what_if_is_computed_without_mutating_case(copilot_user):
     user, audit = copilot_user
     case = load_case("high_expense_shortage")
-    before = case.model_dump() if hasattr(case, "model_dump") else case.transactions[0].model_dump()
+    original_balance = case.transactions[0].balance_after
     result = answer_question(user, case, "What if customer delay increases by 7 days?", db_path=str(audit))
     assert result.intent == "what_if"
     assert any(item["id"] == "E6" for item in result.evidence_pack["evidence"])
     assert "Read-only hypothetical" in result.answer
     assert validate_answer(result.answer, result.evidence_pack)[0]
-    assert case.transactions[0].model_dump() == before if isinstance(before, dict) and "transaction_id" in before else True
+    assert case.transactions[0].balance_after == original_balance
 
 
 @pytest.mark.parametrize("payload", [
@@ -107,6 +108,44 @@ def test_permission_denial_and_unvalidated_llm_output_fall_back(monkeypatch, cop
     assert result.receipt.external_call is True
     assert result.receipt.validator_result.startswith("fallback:")
     assert validate_answer(result.answer, result.evidence_pack)[0]
+
+
+def test_llm_output_must_cite_grounded_numbers_and_unconfigured_mode_makes_no_call(monkeypatch, copilot_user):
+    user, audit = copilot_user
+    case = load_case("high_expense_shortage")
+    monkeypatch.setenv("COPILOT_MODE", "llm")
+    monkeypatch.delenv("COPILOT_BASE_URL", raising=False)
+    monkeypatch.delenv("COPILOT_MODEL", raising=False)
+    monkeypatch.delenv("COPILOT_API_KEY", raising=False)
+    no_config = answer_question(user, case, "How much funding do I need?", db_path=str(audit))
+    assert no_config.receipt.mode == "offline"
+    assert no_config.receipt.external_call is False
+    assert "fallback" in no_config.receipt.validator_result
+
+    captured = {}
+    def provider(question, pack):
+        captured["question"] = question
+        captured["pack"] = pack
+        gap = pack["evidence"][0]["values"]["funding_gap_bdt"]
+        return f"The modeled funding gap is BDT {gap:,.0f} [E1]."
+
+    configured = answer_question(user, case, "How much funding do I need?", db_path=str(audit), llm_callable=provider)
+    assert configured.receipt.mode == "llm"
+    assert configured.receipt.external_call is True
+    assert validate_answer(configured.answer, configured.evidence_pack)[0]
+    assert "Synthetic Customer" not in json.dumps(captured["pack"])
+    assert "Synthetic Supplier" not in json.dumps(captured["pack"])
+
+
+def test_evidence_pack_tracks_selected_forecast_assumptions(copilot_user):
+    user, audit = copilot_user
+    case = load_case("high_expense_shortage")
+    settings = LabAssumptions(horizon_weeks=8, reserve=123_456, funding_buffer_pct=12)
+    pack = build_evidence_pack(user, case, settings, db_path=str(audit))
+    forecast_evidence = next(item for item in pack["evidence"] if item["id"] == "E1")["values"]
+    assert forecast_evidence["horizon_weeks"] == 8
+    assert forecast_evidence["reserve_bdt"] == 123_456
+    assert forecast_evidence["funding_gap_bdt"] >= 0
 
 
 def test_copilot_page_renders_receipt_and_evidence(monkeypatch, tmp_path):

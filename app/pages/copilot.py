@@ -1,8 +1,6 @@
 """Interactive grounded Copilot; every response carries its evidence receipt."""
 from __future__ import annotations
 
-import json
-
 import streamlit as st
 
 from app import components as ui
