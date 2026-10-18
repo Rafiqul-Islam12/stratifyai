@@ -93,7 +93,12 @@ def run() -> None:
         if st.button("Log out", key="auth-logout"):
             logout()
             st.rerun()
-    pg.run()
+    try:
+        with st.spinner("Loading page…"):
+            pg.run()
+    except Exception:  # noqa: BLE001 - keep unexpected page or storage details out of the UI
+        st.error("This page could not be loaded. Check the selected data or local service status and try again.")
+        ui.footer()
 
 
 if __name__ == "__main__":

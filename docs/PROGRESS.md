@@ -1,12 +1,10 @@
 # PROGRESS
 
-Current task: T14 (awaiting user `next`)
+Current task: T15 (awaiting user `next`)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-- T14 checkpoint: computed Overview, five-case demo selector, hero forecast/uncertainty chart, plan/readiness/aging/approvals/audit panels and shared business/scenario/role header added; Overview, page smoke and security tests pass (21 tests), focused Ruff passes.
-- T14 checkpoint: shared no-data states and direct-page permission guards added; AppTest matrix covers all 10 pages, five cases and four roles plus empty-state runs; 67 focused page/Overview/security tests pass, focused Ruff passes.
-- T14 checkpoint: existing approval-to-Lab integration flow now loads its selected synthetic business through Overview before use; the formerly failing integration test passes.
+- T14 checkpoint: app shell now shows a shared loading state and safe page-level error message; handoff checklist updated for completed Overview and shell coverage.
 
 ## Done
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)
@@ -83,6 +81,11 @@ Last updated: 2026-10-18
   - Added 500-character query bound, hashed query audit events with the Copilot receipt, backend `copilot.ask` authorization, and no action execution path. The interactive page displays the answer receipt and evidence drawer under each response.
   - Verified: `pytest -q` (147 passed; 17 T13 tests), `ruff check .` (all checks passed), `python run.py check` (health passed; offline/no key), `python scripts/check_secrets.py` (no matches in 140 files).
   - Local checkpoint commits: `e836284`, `64845c1`, `5de9115`.
+- **T14 Overview page and cross-page polish** (2026-10-18)
+  - Added the computed Overview: shortage alert, six evidence-based KPIs, actual/forecast/P10-P90/reserve chart, recommended Lab plan, readiness, receivables aging, permission-filtered approvals/audit, data badge and demo business loading. The shared context bar carries business, scenario and role selections.
+  - Added consistent no-data states to case-driven pages and direct-page permission checks for Lab, Assumptions and Upload; added help text to every Streamlit metric. The approval-to-Lab integration test now loads its selected case through the Overview first.
+  - Verified: `pytest -q` (194 passed), `ruff check .` (all checks passed), `run.py check` (health passed), secret scan (no matches in 141 files), and `git diff --check` (clean).
+  - HUMAN CHECK still required: inspect the 10 pages for two cases, verify the no-data screen and full-screen layout, and capture screenshots for the deck.
 
 ## How to run
 ```
@@ -99,7 +102,7 @@ Python 3.11.9 in `.venv`; no CDN and no external fonts.
 Secret scan: `python scripts/check_secrets.py` (exit 0 = clean).
 
 ## Known issues
-- T02 visual follow-up deferred at the user's direction: font sizing, alignment, vertical text placement, and card text/layout need review and correction during T14 cross-page UI polish. T02 shell is implemented; the user confirmed all 10 pages are clickable and show content, with these visual issues remaining.
+- T14 browser-level visual confirmation and deck screenshots remain a HUMAN CHECK; AppTest covers the page/role/case matrix, but it does not render screenshots.
 - The competition PDF in docs/inputs/ could not be read on this machine (no poppler, no PDF library; the file has no /ToUnicode CMap). docs/COMPETITION.md is therefore unverified against the PDF - verify by hand before submission.
 - `python run.py start` leaves the server running in its terminal (normal Streamlit behaviour); stop with Ctrl-C.
 - `python run.py status` reports the passing test count but then errors in `scripts/status.py` because `result.stdout` is `None`.

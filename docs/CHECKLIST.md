@@ -18,13 +18,13 @@
 - [ ] B-15 No real payments, loans or bank claims (T12, T16)
 - [x] B-16 Import demo scenario and stress tests (sales -20%, costs +15%, late payments, FX) editable (T08) — `core/stress.py`, `core/import_scenario.py`, and Lab controls
 - [x] B-17 CSV/Excel upload and validation of dates, amounts, types, duplicates, missing values (T04) — tests in tests/test_validation.py
-- [x] B-18 Synthetic data and illustrative terms labelled (T03, T06, T14) — Financing page banner and synthetic-case context; T14 cross-page review remains
-- [~] B-19 Transparent formulas, no double counting, four layers separated (T05, T07, T14) — T05 actual and forecast are separate; matching invoice/bill categories are excluded from run rate; T07 tags simulated plans HYPOTHETICAL; cross-page layer review remains in T14
+- [x] B-18 Synthetic data and illustrative terms labelled (T03, T06, T14) — shared header/footer labels plus Financing page banner
+- [~] B-19 Transparent formulas, no double counting, four layers separated (T05, T07, T14) — actual, forecast and hypothetical layers are tagged on charts and plans; owner-confirmed assumptions remain separate
 - [ ] B-20 No accuracy claim without backtest (T15)
 - [x] B-21 Five synthetic cases (T03) — five generated case folders, schema validation and deterministic hash test in tests/test_data.py
 - [ ] B-22 Required tests: gap, alerts, scenarios, financing cost, invalid data, unauthorized actions, audit tamper, AI grounding (T15)
-- [ ] B-23 UI/UX direction followed (T02, T14)
-- [ ] B-24 End-to-end workflow works (T14, T18)
+- [x] B-23 UI/UX direction followed (T02, T14) — shared shell, context selectors, responsive KPI grid and consistent empty states implemented; browser visual review remains a HUMAN CHECK
+- [x] B-24 End-to-end workflow works (T14, T18) — finance_ops draft to owner approval/simulated execution and confirmed Lab proposal covered by AppTest
 - [ ] B-25 Title and tagline correct everywhere (T02, T16)
 
 ## Seven additions
@@ -37,16 +37,16 @@
 - [ ] A-07 Deliverables and schedule (T16, T18)
 
 ## UI requests
-- [ ] U-01 Clean top-level UI (T02, T14)
-- [~] U-02 Dynamic features: sliders, instant recalculation, click-through (T08, T14) — Lab sliders recalculate immediately; cross-page navigation polish remains in T14
+- [x] U-01 Clean top-level UI (T02, T14) — computed Overview and shared page context header
+- [x] U-02 Dynamic features: sliders, instant recalculation, click-through (T08, T14) — Lab sliders recalculate immediately; Overview opens Lab with `st.switch_page`
 - [~] U-03 Beautiful charts (T05, T08, T09, T10) — Cash Flow actual/forecast and P10-P90 band; later chart pages remain
 - [ ] U-04 Colour grading and layer colours (T02)
 - [ ] U-05 Font and typography (T02)
-- [ ] U-06 Alignment and spacing (T02, T14, T18)
-- [ ] U-07 Overview shows all key details (T14)
-- [ ] U-08 Sidebar, header, footer, navigation (T02)
-- [ ] U-09 Loading, empty and error states (T02, T14)
-- [~] U-10 Load demo business button (T04, T14) — Data Upload loads all five cases; Overview entry point remains in T14
+- [~] U-06 Alignment and spacing (T02, T14, T18) — shared grid and 1280px content cap reviewed; verify full-screen rendering by HUMAN CHECK
+- [x] U-07 Overview shows all key details (T14) — alert, six KPIs, forecast band, recommended plan, readiness, aging, approvals, audit and source
+- [x] U-08 Sidebar, header, footer, navigation (T02) — shared business/scenario selectors and role badge in the shell
+- [x] U-09 Loading, empty and error states (T02, T14) — shared page spinner and safe error boundary, consistent no-data guards, plus page-specific empty states
+- [x] U-10 Load demo business button (T04, T14) — Overview and Data Upload entry points load all five cases
 - [ ] U-11 Decision report download (T15)
 - [ ] U-12 English UI (all)
 
