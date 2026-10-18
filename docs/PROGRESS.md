@@ -4,7 +4,6 @@ Current task: T15 (awaiting user `next`)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-- T14 checkpoint: app shell now shows a shared loading state and safe page-level error message; handoff checklist updated for completed Overview and shell coverage.
 
 ## Done
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)
@@ -16,7 +15,7 @@ Last updated: 2026-10-18
   - Verified: `setup`, `test` (9 passed), `check` (exit 0), `status`, `start` serves on 127.0.0.1:8501 (Health: ok)
 - **T02 Design system and app shell** (2026-10-17)
   - App shell, theme, shared components and charts are implemented in commit `9f1387a`.
-  - Per the user's direction, font sizing, alignment, vertical text placement, and card text/layout are deferred to T14 cross-page polish.
+  - T14 added the responsive KPI grid, aligned shared page context, and consistent page-state handling; visual verification at full-screen remains a HUMAN CHECK.
 - **T03 Synthetic data and schema** (2026-10-18)
   - Added typed Pydantic schemas and a loader for transactions, receivables, payables, profiles and assumptions.
   - Added a fixed-seed generator for five synthetic cases, with 39 weeks of transaction history, 10 synthetic customers, 6 synthetic suppliers and labelled case folders.
