@@ -6,6 +6,7 @@ Last updated: 2026-10-18
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
 - T14 checkpoint: computed Overview, five-case demo selector, hero forecast/uncertainty chart, plan/readiness/aging/approvals/audit panels and shared business/scenario/role header added; Overview, page smoke and security tests pass (21 tests), focused Ruff passes.
 - T14 checkpoint: shared no-data states and direct-page permission guards added; AppTest matrix covers all 10 pages, five cases and four roles plus empty-state runs; 67 focused page/Overview/security tests pass, focused Ruff passes.
+- T14 checkpoint: existing approval-to-Lab integration flow now loads its selected synthetic business through Overview before use; the formerly failing integration test passes.
 
 ## Done
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)

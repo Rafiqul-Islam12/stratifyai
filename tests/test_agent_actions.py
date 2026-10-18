@@ -131,7 +131,10 @@ def test_full_finance_ops_to_owner_ui_flow(monkeypatch, stores):
     main_path = Path(__file__).resolve().parents[1] / "app" / "main.py"
     finance_app = AppTest.from_file(main_path, default_timeout=30)
     finance_app.session_state[AUTH_SESSION_KEY] = finance._session_token
-    finance_app.run().switch_page("pages/approvals.py").run()
+    finance_app.run()
+    finance_app.selectbox(key="overview-case-select").select("high_expense_shortage").run()
+    finance_app.button(key="overview-load-demo").click().run()
+    finance_app.switch_page("pages/approvals.py").run()
     assert not finance_app.exception
     for label, value in (("Overdue customer", "Customer Demo"), ("Invoice reference", "INV-UI-1"),
                          ("Due date", "2026-10-01")):
