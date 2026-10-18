@@ -21,6 +21,7 @@ import streamlit as st
 
 from app import charts
 from app.version import __version__
+from data.generate_synthetic import CASES
 
 TITLE = "StratifyAI"
 TAGLINE = "The Liquidity Decision Lab for SME Financial Intelligence"
@@ -40,6 +41,15 @@ PAGES: list[tuple[str, str, str]] = [
     ("Assumptions", "pages/assumptions.py", "⚙"),
     ("Security", "pages/security.py", "🔒"),
 ]
+CASE_LABELS = {
+    "stable_healthy": "Stable and healthy", "delayed_customer_payments": "Delayed customer payments",
+    "high_expense_shortage": "High expense, shortage", "import_financing": "Import financing",
+    "sales_drop_cost_rise": "Sales drop, cost rise",
+}
+_CASE_WIDGET_KEYS = (
+    "overview-case-select", "cashflow-case-select", "lab-case-select", "financing-case-select",
+    "analysis-case-select", "copilot-case-select", "assumptions-case-select", "upload-demo-case-select",
+)
 _VERSION = __version__
 _STYLES = Path(__file__).with_name("styles.css")
 
@@ -129,6 +139,41 @@ def sidebar_bottom(user: str = "Not signed in", role: str = "viewer") -> None:
         _md('<hr class="sa-divider">')
         _md('<div class="sa-side-user">' + _e(user) + "</div>")
         badge("Role: " + role, tone="muted")
+
+
+def _sync_business_selection() -> None:
+    selected = st.session_state.get("global-business-selector")
+    if selected not in CASES:
+        return
+    st.session_state["active_synthetic_case"] = selected
+    for key in _CASE_WIDGET_KEYS:
+        if key in st.session_state:
+            st.session_state[key] = selected
+
+
+def global_context_bar(user: Any) -> None:
+    """Render the shared business and scenario selectors on every app page."""
+    active = st.session_state.get("active_synthetic_case", "high_expense_shortage")
+    if active in CASES and st.session_state.get("global-business-selector") != active:
+        st.session_state["global-business-selector"] = active
+    st.session_state.setdefault("active_synthetic_case", active)
+    selected_scenario = st.session_state.get("global-scenario-selector", "Forecast baseline")
+    scenario_options = ("Forecast baseline", "Option 0", "Option A", "Option B", "Option C")
+    if selected_scenario not in scenario_options:
+        selected_scenario = "Forecast baseline"
+        st.session_state["global-scenario-selector"] = selected_scenario
+    with st.container():
+        business_col, scenario_col, role_col = st.columns([2, 2, 1], vertical_alignment="bottom")
+        with business_col:
+            st.selectbox("Business", CASES, format_func=lambda value: CASE_LABELS[value],
+                key="global-business-selector", on_change=_sync_business_selection,
+                help="Choose one of the labelled synthetic demo businesses.")
+        with scenario_col:
+            st.selectbox("Scenario", scenario_options, key="global-scenario-selector",
+                help="Choose the forecast baseline or a Decision Lab plan for the Overview comparison.")
+        with role_col:
+            st.caption("Signed in as")
+            badge(f"{user.display_name} · {user.role}", "info")
 
 
 def badge(text: str, tone: str = "muted") -> None:

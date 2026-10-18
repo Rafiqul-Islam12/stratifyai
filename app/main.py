@@ -88,6 +88,7 @@ def run() -> None:
     sidebar_pages = [(title, page_by_path[path], icon) for title, path, icon in visible]
     ui.sidebar_top(sidebar_pages)
     ui.sidebar_bottom(user.display_name, user.role)
+    ui.global_context_bar(user)
     with st.sidebar:
         if st.button("Log out", key="auth-logout"):
             logout()

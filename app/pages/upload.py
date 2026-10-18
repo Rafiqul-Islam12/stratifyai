@@ -104,7 +104,8 @@ if uploaded is not None:
             st.error("The validated dataset could not be saved. The attempt was recorded safely.")
 
 ui.section_title("Load a demo business")
-demo_case = st.selectbox("Synthetic case", options=CASES, format_func=lambda value: DEMO_LABELS[value])
+demo_case = st.selectbox("Synthetic case", options=CASES, format_func=lambda value: DEMO_LABELS[value],
+    index=CASES.index(active_case_name) if active_case_name in CASES else 0, key="upload-demo-case-select")
 st.caption("Synthetic data · BDT · for demonstration only")
 if st.button("Load demo business"):
     try:
