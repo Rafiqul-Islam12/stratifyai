@@ -1,9 +1,10 @@
 # PROGRESS
 
-Current task: T15 (awaiting user `next`)
+Current task: T16 (awaiting user `next`)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
+
 
 ## Done
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)
@@ -86,6 +87,13 @@ Last updated: 2026-10-18
   - Added consistent no-data states to case-driven pages and direct-page permission checks for Lab, Assumptions and Upload; added help text to every Streamlit metric. The approval-to-Lab integration test now loads its selected case through the Overview first.
   - Verified: `pytest -q` (194 passed), `ruff check .` (all checks passed), `run.py check` (health passed), secret scan (no matches in 141 files), and `git diff --check` (clean).
   - HUMAN CHECK still required: inspect the 10 pages for two cases, verify the no-data screen and full-screen layout, and capture screenshots for the deck.
+- **T15 Evaluation, task-completion suite, evidence, report builder and decision report** (2026-10-18)
+  - Added a synthetic holdout backtest for all five cases against the naive last-four-week mean; evaluation saves per-case MAE/WAPE, recomputed Lab reserve outcomes and seeded breach probabilities, 60 role/action checks, ten injection cases, tamper detection, and timestamped full pytest output.
+  - Added 13 scripted service workflows with a real pass/fail report, consolidated Markdown/HTML report generation, checklist counts, and a downloadable Markdown Decision Report on Lab with plan assumptions/sources, layer labels, plan comparison, weekly table, disclaimers and recorded scenario-change audit reference IDs.
+  - Added a regression test that authenticates owner, checks report contents, and triggers the case 3 download control.
+  - Verified: `scripts/run_eval.py` (197 passed; pytest evidence exit 0), `scripts/run_tasks.py` (13/13 passed), case 3 download regression (passed), `run.py report` (exit 0), `run.py check` (health passed), `ruff check .` (all checks passed), secret scan (no matches in 154 files), `git diff --check` (clean).
+  - Backtest result: the model had higher MAE than the naive baseline in all five synthetic cases. Decision-quality reserve check passed for 1/5 selected plans; four cases had no plan meeting reserve, as reported with their computed breach probabilities. These are limitations, not accuracy or feasibility claims.
+  - HUMAN CHECK: review the poor backtest results before presenting; AppTest triggered the case 3 Markdown download and checked its content, but confirm the downloaded file opens as expected in a browser.
 
 ## How to run
 ```
@@ -103,6 +111,7 @@ Secret scan: `python scripts/check_secrets.py` (exit 0 = clean).
 
 ## Known issues
 - T14's full 10-page/two-case visual review and deck screenshots remain a HUMAN CHECK; the T02 follow-up includes one actual 1440px Overview capture.
+- T15 evaluation shows the deterministic forecast is worse than the naive baseline on each of five synthetic holdouts; do not claim forecast accuracy from this evidence.
 - The competition PDF in docs/inputs/ could not be read on this machine (no poppler, no PDF library; the file has no /ToUnicode CMap). docs/COMPETITION.md is therefore unverified against the PDF - verify by hand before submission.
 - `python run.py start` leaves the server running in its terminal (normal Streamlit behaviour); stop with Ctrl-C.
 - `python run.py status` reports the passing test count but then errors in `scripts/status.py` because `result.stdout` is `None`.

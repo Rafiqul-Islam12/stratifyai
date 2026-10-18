@@ -1,0 +1,11 @@
+case,model,training_weeks,holdout_weeks,cutoff,mae_bdt_per_week,wape_ratio
+stable_healthy,StratifyAI forecast,29,10,2026-05-04,255370.86225,3.3098573932855526
+stable_healthy,Naive last-4-week mean net flow,29,10,2026-05-04,32631.253000000008,0.4229331139920267
+sales_drop_cost_rise,StratifyAI forecast,29,10,2026-05-04,166949.39474999998,2.313660538134862
+sales_drop_cost_rise,Naive last-4-week mean net flow,29,10,2026-05-04,140806.33000000002,1.951358073076183
+high_expense_shortage,StratifyAI forecast,29,10,2026-05-04,256412.35824999996,3.7469285434521713
+high_expense_shortage,Naive last-4-week mean net flow,29,10,2026-05-04,26176.575,0.3825157129972948
+delayed_customer_payments,StratifyAI forecast,29,10,2026-05-04,297374.47475,9.891677326745324
+delayed_customer_payments,Naive last-4-week mean net flow,29,10,2026-05-04,18340.143999999993,0.6100550046420695
+import_financing,StratifyAI forecast,29,10,2026-05-04,299112.58,5.769901677757428
+import_financing,Naive last-4-week mean net flow,29,10,2026-05-04,23607.150499999996,0.4553835123785902

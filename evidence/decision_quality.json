@@ -1,0 +1,42 @@
+[
+  {
+    "case": "stable_healthy",
+    "recommended_plan": "Option 0",
+    "minimum_balance_bdt": 3246586.547500001,
+    "reserve_bdt": 389265.825,
+    "keeps_reserve": true,
+    "breach_probability": 0.0
+  },
+  {
+    "case": "sales_drop_cost_rise",
+    "recommended_plan": "Option 0",
+    "minimum_balance_bdt": -1594784.337500001,
+    "reserve_bdt": 529253.6150000001,
+    "keeps_reserve": false,
+    "breach_probability": 1.0
+  },
+  {
+    "case": "high_expense_shortage",
+    "recommended_plan": "Option A",
+    "minimum_balance_bdt": -6229560.420500003,
+    "reserve_bdt": 622695.925,
+    "keeps_reserve": false,
+    "breach_probability": 1.0
+  },
+  {
+    "case": "delayed_customer_payments",
+    "recommended_plan": "Option 0",
+    "minimum_balance_bdt": -188551.13124999998,
+    "reserve_bdt": 452785.8725,
+    "keeps_reserve": false,
+    "breach_probability": 1.0
+  },
+  {
+    "case": "import_financing",
+    "recommended_plan": "Option A",
+    "minimum_balance_bdt": 253078.71499999973,
+    "reserve_bdt": 420886.89,
+    "keeps_reserve": false,
+    "breach_probability": 0.9845
+  }
+]

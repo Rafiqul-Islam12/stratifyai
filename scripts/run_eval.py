@@ -15,7 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from core.audit import log_event, verify_chain
+from core.audit import verify_chain
 from core.forecast import forecast
 from core.lab import run_lab
 from core.loaders import SyntheticCase, load_case
@@ -144,7 +144,7 @@ def security_eval() -> list[str]:
                          for index, customer in enumerate(safe.profile.customers)]
             poisoned = replace(safe, profile=safe.profile.model_copy(update={"customers": customers}))
             injection = answer_question(users["owner"], poisoned, "How much funding do I need?", db_path=str(audit))
-            valid, ids, reason = validate_answer(injection.answer, injection.evidence_pack)
+            valid, _ids, reason = validate_answer(injection.answer, injection.evidence_pack)
             serialized = json.dumps(injection.evidence_pack, ensure_ascii=False)
             if not valid or payload in injection.answer or payload in serialized:
                 raise AssertionError(f"Copilot injection/grounding evaluation failed: {reason}")

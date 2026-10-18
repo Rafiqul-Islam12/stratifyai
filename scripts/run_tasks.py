@@ -104,6 +104,8 @@ def run_task(task: dict, task_root: Path) -> None:
         result = analyze(case)
         assert result.as_of is not None
         assert all(math.isfinite(row["net"]) for row in result.weekly)
+        metrics = (result.dso_days, result.dpo_days, result.runway_weeks, result.gross_margin_pct)
+        assert any(metric.value is None and metric.reason for metric in metrics)
     else:
         raise ValueError(f"Unknown task {task_id}")
 
@@ -116,7 +118,7 @@ def main() -> int:
             try:
                 run_task(task, task_root)
                 results.append((task, True, "expected outcome observed"))
-            except Exception as exc:  # report one task failure while continuing the suite
+            except Exception as exc:  # noqa: BLE001 - record failure and continue the suite
                 results.append((task, False, f"{type(exc).__name__}: {exc}"))
     finally:
         import gc

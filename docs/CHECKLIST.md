@@ -20,9 +20,9 @@
 - [x] B-17 CSV/Excel upload and validation of dates, amounts, types, duplicates, missing values (T04) — tests in tests/test_validation.py
 - [x] B-18 Synthetic data and illustrative terms labelled (T03, T06, T14) — shared header/footer labels plus Financing page banner
 - [~] B-19 Transparent formulas, no double counting, four layers separated (T05, T07, T14) — actual, forecast and hypothetical layers are tagged on charts and plans; owner-confirmed assumptions remain separate
-- [ ] B-20 No accuracy claim without backtest (T15)
+- [x] B-20 No accuracy claim without backtest (T15) — per-case 10-week synthetic holdout vs naive baseline, with explicit accuracy caveat in `evidence/backtest_results.md`
 - [x] B-21 Five synthetic cases (T03) — five generated case folders, schema validation and deterministic hash test in tests/test_data.py
-- [ ] B-22 Required tests: gap, alerts, scenarios, financing cost, invalid data, unauthorized actions, audit tamper, AI grounding (T15)
+- [x] B-22 Required tests: gap, alerts, scenarios, financing cost, invalid data, unauthorized actions, audit tamper, AI grounding (T15) — full suite `evidence/test_results.txt`; scripted service checks `evidence/task_suite_results.md`
 - [x] B-23 UI/UX direction followed (T02, T14) — shared shell, context selectors, responsive KPI grid and consistent empty states implemented; browser visual review remains a HUMAN CHECK
 - [x] B-24 End-to-end workflow works (T14, T18) — finance_ops draft to owner approval/simulated execution and confirmed Lab proposal covered by AppTest
 - [ ] B-25 Title and tagline correct everywhere (T02, T16)
@@ -30,7 +30,7 @@
 ## Seven additions
 - [x] A-01 Agent action drafts with owner approval (T12) — persistent draft state machine and owner review tested in `tests/test_agent_actions.py`
 - [~] A-02 Security tiers, hash-chained audit and known-risk list are displayed in T11; self-assessment report is T16
-- [ ] A-03 Backtest vs naive baseline (T15)
+- [x] A-03 Backtest vs naive baseline (T15) — `evidence/backtest_results.csv`, `.md`
 - [x] A-04 P10/P50/P90 band and computed shortage probabilities (T09) — `core/montecarlo.py`, Cash Flow and Lab uncertainty displays, `tests/test_montecarlo.py`
 - [x] A-05 Deterministic best-plan rule, Option 0, separate levers (T07) — `core/lab.py`, `tests/test_lab.py`
 - [x] A-06 Financing templates and repayment-capacity formula (T06) — `core/financing.py`, `tests/test_financing.py`
@@ -47,7 +47,7 @@
 - [x] U-08 Sidebar, header, footer, navigation (T02) — shared business/scenario selectors and role badge in the shell
 - [x] U-09 Loading, empty and error states (T02, T14) — shared page spinner and safe error boundary, consistent no-data guards, plus page-specific empty states
 - [x] U-10 Load demo business button (T04, T14) — Overview and Data Upload entry points load all five cases
-- [ ] U-11 Decision report download (T15)
+- [x] U-11 Decision report download (T15) — Markdown decision report on Lab; AppTest exercises case 3 download and checks current result, assumptions, layers, audit reference and disclaimer
 - [ ] U-12 English UI (all)
 
 ## Competition
@@ -56,7 +56,7 @@
 - [ ] C-03 Demo script for max 5 minutes (T16)
 - [~] C-04 Source, README, deployment instructions, tests, GitHub (T01, T16, T18) — source, README stub and tests done (T01); deployment instructions are T17, no GitHub remote yet
 - [ ] C-05 Security self-assessment (T16)
-- [~] C-06 Execution evidence logs (T12, T15) — T12 sandbox execution and audit events are logged; consolidated evaluation evidence remains in T15
+- [x] C-06 Execution evidence logs (T12, T15) — T12 sandbox execution and audit events plus T15 backtest, security, decision-quality, task-suite and test artifacts
 - [ ] C-07 Integrity: no copied code, licences respected (T18)
 - [ ] C-08 English everywhere (all)
 
@@ -70,11 +70,11 @@
 - [x] D-02 Copilot Receipt per answer (T13) — rendered under every response and stored with hashed-query audit event in `app/pages/copilot.py`, `services/copilot.py`
 - [ ] D-03 Receivables watchlist (T10)
 - [ ] D-04 Verifiable readiness pack with hash check (T10)
-- [ ] D-05 Scripted task-completion suite with results (T15)
+- [x] D-05 Scripted task-completion suite with results (T15) — 13 service workflows and actual pass rate in `evidence/task_suite_results.md`
 - [ ] D-06 STRIDE threat model and LLM-risk mapping in docs (T16)
 - [~] D-07 CI workflow runs tests on every push (T01) — .github/workflows/ci.yml on push+PR, Python 3.11 and 3.12, `pytest -q` then `ruff check .`; both commands pass locally, CI has not yet run remotely (no origin)
 - [x] D-08 One-command launcher run.py (T01, T17) — setup/start/demo/test/eval/check/status/report; verified setup, test, check, status and a live HTTP 200 from `start`
-- [ ] D-09 Consolidated final report builder (T15)
+- [x] D-09 Consolidated final report builder (T15) — `scripts/build_report.py`, outputs `reports/final_report.md` and `.html`
 
 ## Packaging and reachability
 - [ ] P-01 Docker image runs the app offline (T17)

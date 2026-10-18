@@ -16,7 +16,7 @@ Legend: [ ] todo, [x] done. P1 must, P2 should, P3 cut first.
 - [x] T12 Agent action drafts, approval workflow, simulated execution (P1)
 - [x] T13 Grounded copilot, injection protection, offline mode, receipt (P1)
 - [x] T14 Overview page and cross-page polish (P1; include T02 font sizing, alignment, card text/layout, and vertical text placement fixes)
-- [ ] T15 Evaluation, task-completion suite, evidence, report builder, decision report (P1)
+- [x] T15 Evaluation, task-completion suite, evidence, report builder, decision report (P1)
 - [ ] T16 Documentation, README blueprint, submission docs, demo fixtures (P1)
 - [ ] T17 Packaging, Docker, submission zip, optional live deployment (P2)
 - [ ] T18 Final QA, fresh-clone test, submission checklist (P1)
