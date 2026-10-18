@@ -4,7 +4,6 @@ Current task: T15 (awaiting user `next`)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-- T02 visual follow-up checkpoint: added regression coverage proving stale session state cannot suppress stylesheet injection after a Streamlit rerun.
 
 ## Done
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)
@@ -17,7 +16,7 @@ Last updated: 2026-10-18
 - **T02 Design system and app shell** (2026-10-17)
   - App shell, theme, shared components and charts are implemented in commit `9f1387a`.
   - Follow-up completed the deferred type scale and card/header alignment; fixed stylesheet reinjection across Streamlit reruns; verified the six-card grid and text wrapping in an actual 1440px Edge capture (`evidence/t02-overview-review.png`).
-  - Verified: `pytest -q` (195 passed), `ruff check .` (all checks passed), `run.py check` (health passed), and secret scan (no matches in 142 files).
+  - Added regression coverage for stylesheet reinjection after a Streamlit rerun. Verified: `pytest -q` (196 passed), `ruff check .` (all checks passed), `run.py check` (health passed), secret scan (no matches in 142 files), and `git diff --check` (clean).
 - **T03 Synthetic data and schema** (2026-10-18)
   - Added typed Pydantic schemas and a loader for transactions, receivables, payables, profiles and assumptions.
   - Added a fixed-seed generator for five synthetic cases, with 39 weeks of transaction history, 10 synthetic customers, 6 synthetic suppliers and labelled case folders.
