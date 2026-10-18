@@ -91,6 +91,7 @@ def test_untrusted_customer_names_and_invoice_text_never_enter_evidence(payload,
     assert payload not in serialized
     assert payload not in result.answer
     assert result.receipt.masked_fields == len(profile.customers) + len(profile.suppliers)
+    assert all("name" not in item for item in result.evidence_pack["masked_entities"])
     assert original.profile.customers[0].name != payload
     assert original.transactions[0].description != payload
     assert validate_answer(result.answer, result.evidence_pack)[0]
@@ -133,8 +134,11 @@ def test_llm_output_must_cite_grounded_numbers_and_unconfigured_mode_makes_no_ca
     assert configured.receipt.mode == "llm"
     assert configured.receipt.external_call is True
     assert validate_answer(configured.answer, configured.evidence_pack)[0]
-    assert "Synthetic Customer" not in json.dumps(captured["pack"])
-    assert "Synthetic Supplier" not in json.dumps(captured["pack"])
+    llm_payload = json.dumps(captured["pack"])
+    assert "Synthetic Customer" not in llm_payload
+    assert "Synthetic Supplier" not in llm_payload
+    assert case.profile.customers[0].customer_id in llm_payload
+    assert case.profile.suppliers[0].supplier_id in llm_payload
 
 
 def test_evidence_pack_tracks_selected_forecast_assumptions(copilot_user):
@@ -164,4 +168,8 @@ def test_copilot_page_renders_receipt_and_evidence(monkeypatch, tmp_path):
     assert not app.exception
     assert app.session_state["copilot_answers"]
     assert "Receipt" in app.markdown[-2].value or any("Receipt" in item.value for item in app.caption)
+    app.button(key="copilot-suggest-0").click().run(timeout=45)
+    assert len(app.session_state["copilot_answers"]) == 2
+    assert all("evidence_ids" in message["receipt"] for message in app.session_state["copilot_answers"])
+    assert len([item for item in app.expander if item.label == "Evidence used"]) == 2
 

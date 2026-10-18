@@ -86,7 +86,8 @@ def build_evidence_pack(
     analysis = analyze(case)
     readiness = assess_readiness(case, analysis, projection,
         capacity_ratio=lab.plans["Option B"].capacity_ratio)
-    names = [item.name for item in (*case.profile.customers, *case.profile.suppliers) if item.name]
+    masked_entities = ([{"type": "customer", "id": item.customer_id} for item in case.profile.customers]
+        + [{"type": "supplier", "id": item.supplier_id} for item in case.profile.suppliers])
     plans = {
         name: {
             "funding_gap": _number(plan.funding_gap),
@@ -150,7 +151,8 @@ def build_evidence_pack(
          "values": {"data_quality": quality, "assumptions": assumptions_used}},
     ]
     return {"schema_version": 1, "currency": case.profile.currency, "evidence": entries,
-            "masked_fields": len(names), "privacy": "Names and free-text source fields excluded; IDs and aggregates only."}
+            "masked_fields": len(masked_entities), "masked_entities": masked_entities,
+            "privacy": "Names and free-text source fields excluded; customer and supplier IDs are the only entity labels."}
 
 
 def _intent(question: str) -> str:
