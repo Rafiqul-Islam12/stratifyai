@@ -4,6 +4,7 @@ Current task: T13
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
+- T13 checkpoint: grounded Copilot service, interactive page and initial tests implemented; focused suite passes (15 tests). Continue by tightening active-assumption grounding and running full checks.
 
 ## Done
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)
