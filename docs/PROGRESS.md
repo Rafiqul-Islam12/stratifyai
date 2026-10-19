@@ -1,12 +1,14 @@
 # PROGRESS
 
-Current task: T16 (awaiting user `next`)
+Current task: T16 (in progress)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
+- T16 checkpoint: completed the README blueprint and technical architecture, data-flow, algorithm and security documentation.
 
 
 ## Done
+- UI v2.2: navbar is one fixed HTML row + pinned button (no columns); identical sidebar rows signed out and in; hero background as CSS data-URI; card surfaces for charts. UI v2.1 fixes after first real run: navbar fixed + bigger + pill links + tagline, flat compact sidebar, smaller hero with right-aligned actions, role-card buttons first, layer cards, visible inputs, big card-style tabs. UI v2 redesign (out-of-plan job, spec in docs/UI_REDESIGN.md): new green/off-white design system (app/styles.css, app/charts.py, app/icons.py, .streamlit/config.toml); fixed navbar + fixed grouped sidebar (app/components.py, app/main.py); public Overview, sign-in screen and role cards (app/landing.py); redesigned signed-in Overview; tabs and cards on Cash Flow, Decision Lab, Financing, Analysis, Approvals, Upload, Assumptions, Security; removed leftover T02 placeholder block from the Cash Flow page; tests updated (test_design, test_overview, test_security) and tests/test_shell.py added. NOT yet verified inside a real Streamlit run: run `pytest -q`, `ruff check .`, `python run.py start` and look at every page.
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)
   - Folder skeleton: core/, services/, app/pages/, data/, tests/, scripts/, evidence/, static/fonts/, docs/img/, .streamlit/, .github/workflows/
   - `run.py` launcher (stdlib only): setup, start, demo, test, eval, check, status, report
