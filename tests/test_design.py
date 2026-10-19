@@ -31,8 +31,9 @@ def test_design_files_exist() -> None:
 
 
 def test_style_sheet_is_under_line_budget() -> None:
+    """The v2 design system (docs/UI_REDESIGN.md) replaced the 150-line T02 budget."""
     lines = STYLES.read_text(encoding="utf-8").splitlines()
-    assert len(lines) <= 160, f"styles.css has {len(lines)} lines, budget is about 150"
+    assert len(lines) <= 700, f"styles.css has {len(lines)} lines, budget is about 600"
 
 
 def test_shared_typography_and_cards_wrap_without_truncation() -> None:
@@ -74,6 +75,8 @@ def test_no_external_url_in_the_app() -> None:
         hosts = set()
         for scheme, host in URL_HOST.findall(path.read_text(encoding="utf-8").lower()):
             host = host.split("/")[0].split(")")[0].split(";")[0].strip(" ,")
+            if host == "www.w3.org":  # the SVG XML namespace identifier inside inline SVG; the browser never requests it
+                continue
             if host and host not in {"127.0.0.1", "localhost"} and not host.startswith("127."):
                 hosts.add(f"{scheme}://{host}")
         if hosts:
@@ -106,3 +109,21 @@ def test_styles_are_reinjected_after_a_streamlit_rerun() -> None:
     at.session_state["_sa_styles"] = True  # Stale session state from a prior run must not suppress CSS.
     at.run()
     assert any("--fs-caption" in element.value for element in at.markdown)
+
+
+def test_design_tokens_are_green_and_off_white() -> None:
+    styles = STYLES.read_text(encoding="utf-8")
+    for token in ("--green-900:", "--green-700:", "--cream-50:", "--cream-100:", "--amber:", "--fs-caption:", "--fs-kpi:", "--fs-hero:"):
+        assert token in styles, token
+    assert "#4F46E5" not in styles  # the old indigo brand colour must be gone
+
+
+def test_shell_defines_fixed_navbar_and_fixed_sidebar() -> None:
+    styles = STYLES.read_text(encoding="utf-8")
+    assert ".st-key-sa-navbar" in styles and "position: fixed" in styles
+    assert "stSidebarCollapseButton" in styles  # the sidebar is always open
+
+
+def test_icons_module_has_no_external_assets() -> None:
+    icons = importlib.import_module("app.icons")
+    assert icons.svg("lock").startswith("<svg") and "http" not in icons.svg("lock") and "http" not in icons.logo_mark()

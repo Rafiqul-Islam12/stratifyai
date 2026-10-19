@@ -9,7 +9,6 @@ from app import components as ui
 from core.analysis import Metric, analyze
 from core.loaders import load_case
 from core.watchlist import receivables_watchlist
-from data.generate_synthetic import CASES
 
 CASE_LABELS = {
     "stable_healthy": "Stable and healthy", "delayed_customer_payments": "Delayed customer payments",
@@ -32,9 +31,7 @@ ui.load_styles()
 if ui.no_data_state("Business Analysis", "Recorded income, expenses and working capital."):
     st.stop()
 active = st.session_state.get("active_synthetic_case", "high_expense_shortage")
-case_name = st.selectbox("Synthetic demo case", CASES,
-    index=CASES.index(active) if active in CASES else CASES.index("high_expense_shortage"),
-    format_func=lambda value: CASE_LABELS[value], key="analysis-case-select")
+case_name = ui.active_case("analysis-case-select")
 case = load_case(case_name)
 st.session_state["active_synthetic_case"] = case_name
 st.session_state["synthetic_case_data"] = case
@@ -61,62 +58,73 @@ ui.kpi_row([
     ("Top customer share", _metric(result.customer_concentration_pct, "%"), "Largest customer's share of total open receivables."),
 ])
 
-ui.section_title("Income and expenses by week")
-weekly = result.weekly[-26:]
-fig = charts.base_layout(title="Recorded weekly cash activity", x_title="Week starting", y_title="BDT", height=380)
-labels = [row["week_start"].isoformat() for row in weekly]
-charts.line(fig, labels, [row["income"] for row in weekly], layer="ACTUAL", name="Income")
-charts.line(fig, labels, [row["expenses"] for row in weekly], layer="ACTUAL", name="Expenses")
-st.plotly_chart(fig, width="stretch")
+tab_trends, tab_categories, tab_receivables, tab_insights = st.tabs(["Trends", "Categories", "Receivables", "Insights"])
+with tab_trends:
+    ui.section_title("Income and expenses by week")
+    weekly = result.weekly[-26:]
+    fig = charts.base_layout(title="Recorded weekly cash activity", x_title="Week starting", y_title="BDT", height=380)
+    labels = [row["week_start"].isoformat() for row in weekly]
+    charts.line(fig, labels, [row["income"] for row in weekly], layer="ACTUAL", name="Income")
+    charts.line(fig, labels, [row["expenses"] for row in weekly], layer="ACTUAL", name="Expenses")
+    st.plotly_chart(charts.polish(fig), width="stretch")
 
-left, right = st.columns(2)
-with left:
-    ui.section_title("Income by category")
-    income_fig = charts.base_layout(title="Recorded income by category", x_title="BDT", height=360)
-    income_fig.add_bar(x=[amount for _, amount in result.income_by_category],
-        y=[name for name, _ in result.income_by_category], orientation="h", marker_color=charts.PRIMARY)
-    income_fig.update_layout(showlegend=False, yaxis=dict(autorange="reversed"))
-    st.plotly_chart(income_fig, width="stretch")
-with right:
-    ui.section_title("Expenses by category")
-    expense_fig = charts.base_layout(title="Recorded expenses by category", x_title="BDT", height=360)
-    expense_fig.add_bar(x=[amount for _, amount in result.expense_by_category],
-        y=[name for name, _ in result.expense_by_category], orientation="h", marker_color=charts.PRIMARY)
-    expense_fig.update_layout(showlegend=False, yaxis=dict(autorange="reversed"))
-    st.plotly_chart(expense_fig, width="stretch")
+with tab_categories:
+    def _category_card(column, key, title, rows):
+        """Donut + progress rows for one category breakdown (top 6 plus an Other bucket)."""
+        ordered = sorted(((name, amount) for name, amount in rows if amount > 0), key=lambda item: item[1], reverse=True)
+        shown, rest = ordered[:6], ordered[6:]
+        if rest:
+            shown.append(("Other", sum(amount for _, amount in rest)))
+        total = sum(amount for _, amount in shown) or 1.0
+        with column, ui.card(key, title, f"Recorded total {_money(sum(amount for _, amount in ordered))}"):
+            if not shown:
+                st.caption("No recorded amounts in this category.")
+                return
+            st.plotly_chart(charts.donut([name for name, _ in shown], [amount for _, amount in shown],
+                                         center=_money(total), height=280), width="stretch")
+            ui.progress_rows([(name, _money(amount), amount / total * 100) for name, amount in shown])
 
-ui.section_title("Receivables aging")
-aging_fig = charts.base_layout(title="Overdue open receivables by age", y_title="BDT", height=320)
-aging_fig.add_bar(x=list(result.aging), y=list(result.aging.values()), marker_color=charts.PRIMARY)
-aging_fig.update_layout(showlegend=False)
-st.plotly_chart(aging_fig, width="stretch")
-st.caption("Aging is measured from due date to the latest transaction date. The 90+ bucket means more than 90 days.")
 
-ui.section_title("Monthly cash-flow trend")
-st.dataframe(pd.DataFrame([{"Month": row["month"], "Income (BDT)": round(row["income"], 2),
-    "Expenses (BDT)": round(row["expenses"], 2), "Net cash flow (BDT)": round(row["net"], 2)}
-    for row in result.monthly]), width="stretch", hide_index=True)
-ui.section_title("Computed insights and expense trend flags")
-for sentence in result.insights:
-    st.markdown(f"- {sentence}")
-if not result.expense_trend_flags:
-    st.caption("No expense category increased more than 15% in the latest four weeks versus the previous four recorded weeks.")
+    left, right = st.columns(2, gap="medium")
+    _category_card(left, "income-by-category", "Income by category", result.income_by_category)
+    _category_card(right, "expense-by-category", "Expenses by category", result.expense_by_category)
 
-ui.section_title("Receivables watchlist")
-st.caption("Scores use overdue share (40), weighted days overdue (30), payment-delay trend (20) and customer concentration (10). Missing delay history is excluded and remaining weights are normalized.")
-if watchlist:
-    st.dataframe(pd.DataFrame([{
-        "Customer": row.customer_name, "Open (BDT)": round(row.open_balance, 2),
-        "Overdue (BDT)": round(row.overdue_balance, 2), "Score": round(row.score, 1),
-        "Status": row.label, "Invoice IDs": ", ".join(row.invoice_ids),
-    } for row in watchlist]), width="stretch", hide_index=True)
-    with st.expander("Watchlist score details"):
-        for row in watchlist:
-            st.markdown(f"**{row.customer_name} · {row.score:.1f} ({row.label})**")
-            for name, score in row.component_scores.items():
-                st.markdown(f"- {name}: {f'{score:.1f} points' if score is not None else 'Not available'}")
-            st.caption("Evidence invoices: " + (", ".join(row.invoice_ids) or "None"))
-else:
-    ui.empty_state("No open receivables", "The watchlist appears when unpaid invoice balances are available.",
-                   "Review data", disabled=True)
+with tab_receivables:
+    ui.section_title("Receivables aging")
+    aging_fig = charts.base_layout(title="Overdue open receivables by age", y_title="BDT", height=320)
+    aging_fig.add_bar(x=list(result.aging), y=list(result.aging.values()), marker_color=charts.PRIMARY)
+    aging_fig.update_layout(showlegend=False)
+    st.plotly_chart(charts.polish(aging_fig), width="stretch")
+    st.caption("Aging is measured from due date to the latest transaction date. The 90+ bucket means more than 90 days.")
+
+with tab_trends:
+    ui.section_title("Monthly cash-flow trend")
+    st.dataframe(pd.DataFrame([{"Month": row["month"], "Income (BDT)": round(row["income"], 2),
+        "Expenses (BDT)": round(row["expenses"], 2), "Net cash flow (BDT)": round(row["net"], 2)}
+        for row in result.monthly]), width="stretch", hide_index=True)
+with tab_insights:
+    ui.section_title("Computed insights and expense trend flags")
+    for sentence in result.insights:
+        st.markdown(f"- {sentence}")
+    if not result.expense_trend_flags:
+        st.caption("No expense category increased more than 15% in the latest four weeks versus the previous four recorded weeks.")
+
+with tab_receivables:
+    ui.section_title("Receivables watchlist")
+    st.caption("Scores use overdue share (40), weighted days overdue (30), payment-delay trend (20) and customer concentration (10). Missing delay history is excluded and remaining weights are normalized.")
+    if watchlist:
+        st.dataframe(pd.DataFrame([{
+            "Customer": row.customer_name, "Open (BDT)": round(row.open_balance, 2),
+            "Overdue (BDT)": round(row.overdue_balance, 2), "Score": round(row.score, 1),
+            "Status": row.label, "Invoice IDs": ", ".join(row.invoice_ids),
+        } for row in watchlist]), width="stretch", hide_index=True)
+        with st.expander("Watchlist score details"):
+            for row in watchlist:
+                st.markdown(f"**{row.customer_name} · {row.score:.1f} ({row.label})**")
+                for name, score in row.component_scores.items():
+                    st.markdown(f"- {name}: {f'{score:.1f} points' if score is not None else 'Not available'}")
+                st.caption("Evidence invoices: " + (", ".join(row.invoice_ids) or "None"))
+    else:
+        ui.empty_state("No open receivables", "The watchlist appears when unpaid invoice balances are available.",
+                       "Review data", disabled=True)
 ui.footer()

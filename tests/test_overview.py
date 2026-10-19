@@ -25,10 +25,14 @@ def test_overview_empty_state_and_all_five_cases(monkeypatch, tmp_path):
     assert not app.exception
     assert any("No data loaded" in item.value for item in app.markdown)
 
-    for case_name in ("stable_healthy", "delayed_customer_payments", "high_expense_shortage",
-                      "import_financing", "sales_drop_cost_rise"):
-        app.selectbox(key="overview-case-select").select(case_name).run()
-        app.button(key="overview-load-demo").click().run(timeout=45)
+    for index, case_name in enumerate(("stable_healthy", "delayed_customer_payments", "high_expense_shortage",
+                                       "import_financing", "sales_drop_cost_rise")):
+        if index == 0:  # the empty state offers its own picker; once loaded, the shell header selector owns the choice
+            app.selectbox(key="overview-case-select").select(case_name).run()
+            app.button(key="overview-load-demo").click().run(timeout=45)
+        else:
+            app.session_state["active_synthetic_case"] = case_name
+            app.run(timeout=45)
         assert not app.exception, case_name
         assert app.session_state["active_synthetic_case"] == case_name
         assert all(label in "\n".join(item.value for item in app.markdown)

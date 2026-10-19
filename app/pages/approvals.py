@@ -141,62 +141,70 @@ ui.kpi_row([
 ui.alert_banner("info", "Money movement is always denied",
                 "No user, including the owner, can move or transmit money through this application.")
 
-if user.role == "owner":
-    _render_owner_queue(user, drafts)
-elif user.role == "auditor":
-    ui.section_title("Approval status")
-    st.info("Auditor access is read-only and does not expose draft contents.")
-else:
-    ui.section_title("Your drafts")
-    own_drafts = [draft for draft in drafts if draft.created_by == user.username]
-    if own_drafts:
-        st.dataframe(pd.DataFrame([{"Draft": draft.draft_id[:8], "Type": draft.action_type,
-            "Status": draft.status, "Created": draft.created_at} for draft in own_drafts]),
-            width="stretch", hide_index=True)
+tab_queue, tab_create, tab_audit = st.tabs(["Approval queue" if user.role == "owner" else "Drafts and status", "Create a draft", "Audit log"])
+with tab_queue:
+    if user.role == "owner":
+        _render_owner_queue(user, drafts)
+    elif user.role == "auditor":
+        ui.section_title("Approval status")
+        st.info("Auditor access is read-only and does not expose draft contents.")
     else:
-        st.caption("You have not submitted any drafts yet.")
-    if own_drafts:
-        selected_own_id = st.selectbox("Draft details", [draft.draft_id for draft in own_drafts],
-            format_func=lambda value: next(
-                f"{draft.action_type.replace('_', ' ').title()} · {draft.draft_id[:8]} · {draft.status}"
-                for draft in own_drafts if draft.draft_id == value), key="own-draft-details")
-        selected_own = next(draft for draft in own_drafts if draft.draft_id == selected_own_id)
-        st.json(selected_own.payload)
-        st.markdown("**Status timeline**")
-        st.dataframe(pd.DataFrame(selected_own.timeline), width="stretch", hide_index=True)
-
-if user.role in {"owner", "finance_ops"}:
-    _create_action_form(user)
-
-if can_audit:
-    ui.section_title("Audit log")
-    filters = st.columns(3)
-    actor_filter = filters[0].text_input("Filter actor")
-    audit_actions = sorted({row["action"] for row in events})
-    selected_audit_action = filters[1].selectbox("Filter action", ["All", *audit_actions])
-    limit = filters[2].selectbox("Rows", (50, 100, 500, 2000), index=1)
-    if st.button("Verify chain", type="primary", key="audit-verify"):
-        try:
-            chain = verify_audit_chain(user)
-            st.session_state["audit_verification"] = chain
-        except PermissionDenied as exc:
-            st.error(str(exc))
-        except Exception:  # noqa: BLE001 - expose only a safe audit failure message
-            st.error("Audit verification failed safely. Review the system status for the chain result.")
-        else:
-            ui.alert_banner("info" if chain.ok else "critical", "Audit chain verified" if chain.ok else "Audit chain broken", chain.message)
-    try:
-        filtered = get_audit_events(user, actor=actor_filter or None,
-            action=selected_audit_action if selected_audit_action != "All" else None, limit=int(limit))
-        if filtered:
-            st.dataframe(pd.DataFrame([{key: row[key] for key in
-                ("id", "ts", "actor", "role", "action", "entity", "payload_json", "hash")} for row in filtered]),
+        ui.section_title("Your drafts")
+        own_drafts = [draft for draft in drafts if draft.created_by == user.username]
+        if own_drafts:
+            st.dataframe(pd.DataFrame([{"Draft": draft.draft_id[:8], "Type": draft.action_type,
+                "Status": draft.status, "Created": draft.created_at} for draft in own_drafts]),
                 width="stretch", hide_index=True)
         else:
-            ui.empty_state("No matching audit entries", "Change the filters or perform a logged action.",
-                           "Clear filters", disabled=True)
-    except PermissionDenied as exc:
-        st.error(str(exc))
-    except Exception:  # noqa: BLE001 - expose only a safe audit loading message
-        st.error("The audit entries could not be loaded. Sensitive error details are not shown.")
+            st.caption("You have not submitted any drafts yet.")
+        if own_drafts:
+            selected_own_id = st.selectbox("Draft details", [draft.draft_id for draft in own_drafts],
+                format_func=lambda value: next(
+                    f"{draft.action_type.replace('_', ' ').title()} · {draft.draft_id[:8]} · {draft.status}"
+                    for draft in own_drafts if draft.draft_id == value), key="own-draft-details")
+            selected_own = next(draft for draft in own_drafts if draft.draft_id == selected_own_id)
+            st.json(selected_own.payload)
+            st.markdown("**Status timeline**")
+            st.dataframe(pd.DataFrame(selected_own.timeline), width="stretch", hide_index=True)
+
+with tab_create:
+    if user.role in {"owner", "finance_ops"}:
+        _create_action_form(user)
+    else:
+        ui.locked_card("Creating drafts is not available for this role", "Drafts are written by finance staff and approved by the owner.", "owner, finance_ops")
+
+with tab_audit:
+    if can_audit:
+        ui.section_title("Audit log")
+        filters = st.columns(3)
+        actor_filter = filters[0].text_input("Filter actor")
+        audit_actions = sorted({row["action"] for row in events})
+        selected_audit_action = filters[1].selectbox("Filter action", ["All", *audit_actions])
+        limit = filters[2].selectbox("Rows", (50, 100, 500, 2000), index=1)
+        if st.button("Verify chain", type="primary", key="audit-verify"):
+            try:
+                chain = verify_audit_chain(user)
+                st.session_state["audit_verification"] = chain
+            except PermissionDenied as exc:
+                st.error(str(exc))
+            except Exception:  # noqa: BLE001 - expose only a safe audit failure message
+                st.error("Audit verification failed safely. Review the system status for the chain result.")
+            else:
+                ui.alert_banner("info" if chain.ok else "critical", "Audit chain verified" if chain.ok else "Audit chain broken", chain.message)
+        try:
+            filtered = get_audit_events(user, actor=actor_filter or None,
+                action=selected_audit_action if selected_audit_action != "All" else None, limit=int(limit))
+            if filtered:
+                st.dataframe(pd.DataFrame([{key: row[key] for key in
+                    ("id", "ts", "actor", "role", "action", "entity", "payload_json", "hash")} for row in filtered]),
+                    width="stretch", hide_index=True)
+            else:
+                ui.empty_state("No matching audit entries", "Change the filters or perform a logged action.",
+                               "Clear filters", disabled=True)
+        except PermissionDenied as exc:
+            st.error(str(exc))
+        except Exception:  # noqa: BLE001 - expose only a safe audit loading message
+            st.error("The audit entries could not be loaded. Sensitive error details are not shown.")
+    else:
+        ui.locked_card("Audit log is restricted", "Only the owner and auditor roles can read and verify the audit trail.", "owner, auditor")
 ui.footer()

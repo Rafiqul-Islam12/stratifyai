@@ -1,5 +1,9 @@
 # DESIGN SYSTEM (single source of truth for UI)
 
+> **Superseded for colour, typography and layout by `docs/UI_REDESIGN.md` (UI v2: green + off-white, fixed navbar and
+> sidebar, card grid, public Overview, sign-in screen).** The token table below is the old indigo/teal system; keep it
+> only for the four-layer meanings and the component list. Where the two disagree, UI_REDESIGN.md wins.
+
 Goal: clean, premium, judge-impressive, consistent. Designed for a 1440px wide screen (presentation), layout="wide". English UI.
 
 ## Tokens (define once in app/styles.css as CSS variables and in .streamlit/config.toml; never hard-code colours elsewhere)

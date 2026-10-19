@@ -43,34 +43,38 @@ ui.page_header("Security", "Permission registry, audit status and system control
                business="Synthetic demo", scenario=f"Signed in: {user.display_name} · {user.role}")
 st.caption("DEMO authentication. This application uses synthetic data and does not execute money movement.")
 
-ui.section_title("System status")
-ui.kpi_row([
-    ("App version", f"v{__version__}", "Version loaded from app/version.py."),
-    ("Data mode", "Synthetic", "Demo data only."),
-    ("Copilot mode", os.getenv("COPILOT_MODE", "offline").lower(), "Local mode from environment; default is offline."),
-])
-ui.kpi_row([
-    ("Audit chain", "OK" if chain.ok else f"Broken · {chain.broken_index}", chain.message),
-    ("Last test run", test_summary, "Last line of evidence/test_results.txt when available."),
-    ("Fonts local", "Yes" if fonts_local else "No", "Checks static/fonts for a local WOFF2 font file."),
-])
+tab_status, tab_roles, tab_controls = st.tabs(["Status", "Roles and permissions", "Controls and risks"])
+with tab_status:
+    ui.section_title("System status")
+    ui.kpi_row([
+        ("App version", f"v{__version__}", "Version loaded from app/version.py."),
+        ("Data mode", "Synthetic", "Demo data only."),
+        ("Copilot mode", os.getenv("COPILOT_MODE", "offline").lower(), "Local mode from environment; default is offline."),
+    ])
+    ui.kpi_row([
+        ("Audit chain", "OK" if chain.ok else f"Broken · {chain.broken_index}", chain.message),
+        ("Last test run", test_summary, "Last line of evidence/test_results.txt when available."),
+        ("Fonts local", "Yes" if fonts_local else "No", "Checks static/fonts for a local WOFF2 font file."),
+    ])
 
-ui.section_title("Permission tiers")
-tiers = [
-    ("READ", "View data, dashboards and results", "All roles or the action-specific read scope"),
-    ("DRAFT", "Run scenarios, upload and create drafts", "owner, finance_ops"),
-    ("APPROVAL_REQUIRED", "Approve or reject; simulated execution", "owner only"),
-    ("MONEY_MOVEMENT", "Transmit or move money", "No role; always denied and audited"),
-]
-st.dataframe(pd.DataFrame(tiers, columns=("Tier", "Action", "Allowed role scope")), width="stretch", hide_index=True)
+with tab_roles:
+    ui.section_title("Permission tiers")
+    tiers = [
+        ("READ", "View data, dashboards and results", "All roles or the action-specific read scope"),
+        ("DRAFT", "Run scenarios, upload and create drafts", "owner, finance_ops"),
+        ("APPROVAL_REQUIRED", "Approve or reject; simulated execution", "owner only"),
+        ("MONEY_MOVEMENT", "Transmit or move money", "No role; always denied and audited"),
+    ]
+    st.dataframe(pd.DataFrame(tiers, columns=("Tier", "Action", "Allowed role scope")), width="stretch", hide_index=True)
 
-ui.section_title("Role preview from the backend registry")
-st.dataframe(pd.DataFrame(permission_matrix()), width="stretch", hide_index=True)
-ui.section_title("Controls")
-for control in _doc_bullets("Controls (baseline)"):
-    st.markdown(f"- {control}")
-ui.section_title("Known risks")
-for risk in _doc_bullets("Known risks (initial list; keep honest and extend)"):
-    st.markdown(f"- {risk}")
+    ui.section_title("Role preview from the backend registry")
+    st.dataframe(pd.DataFrame(permission_matrix()), width="stretch", hide_index=True)
+with tab_controls:
+    ui.section_title("Controls")
+    for control in _doc_bullets("Controls (baseline)"):
+        st.markdown(f"- {control}")
+    ui.section_title("Known risks")
+    for risk in _doc_bullets("Known risks (initial list; keep honest and extend)"):
+        st.markdown(f"- {risk}")
 
 ui.footer()

@@ -1,4 +1,4 @@
-"""Every Streamlit page must run without raising (T02).
+﻿"""Every Streamlit page must run without raising (T02).
 
 Layout bugs only surface when the whole page executes, so each stub is driven
 by AppTest instead of being inspected for markup.
@@ -82,6 +82,7 @@ def test_case_pages_show_empty_state_without_loaded_data(page: str, monkeypatch,
           db_path=tmp_path / "audit.sqlite3")
     at = AppTest.from_file(page, default_timeout=45)
     at.session_state[AUTH_SESSION_KEY] = state[AUTH_SESSION_KEY]
+    at.session_state["_sa_shell"] = True
     at.session_state["active_synthetic_case"] = None
     at.session_state["global-business-selector"] = None
     at.run(timeout=45)

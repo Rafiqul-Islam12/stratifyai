@@ -15,17 +15,16 @@ gatherUsageStats = false
 # Navigation is rendered in our own sidebar, so the built-in one is hidden by
 # st.navigation(position="hidden"), not here.
 showSidebarNavigation = false
-# Viewer mode keeps only the viewer controls: no deploy button, no rerun, no
-# clear-cache. The toolbar itself stays, because the collapsed sidebar is
-# reopened from it.
+# Viewer mode keeps only the viewer controls. The header/toolbar is hidden by
+# app/styles.css because the sidebar is fixed and always open.
 toolbarMode = "viewer"
 
 [theme]
 base = "light"
-primaryColor = "#4F46E5"
-backgroundColor = "#F8FAFC"
-secondaryBackgroundColor = "#FFFFFF"
-textColor = "#0F172A"
+primaryColor = "#0F6A52"
+backgroundColor = "#FAF7F2"
+secondaryBackgroundColor = "#FFFBF8"
+textColor = "#14231D"
 font = "sans serif"
 
 # --- Inter (self-hosted, optional) -----------------------------------------

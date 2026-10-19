@@ -97,11 +97,13 @@ def test_audit_chain_sanitizes_and_detects_tampering(audit_db):
 
 def test_login_screen_accepts_a_demo_user(monkeypatch, audit_db):
     monkeypatch.setenv("STRATIFY_AUDIT_DB", str(audit_db))
-    app = AppTest.from_file(Path(__file__).resolve().parents[1] / "app" / "main.py", default_timeout=30).run()
+    app = AppTest.from_file(Path(__file__).resolve().parents[1] / "app" / "main.py", default_timeout=30)
+    app.session_state["sa_view"] = "login"  # signed-out visitors land on the public Overview; this opens the sign-in screen
+    app.run()
     assert not app.exception
     app.text_input[0].set_value("viewer")
     app.text_input[1].set_value(DEMO_PASSWORD_DEFAULTS["viewer"])
-    app.button[0].click().run()
+    app.button(key="login-submit").click().run()
     assert not app.exception
     assert any("Viewer" in item.value for item in app.markdown)
 

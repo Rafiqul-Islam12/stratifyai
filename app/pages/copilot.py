@@ -6,7 +6,6 @@ import streamlit as st
 from app import components as ui
 from app.assumptions_store import get_values, to_lab_assumptions
 from core.loaders import load_case
-from data.generate_synthetic import CASES
 from services.auth import current_user
 from services.copilot import answer_question
 
@@ -29,9 +28,7 @@ if ui.no_data_state("Copilot", "Ask about computed business and forecast evidenc
     st.stop()
 
 active = st.session_state.get("active_synthetic_case", "high_expense_shortage")
-case_name = st.selectbox("Synthetic demo case", CASES,
-    index=CASES.index(active) if active in CASES else CASES.index("high_expense_shortage"),
-    format_func=lambda value: CASE_LABELS[value], key="copilot-case-select")
+case_name = ui.active_case("copilot-case-select")
 case = load_case(case_name)
 st.session_state["active_synthetic_case"] = case_name
 st.session_state["synthetic_case_data"] = case
@@ -45,9 +42,9 @@ ui.alert_banner("info", "LLM mode" if mode == "llm" else "Offline mode",
     else "Answers are generated from deterministic application results and work without network access or an API key.")
 
 ui.section_title("Suggested questions")
-cols = st.columns(3)
+cols = st.columns(3, gap="small")
 for index, suggestion in enumerate(SUGGESTIONS):
-    if cols[index % 3].button(suggestion, key=f"copilot-suggest-{index}", use_container_width=True):
+    if cols[index % 3].button(suggestion, key=f"copilot-suggest-{index}", icon=":material/chat_bubble_outline:", use_container_width=True):
         st.session_state["copilot_pending_question"] = suggestion
 
 with st.form("copilot-ask-form", clear_on_submit=True):

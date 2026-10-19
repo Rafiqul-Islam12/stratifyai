@@ -1,4 +1,4 @@
-"""Interactive comparison of deterministic baseline, levers, stress and financing."""
+﻿"""Interactive comparison of deterministic baseline, levers, stress and financing."""
 from __future__ import annotations
 
 import pandas as pd
@@ -13,7 +13,6 @@ from core.lab import run_lab
 from core.loaders import load_case
 from core.montecarlo import simulate
 from core.stress import apply_stress
-from data.generate_synthetic import CASES
 from services.actions import record_scenario_change
 from services.actions import run_lab as run_authorized_lab
 from services.agent_actions import confirmed_plans, create_draft, submit_draft
@@ -48,9 +47,9 @@ def _cached_plan_mc(case, projection, inflow_delta, outflow_delta, adjustments, 
                     sales_variability_cv=cv, customer_delay_sd_days=delay_sd)
 
 
-def _render_controls(case_name: str, case, values: dict) -> dict:
+def _render_controls(case_name: str, case, values: dict, stress_tab) -> dict:
     updates = dict(values)
-    with st.expander("Adjust assumptions, levers and stress", expanded=True):
+    with st.container():
         st.caption("Controls save to the session assumption store and recalculate this comparison immediately.")
         ui.section_title("Reserve and horizon")
         cols = st.columns(4)
@@ -96,12 +95,13 @@ def _render_controls(case_name: str, case, values: dict) -> dict:
         updates["tenor_months"] = cols[3].number_input("Tenor (months)", min_value=1, max_value=120, value=int(values["tenor_months"]), key=f"lab::{case_name}::tenor_months")
         updates["advance_pct"] = cols[4].number_input("Invoice advance (%)", min_value=1.0, max_value=100.0, value=float(values["advance_pct"]), step=1.0, key=f"lab::{case_name}::advance_pct")
 
-        ui.section_title("Stress inputs")
-        cols = st.columns(4)
-        updates["stress_sales_drop_pct"] = cols[0].slider("Sales decrease (%)", 0.0, 50.0, min(50.0, float(values["stress_sales_drop_pct"])), step=1.0, key=f"lab::{case_name}::stress_sales_drop_pct")
-        updates["stress_cost_increase_pct"] = cols[1].slider("Costs increase (%)", 0.0, 100.0, min(100.0, float(values["stress_cost_increase_pct"])), step=1.0, key=f"lab::{case_name}::stress_cost_increase_pct")
-        updates["stress_delay_days"] = cols[2].slider("Customer delay +days", 0, 180, min(180, int(values["stress_delay_days"])), key=f"lab::{case_name}::stress_delay_days")
-        updates["stress_fx_shock_pct"] = cols[3].slider("FX shock (%)", -50.0, 100.0, min(100.0, max(-50.0, float(values["stress_fx_shock_pct"]))), step=1.0, key=f"lab::{case_name}::stress_fx_shock_pct")
+        with stress_tab:
+            ui.section_title("Stress inputs")
+            cols = st.columns(4)
+            updates["stress_sales_drop_pct"] = cols[0].slider("Sales decrease (%)", 0.0, 50.0, min(50.0, float(values["stress_sales_drop_pct"])), step=1.0, key=f"lab::{case_name}::stress_sales_drop_pct")
+            updates["stress_cost_increase_pct"] = cols[1].slider("Costs increase (%)", 0.0, 100.0, min(100.0, float(values["stress_cost_increase_pct"])), step=1.0, key=f"lab::{case_name}::stress_cost_increase_pct")
+            updates["stress_delay_days"] = cols[2].slider("Customer delay +days", 0, 180, min(180, int(values["stress_delay_days"])), key=f"lab::{case_name}::stress_delay_days")
+            updates["stress_fx_shock_pct"] = cols[3].slider("FX shock (%)", -50.0, 100.0, min(100.0, max(-50.0, float(values["stress_fx_shock_pct"]))), step=1.0, key=f"lab::{case_name}::stress_fx_shock_pct")
 
         if case.profile.import_scenario:
             ui.section_title("Case 4 import scenario")
@@ -123,23 +123,24 @@ def _render_controls(case_name: str, case, values: dict) -> dict:
 ui.load_styles()
 user = current_user()
 if user is not None and not can_user(user, "lab.run"):
-    st.warning("Your role cannot run Decision Lab scenarios.")
+    ui.locked_card("Decision Lab is not available for this role", "Running and changing scenarios needs a role that can draft hypothetical changes.", "owner, finance_ops")
     ui.footer()
     st.stop()
 if ui.no_data_state("Liquidity Decision Lab", "Compare baseline cash, levers and financing."):
     st.stop()
 active = st.session_state.get("active_synthetic_case", "high_expense_shortage")
-case_name = st.selectbox("Synthetic demo case", CASES,
-                         index=CASES.index(active) if active in CASES else CASES.index("high_expense_shortage"),
-                         format_func=lambda value: CASE_LABELS[value], key="lab-case-select")
+case_name = ui.active_case("lab-case-select", default_case="high_expense_shortage")
 case = load_case(case_name)
 st.session_state["active_synthetic_case"] = case_name
 st.session_state["synthetic_case_data"] = case
 ui.page_header("Liquidity Decision Lab", "Compare baseline cash, operational levers, stress and illustrative financing.",
                business=case.profile.business_name, scenario=CASE_LABELS[case_name])
-st.caption("Synthetic data · BDT · deterministic projections; proposed changes remain HYPOTHETICAL.")
 values = get_values(case_name, case)
-values = _render_controls(case_name, case, values)
+summary = st.container()
+tab_compare, tab_levers, tab_stress, tab_details, tab_scenarios = st.tabs(
+    ["Compare plans", "Levers and assumptions", "Stress tests", "Plan details", "Scenarios and proposal"])
+with tab_levers:
+    values = _render_controls(case_name, case, values, tab_stress)
 snapshot_key = f"lab_authorized_snapshot::{case_name}"
 previous_values = st.session_state.get(snapshot_key, {})
 changed_fields = sorted(key for key, value in values.items() if previous_values.get(key) != value)
@@ -208,203 +209,210 @@ def _decision_report() -> str:
 
 decision_report = _decision_report()
 st.session_state["lab_decision_report"] = decision_report
-st.download_button("Download decision report (Markdown)", data=decision_report,
-                   file_name=f"stratifyai-decision-report-{case_name}.md", mime="text/markdown",
-                   key=f"lab-decision-report-{case_name}")
-ui.alert_banner(
-    "success" if selected.is_feasible else "warning",
-    f"Recommended plan: {lab_result.best_plan_id}" if selected.is_feasible else f"No plan fully closes the gap · smallest gap: {lab_result.best_plan_id}",
-    lab_result.best_plan_reason,
-)
-first_shortage = _shortage(baseline.shortage_week)
-ui.kpi_row([
-    ("Scenario funding gap", _money(baseline.funding_gap), "Reserve minus the lowest projected balance under the current case and stress settings, before levers or financing."),
-    ("Baseline shortage", first_shortage, "First forecast week that closes below the selected reserve."),
-    ("Recommended plan", lab_result.best_plan_id, lab_result.best_plan_reason),
-    ("Borrowing necessary?", "Yes" if lab_result.borrowing_necessary else "No", lab_result.borrowing_reason),
-])
+with summary:
+    st.download_button("Download decision report (Markdown)", data=decision_report,
+                       file_name=f"stratifyai-decision-report-{case_name}.md", mime="text/markdown",
+                       key=f"lab-decision-report-{case_name}")
+    ui.alert_banner(
+        "success" if selected.is_feasible else "warning",
+        f"Recommended plan: {lab_result.best_plan_id}" if selected.is_feasible else f"No plan fully closes the gap · smallest gap: {lab_result.best_plan_id}",
+        lab_result.best_plan_reason,
+    )
+    first_shortage = _shortage(baseline.shortage_week)
+    ui.kpi_row([
+        ("Scenario funding gap", _money(baseline.funding_gap), "Reserve minus the lowest projected balance under the current case and stress settings, before levers or financing."),
+        ("Baseline shortage", first_shortage, "First forecast week that closes below the selected reserve."),
+        ("Recommended plan", lab_result.best_plan_id, lab_result.best_plan_reason),
+        ("Borrowing necessary?", "Yes" if lab_result.borrowing_necessary else "No", lab_result.borrowing_reason),
+    ])
 
-ui.section_title("Five decision questions")
-questions = list(lab_result.key_answers.values())
-cols = st.columns(5)
-for col, answer in zip(cols, questions):
-    value = answer["answer"]
-    if isinstance(value, float):
-        shown = _money(value)
-    elif isinstance(value, bool):
-        shown = "Yes" if value else "No"
-    elif value is None:
-        shown = "None"
-    else:
-        shown = str(value)
-    col.metric(str(answer["question"]), shown)
+with tab_compare:
+    ui.section_title("Five decision questions")
+    questions = list(lab_result.key_answers.values())
+    cols = st.columns(5)
+    for col, answer in zip(cols, questions):
+        value = answer["answer"]
+        if isinstance(value, float):
+            shown = _money(value)
+        elif isinstance(value, bool):
+            shown = "Yes" if value else "No"
+        elif value is None:
+            shown = "None"
+        else:
+            shown = str(value)
+        col.metric(str(answer["question"]), shown)
 
-ui.section_title("Plan comparison")
-cols = st.columns(4)
-for col, name in zip(cols, PLAN_ORDER):
-    plan = lab_result.plans[name]
-    min_balance = min(point.closing_balance for point in plan.balance_series_after)
-    shortage_date = plan.balance_series_after[plan.shortage_week - 1].week_start if plan.shortage_week else "None"
-    ui.plan_card(col, name, [
-        ("Minimum balance", _money(min_balance)),
-        ("Gap before finance", _money(plan.funding_gap)),
-        ("Remaining gap", _money(plan.remaining_gap)),
-        ("First shortage", _shortage(plan.shortage_week)),
-        ("Reserve breach probability", f"{plan.breach_probability:.1%}" if plan.breach_probability is not None else "Unavailable"),
-        ("Shortage date", shortage_date),
-        ("Facility", _money(plan.financing_amount)),
-        ("Financing cost", _money(plan.financing_cost)),
-        ("Capacity", f"{plan.capacity_ratio:.2f}x · {plan.capacity_label}" if plan.capacity_ratio is not None else plan.capacity_label),
-        ("Status", "Feasible" if plan.is_feasible else "Gap remains"),
-        ("Layer", ", ".join(plan.layer_tags)),
-    ], recommended=name == lab_result.best_plan_id)
+with summary:
+    ui.section_title("Plan comparison")
+    _plans = []
+    for name in PLAN_ORDER:
+        plan = lab_result.plans[name]
+        min_balance = min(point.closing_balance for point in plan.balance_series_after)
+        shortage_date = plan.balance_series_after[plan.shortage_week - 1].week_start if plan.shortage_week else "None"
+        _plans.append((name, [
+            ("Minimum balance", _money(min_balance)),
+            ("Gap before finance", _money(plan.funding_gap)),
+            ("Remaining gap", _money(plan.remaining_gap)),
+            ("First shortage", _shortage(plan.shortage_week)),
+            ("Reserve breach probability", f"{plan.breach_probability:.1%}" if plan.breach_probability is not None else "Unavailable"),
+            ("Shortage date", str(shortage_date)),
+            ("Facility", _money(plan.financing_amount)),
+            ("Financing cost", _money(plan.financing_cost)),
+            ("Capacity", f"{plan.capacity_ratio:.2f}x · {plan.capacity_label}" if plan.capacity_ratio is not None else plan.capacity_label),
+            ("Status", "Feasible" if plan.is_feasible else "Gap remains"),
+            ("Layer", ", ".join(plan.layer_tags)),
+        ], name == lab_result.best_plan_id))
+    ui.plan_row(_plans)
 
-ui.section_title("Balance by plan")
-first_plan = lab_result.plans["Option 0"].balance_series_after
-week_labels = [point.week_start for point in first_plan]
-figure = charts.base_layout(title="Projected closing balance", x_title="Week starting", y_title="BDT", height=420)
-scenario_active = any((float(values["stress_sales_drop_pct"]), float(values["stress_cost_increase_pct"]),
-                       int(values["stress_delay_days"]), float(values["stress_fx_shock_pct"]))) or import_result is not None
-for name in PLAN_ORDER:
-    plan = lab_result.plans[name]
-    layer = "HYPOTHETICAL" if name != "Option 0" or scenario_active else "FORECAST"
-    charts.line(figure, week_labels, [point.closing_balance for point in plan.balance_series_after], layer=layer, name=name)
-    plan_projection = forecast(scenario_case, reserve=lab_result.reserve)
-    base_inflows = tuple(week.inflow for week in plan_projection.forecast_weeks)
-    base_outflows = tuple(week.outflow for week in plan_projection.forecast_weeks)
-    mc = _cached_plan_mc(scenario_case, plan_projection,
-        tuple(a - b for a, b in zip(plan.simulation_inflows, base_inflows)),
-        tuple(a - b for a, b in zip(plan.simulation_outflows, base_outflows)), plan.simulation_adjustments,
-        lab_result.reserve, float(values["sales_variability_cv"]), float(values["customer_delay_sd_days"]))
-    if name == "Option 0":
-        charts.band(figure, week_labels, mc.p10, mc.p90)
-for proposal in confirmed:
-    snapshot = proposal.get("plan_snapshot", {})
-    points = snapshot.get("balance_series_after", [])
-    if points:
-        charts.line(figure, [point["week_start"] for point in points],
-                    [point["closing_balance"] for point in points], layer="CONFIRMED",
-                    name=f"Confirmed · {proposal.get('plan_id', 'Lab plan')}")
-charts.reserve(figure, week_labels, lab_result.reserve)
-st.plotly_chart(figure, width="stretch")
-ui.layer_legend()
+with tab_compare:
+    ui.section_title("Balance by plan")
+    first_plan = lab_result.plans["Option 0"].balance_series_after
+    week_labels = [point.week_start for point in first_plan]
+    figure = charts.base_layout(title="Projected closing balance", x_title="Week starting", y_title="BDT", height=420)
+    scenario_active = any((float(values["stress_sales_drop_pct"]), float(values["stress_cost_increase_pct"]),
+                           int(values["stress_delay_days"]), float(values["stress_fx_shock_pct"]))) or import_result is not None
+    for name in PLAN_ORDER:
+        plan = lab_result.plans[name]
+        layer = "HYPOTHETICAL" if name != "Option 0" or scenario_active else "FORECAST"
+        charts.line(figure, week_labels, [point.closing_balance for point in plan.balance_series_after], layer=layer, name=name)
+        plan_projection = forecast(scenario_case, reserve=lab_result.reserve)
+        base_inflows = tuple(week.inflow for week in plan_projection.forecast_weeks)
+        base_outflows = tuple(week.outflow for week in plan_projection.forecast_weeks)
+        mc = _cached_plan_mc(scenario_case, plan_projection,
+            tuple(a - b for a, b in zip(plan.simulation_inflows, base_inflows)),
+            tuple(a - b for a, b in zip(plan.simulation_outflows, base_outflows)), plan.simulation_adjustments,
+            lab_result.reserve, float(values["sales_variability_cv"]), float(values["customer_delay_sd_days"]))
+        if name == "Option 0":
+            charts.band(figure, week_labels, mc.p10, mc.p90)
+    for proposal in confirmed:
+        snapshot = proposal.get("plan_snapshot", {})
+        points = snapshot.get("balance_series_after", [])
+        if points:
+            charts.line(figure, [point["week_start"] for point in points],
+                        [point["closing_balance"] for point in points], layer="CONFIRMED",
+                        name=f"Confirmed · {proposal.get('plan_id', 'Lab plan')}")
+    charts.reserve(figure, week_labels, lab_result.reserve)
+    st.plotly_chart(charts.polish(figure), width="stretch")
+    ui.layer_legend()
 
-ui.section_title("Financing cost and gap reduction")
-cost_gap = charts.base_layout(title="Financing cost vs reserve-gap reduction", x_title="Gap reduction (BDT)", y_title="Financing cost (BDT)", height=340)
-for name in PLAN_ORDER:
-    plan = lab_result.plans[name]
-    reduction = baseline.funding_gap - plan.remaining_gap
-    cost_gap.add_scatter(x=[reduction], y=[plan.financing_cost], mode="markers+text", text=[name],
-                         textposition="top center", name=name, showlegend=False)
-st.plotly_chart(cost_gap, width="stretch")
+    ui.section_title("Financing cost and gap reduction")
+    cost_gap = charts.base_layout(title="Financing cost vs reserve-gap reduction", x_title="Gap reduction (BDT)", y_title="Financing cost (BDT)", height=340)
+    for name in PLAN_ORDER:
+        plan = lab_result.plans[name]
+        reduction = baseline.funding_gap - plan.remaining_gap
+        cost_gap.add_scatter(x=[reduction], y=[plan.financing_cost], mode="markers+text", text=[name],
+                             textposition="top center", name=name, showlegend=False)
+    st.plotly_chart(charts.polish(cost_gap), width="stretch")
 
-ui.section_title("Option A lever breakdown")
-lever_chart = charts.base_layout(title="Reserve-gap reduction by isolated lever", x_title="Lever", y_title="Gap reduction (BDT)", height=320)
-lever_names = ("L1", "L2", "L3")
-lever_gains = [baseline.funding_gap - lab_result.plans[name].remaining_gap for name in lever_names]
-lever_chart.add_bar(x=lever_names, y=lever_gains, marker_color=charts.PRIMARY, name="Gap reduction")
-lever_chart.update_layout(showlegend=False)
-st.plotly_chart(lever_chart, width="stretch")
+    ui.section_title("Option A lever breakdown")
+    lever_chart = charts.base_layout(title="Reserve-gap reduction by isolated lever", x_title="Lever", y_title="Gap reduction (BDT)", height=320)
+    lever_names = ("L1", "L2", "L3")
+    lever_gains = [baseline.funding_gap - lab_result.plans[name].remaining_gap for name in lever_names]
+    lever_chart.add_bar(x=lever_names, y=lever_gains, marker_color=charts.PRIMARY, name="Gap reduction")
+    lever_chart.update_layout(showlegend=False)
+    st.plotly_chart(charts.polish(lever_chart), width="stretch")
 
-if import_result:
-    with st.expander("Hypothetical import cash events and assumptions", expanded=False):
-        st.caption("Product and shipping inputs are foreign currency units converted at the editable BDT rate. Duties/taxes are user-entered assumptions, not country rules.")
-        st.dataframe(pd.DataFrame([{
-            "Week": event.week, "Date": event.date, "Event": event.event,
-            "Amount (BDT)": round(event.amount_bdt, 2), "Layer": event.layer,
-        } for event in import_result.events]), width="stretch", hide_index=True)
-        import_assumptions = pd.DataFrame(import_result.assumptions_with_sources)
-        import_assumptions["value"] = import_assumptions["value"].astype(str)
-        st.dataframe(import_assumptions, width="stretch", hide_index=True)
+with tab_details:
+    if import_result:
+        with st.expander("Hypothetical import cash events and assumptions", expanded=False):
+            st.caption("Product and shipping inputs are foreign currency units converted at the editable BDT rate. Duties/taxes are user-entered assumptions, not country rules.")
+            st.dataframe(pd.DataFrame([{
+                "Week": event.week, "Date": event.date, "Event": event.event,
+                "Amount (BDT)": round(event.amount_bdt, 2), "Layer": event.layer,
+            } for event in import_result.events]), width="stretch", hide_index=True)
+            import_assumptions = pd.DataFrame(import_result.assumptions_with_sources)
+            import_assumptions["value"] = import_assumptions["value"].astype(str)
+            st.dataframe(import_assumptions, width="stretch", hide_index=True)
 
-ui.section_title("Plan details")
-for name in PLAN_ORDER:
-    plan = lab_result.plans[name]
-    with st.expander(f"{name}: assumptions, sources, risks, pros, cons and next steps", expanded=name == lab_result.best_plan_id):
-        left, right = st.columns(2)
-        left.markdown("**Assumptions and sources**")
-        source_frame = pd.DataFrame(plan.assumptions_with_sources)
-        if "value" in source_frame:
-            source_frame["value"] = source_frame["value"].astype(str)
-        left.dataframe(source_frame, width="stretch", hide_index=True)
-        right.markdown("**Risks**")
-        for note in plan.risks or ("No plan-specific risk flag was triggered.",):
-            right.markdown(f"- {note}")
-        right.markdown("**Pros**")
-        for item in plan.pros:
-            right.markdown(f"- {item}")
-        right.markdown("**Cons**")
-        for item in plan.cons:
-            right.markdown(f"- {item}")
-        right.markdown("**Next steps**")
-        for item in plan.next_steps:
-            right.markdown(f"- {item}")
-        if plan.breach_probability_by_week:
-            peak_week = max(range(len(plan.breach_probability_by_week)), key=plan.breach_probability_by_week.__getitem__)
-            st.caption(f"Probability of falling below reserve in week {peak_week + 1}: "
-                       f"{plan.breach_probability_by_week[peak_week]:.1%}; "
-                       f"chance of any reserve breach: {plan.breach_probability:.1%}.")
+    ui.section_title("Plan details")
+    for name in PLAN_ORDER:
+        plan = lab_result.plans[name]
+        with st.expander(f"{name}: assumptions, sources, risks, pros, cons and next steps", expanded=name == lab_result.best_plan_id):
+            left, right = st.columns(2)
+            left.markdown("**Assumptions and sources**")
+            source_frame = pd.DataFrame(plan.assumptions_with_sources)
+            if "value" in source_frame:
+                source_frame["value"] = source_frame["value"].astype(str)
+            left.dataframe(source_frame, width="stretch", hide_index=True)
+            right.markdown("**Risks**")
+            for note in plan.risks or ("No plan-specific risk flag was triggered.",):
+                right.markdown(f"- {note}")
+            right.markdown("**Pros**")
+            for item in plan.pros:
+                right.markdown(f"- {item}")
+            right.markdown("**Cons**")
+            for item in plan.cons:
+                right.markdown(f"- {item}")
+            right.markdown("**Next steps**")
+            for item in plan.next_steps:
+                right.markdown(f"- {item}")
+            if plan.breach_probability_by_week:
+                peak_week = max(range(len(plan.breach_probability_by_week)), key=plan.breach_probability_by_week.__getitem__)
+                st.caption(f"Probability of falling below reserve in week {peak_week + 1}: "
+                           f"{plan.breach_probability_by_week[peak_week]:.1%}; "
+                           f"chance of any reserve breach: {plan.breach_probability:.1%}.")
 
-with st.expander("Stress assumptions and sources", expanded=False):
-    stress_frame = pd.DataFrame(stress.assumptions)
-    stress_frame["value"] = stress_frame["value"].astype(str)
-    st.dataframe(stress_frame, width="stretch", hide_index=True)
-    for note in stress.risk_notes:
-        st.markdown(f"- {note}")
+    with st.expander("Stress assumptions and sources", expanded=False):
+        stress_frame = pd.DataFrame(stress.assumptions)
+        stress_frame["value"] = stress_frame["value"].astype(str)
+        st.dataframe(stress_frame, width="stretch", hide_index=True)
+        for note in stress.risk_notes:
+            st.markdown(f"- {note}")
 
-ui.section_title("Save and compare scenarios")
-saved_scenarios = st.session_state.setdefault("lab_saved_scenarios", {}).setdefault(case_name, [])
-cols = st.columns([3, 1])
-scenario_name = cols[0].text_input("Scenario name", value=f"Scenario {len(saved_scenarios) + 1}", key=f"lab-save-name-{case_name}")
-if cols[1].button("Save scenario", disabled=len(saved_scenarios) >= 3, key=f"lab-save-{case_name}"):
-    snapshot = {
-        "name": scenario_name.strip() or f"Scenario {len(saved_scenarios) + 1}",
-        "best plan": lab_result.best_plan_id,
-        "funding gap (BDT)": baseline.funding_gap,
-        "Option A remaining (BDT)": lab_result.plans["Option A"].remaining_gap,
-        "Option B facility (BDT)": lab_result.plans["Option B"].financing_amount,
-        "Option C facility (BDT)": lab_result.plans["Option C"].financing_amount,
-        "Option A cost (BDT)": lab_result.plans["Option A"].financing_cost,
-        "stress sales decrease (%)": values["stress_sales_drop_pct"],
-        "stress cost increase (%)": values["stress_cost_increase_pct"],
-        "stress delay (days)": values["stress_delay_days"],
-        "FX shock (%)": values["stress_fx_shock_pct"],
-        "L1 collection (%)": values["collection_pct"],
-        "L2 deferral (weeks)": values["deferral_weeks"],
-        "L3 reduction (%)": values["discretionary_reduction_pct"],
-        "reserve mode": values["reserve_mode"],
-        "reserve (BDT)": lab_result.reserve,
-        "financing template": values["financing_template"],
-        "annual rate (%)": values["annual_rate_pct"],
-        "fee (%)": values["fee_pct"],
-        "tenor (months)": values["tenor_months"],
-        "import included": bool(import_result),
-        "import FX rate": values["import_fx_rate"] if import_result else None,
-        "import FX shock (%)": values["import_fx_shock_pct"] if import_result else None,
-        "import deposit (%)": values["import_deposit_pct"] if import_result else None,
-    }
-    saved_scenarios.append(snapshot)
-    st.rerun()
-if saved_scenarios:
-    st.dataframe(pd.DataFrame(saved_scenarios), width="stretch", hide_index=True)
-    st.caption(f"{len(saved_scenarios)} of 3 scenarios saved for {CASE_LABELS[case_name]}.")
-else:
-    st.caption("Save up to three settings snapshots to compare them in this session.")
-
-ui.section_title("Submit a plan proposal")
-proposal_plan_id = st.selectbox("Plan to submit", PLAN_ORDER, index=PLAN_ORDER.index(lab_result.best_plan_id)
-    if lab_result.best_plan_id in PLAN_ORDER else 0, key=f"lab-proposal-plan-{case_name}")
-if st.button("Save as proposal", disabled=user is None, key=f"lab-proposal-save-{case_name}"):
-    try:
-        plan_snapshot = lab_result.plans[proposal_plan_id].to_dict()
-        draft = create_draft(user, "plan_proposal", {
-            "case_name": case_name,
-            "plan_id": proposal_plan_id,
-            "plan_snapshot": plan_snapshot,
-        })
-        submit_draft(user, draft.draft_id)
-        st.success(f"Proposal {draft.draft_id[:8]} submitted for owner review. Assumptions remain HYPOTHETICAL until approved.")
+with tab_scenarios:
+    ui.section_title("Save and compare scenarios")
+    saved_scenarios = st.session_state.setdefault("lab_saved_scenarios", {}).setdefault(case_name, [])
+    cols = st.columns([3, 1])
+    scenario_name = cols[0].text_input("Scenario name", value=f"Scenario {len(saved_scenarios) + 1}", key=f"lab-save-name-{case_name}")
+    if cols[1].button("Save scenario", disabled=len(saved_scenarios) >= 3, key=f"lab-save-{case_name}"):
+        snapshot = {
+            "name": scenario_name.strip() or f"Scenario {len(saved_scenarios) + 1}",
+            "best plan": lab_result.best_plan_id,
+            "funding gap (BDT)": baseline.funding_gap,
+            "Option A remaining (BDT)": lab_result.plans["Option A"].remaining_gap,
+            "Option B facility (BDT)": lab_result.plans["Option B"].financing_amount,
+            "Option C facility (BDT)": lab_result.plans["Option C"].financing_amount,
+            "Option A cost (BDT)": lab_result.plans["Option A"].financing_cost,
+            "stress sales decrease (%)": values["stress_sales_drop_pct"],
+            "stress cost increase (%)": values["stress_cost_increase_pct"],
+            "stress delay (days)": values["stress_delay_days"],
+            "FX shock (%)": values["stress_fx_shock_pct"],
+            "L1 collection (%)": values["collection_pct"],
+            "L2 deferral (weeks)": values["deferral_weeks"],
+            "L3 reduction (%)": values["discretionary_reduction_pct"],
+            "reserve mode": values["reserve_mode"],
+            "reserve (BDT)": lab_result.reserve,
+            "financing template": values["financing_template"],
+            "annual rate (%)": values["annual_rate_pct"],
+            "fee (%)": values["fee_pct"],
+            "tenor (months)": values["tenor_months"],
+            "import included": bool(import_result),
+            "import FX rate": values["import_fx_rate"] if import_result else None,
+            "import FX shock (%)": values["import_fx_shock_pct"] if import_result else None,
+            "import deposit (%)": values["import_deposit_pct"] if import_result else None,
+        }
+        saved_scenarios.append(snapshot)
         st.rerun()
-    except Exception:  # noqa: BLE001 - don't expose persistence or internal plan details
-        st.error("The plan proposal could not be saved. No external action was taken.")
+    if saved_scenarios:
+        st.dataframe(pd.DataFrame(saved_scenarios), width="stretch", hide_index=True)
+        st.caption(f"{len(saved_scenarios)} of 3 scenarios saved for {CASE_LABELS[case_name]}.")
+    else:
+        st.caption("Save up to three settings snapshots to compare them in this session.")
+
+    ui.section_title("Submit a plan proposal")
+    proposal_plan_id = st.selectbox("Plan to submit", PLAN_ORDER, index=PLAN_ORDER.index(lab_result.best_plan_id)
+        if lab_result.best_plan_id in PLAN_ORDER else 0, key=f"lab-proposal-plan-{case_name}")
+    if st.button("Save as proposal", disabled=user is None, key=f"lab-proposal-save-{case_name}"):
+        try:
+            plan_snapshot = lab_result.plans[proposal_plan_id].to_dict()
+            draft = create_draft(user, "plan_proposal", {
+                "case_name": case_name,
+                "plan_id": proposal_plan_id,
+                "plan_snapshot": plan_snapshot,
+            })
+            submit_draft(user, draft.draft_id)
+            st.success(f"Proposal {draft.draft_id[:8]} submitted for owner review. Assumptions remain HYPOTHETICAL until approved.")
+            st.rerun()
+        except Exception:  # noqa: BLE001 - don't expose persistence or internal plan details
+            st.error("The plan proposal could not be saved. No external action was taken.")
 ui.footer()
