@@ -1,0 +1,12 @@
+# Judge Questions and Expected Behaviour
+
+1. **Are the displayed business numbers real?** No. Every bundled case is synthetic and labelled; uploaded examples are fixtures. The app does not connect to a bank.
+2. **How is the shortage week calculated?** The deterministic weekly forecast uses recorded transactions, open invoices/bills and editable assumptions; the reserve breach is the first projected closing balance below the reserve.
+3. **Why can the recommended plan still miss the reserve?** Feasibility uses the deterministic minimum balance. When no option is feasible, the app says so and chooses the smallest remaining gap; it reports uncertainty separately.
+4. **What do L1, L2 and L3 assume?** L1 assumes a configured share of overdue receivables is collected earlier; L2 assumes an eligible supplier might agree to defer; L3 assumes selected discretionary outflows can be reduced. All are HYPOTHETICAL until owner approval.
+5. **Does a financing comparison mean a lender will approve?** No. Rates, fees, capacities and schedules are editable illustrative templates. No application is submitted.
+6. **Can Copilot make up a financial number or execute an action?** Its answer must cite computed evidence IDs and every numeric literal must match the evidence pack. It has no execution tool; invalid provider output falls back to offline text.
+7. **What happens to prompt-injection text in a customer name or transaction description?** It is excluded from the Copilot evidence pack. The ten tested poisoned-name cases are in `evidence/security_eval.md`; the Copilot remains read-only even if a model is manipulated.
+8. **Who can approve and what does execution do?** Only `owner` can approve/reject and record simulated execution. The result is written to a local JSONL sandbox log with `network_sent: false`; no real payment occurs.
+9. **Can the audit database be tampered with?** SQLite triggers block ordinary update/delete operations and a SHA-256 chain detects content changes. A host administrator can replace the database; the chain is tamper-evident, not immutable storage.
+10. **Is the forecast accurate enough for real credit decisions?** No such claim is made. On five small synthetic holdouts, model MAE exceeded the naive baseline in all five; four of five recommended plans failed to keep the reserve.

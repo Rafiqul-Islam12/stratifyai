@@ -1,0 +1,4 @@
+transaction_id,date,description,category,amount,direction,balance_after
+BAD-001,not-a-date,Synthetic receipt,Sales,125000,inflow,1125000
+BAD-002,2026-01-06,Synthetic utility,Utilities,many,outflow,1100000
+BAD-003,2026-01-09,Synthetic refund,Sales,-500,outflow,1099500

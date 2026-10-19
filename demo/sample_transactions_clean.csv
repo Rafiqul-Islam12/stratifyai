@@ -1,0 +1,4 @@
+transaction_id,date,description,category,amount,direction,balance_after
+SYN-001,2026-01-05,Synthetic sale receipt,Sales,125000,inflow,1125000
+SYN-002,2026-01-06,Synthetic utility payment,Utilities,25000,outflow,1100000
+SYN-003,2026-01-09,Synthetic customer receipt,Sales,50000,inflow,1150000

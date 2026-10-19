@@ -4,6 +4,7 @@ Current task: T16 (in progress)
 Last updated: 2026-10-18
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
+- T16 checkpoint: completed security self-assessment, OWASP 2026 mapping, deck/demo scripts, evidence index, judge Q&A and four synthetic upload fixtures.
 - T16 checkpoint: completed the README blueprint and technical architecture, data-flow, algorithm and security documentation.
 
 
