@@ -1,4 +1,4 @@
-# StratifyAI
+﻿# StratifyAI
 
 ## The Liquidity Decision Lab for SME Financial Intelligence
 
@@ -8,9 +8,9 @@
 
 > **Synthetic data only. Financing terms are illustrative. No financial advice, real lender connection, loan application, or payment is provided.**
 
-![Overview screenshot from the earlier T02 visual review](evidence/t02-overview-review.png)
+![Current 1440px public Overview in the green UI](docs/img/overview.png)
 
-The current green UI needs a fresh 1440px screenshot before submission; capture `docs/img/overview.png` and use it to replace the earlier visual review above.
+This is a current 1440px browser capture of the public Overview.
 
 StratifyAI helps SME owners see a projected cash shortage and compare explicitly hypothetical responses. Deterministic Python code computes balances, plans, costs and readiness indicators. The optional copilot explains only a validated evidence pack. Owner approval is required before a draft can be marked as simulated execution.
 
@@ -50,9 +50,7 @@ SME owners can discover a cash shortage only after a customer payment is late or
 
 Every lever is modelled separately and in combination. A plan is feasible only when its deterministic minimum balance keeps the configured reserve. When no plan meets that condition, the result says so and selects the smallest remaining gap. The uncertainty model reports breach probability separately. Financing amounts, capacity and costs are illustrative, editable estimates.
 
-![Liquidity view screenshot to replace after current 1440px capture](evidence/t02-overview-review.png)
-
-Capture the current Lab view as `docs/img/lab.png` before submission.
+The current Overview screenshot appears above. A dedicated 1440px Decision Lab capture will be added at `docs/img/lab.png` after the signed-in view is captured.
 
 ```mermaid
 flowchart LR
@@ -239,7 +237,7 @@ Use [the demo script](docs/DEMO_SCRIPT.md), [judge questions](demo/judging_quest
 - Demo authentication has no MFA or production identity provider; password-free demo shortcuts are for local demonstration only.
 - Optional LLM mode depends on a user-configured provider. Offline mode is the default; the external provider's availability, retention and reachability are outside this repository's control.
 - Single-process local prototype; no real bank, payment, lending or external business-system integration.
-- Browser screenshots for the current green UI still need capture at 1440px; the checked-in Overview image is an older T02 review.
+- `docs/img/overview.png` is a current 1440px public Overview capture; dedicated 1440px captures of the signed-in pages remain to be added.
 - `python run.py status` has a known status-script stdout error; the remaining quick-start commands are the supported path while it is corrected.
 
 ### Roadmap (future work)
