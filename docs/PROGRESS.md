@@ -1,14 +1,14 @@
-# PROGRESS
+﻿# PROGRESS
 
-Current task: T16 (in progress)
-Last updated: 2026-10-18
+Current task: T17 (next)
+Last updated: 2026-10-20
 
 ## In progress (checkpoints; one line per finished sub-step, cleared when the task is done)
-- T16 checkpoint: completed security self-assessment, OWASP 2026 mapping, deck/demo scripts, evidence index, judge Q&A and four synthetic upload fixtures.
-- T16 checkpoint: completed the README blueprint and technical architecture, data-flow, algorithm and security documentation.
-
+- None. T16 documentation package is checkpointed; T17 is next.
 
 ## Done
+- **T16 Documentation and submission docs** (2026-10-20; local commits `ba6bcbd`, `fde3f91`). Added the README blueprint, technical architecture, security self-assessment with STRIDE and OWASP GenAI LLM Top 10 2026 mapping, 12-slide/9:40 deck outline, 4:50 demo script, execution evidence index, judging Q&A, expected results and four synthetic CSV fixtures. `python run.py check` passed, secret scan clean (171 files), task suite 13/13, and fixture validation passed. Full `pytest -q`: 197 passed, 8 failed in Financing/Decision Lab page tests; `ruff check .`: 4 errors in uncommitted UI redesign files. These are recorded below as outstanding QA findings.
+  - HUMAN CHECK: capture the nine current screenshots listed in `docs/EXECUTION_EVIDENCE.md` at 1440px; render README on GitHub after push; review the security self-assessment and test references; time the deck and demo.
 - UI v2.2: navbar is one fixed HTML row + pinned button (no columns); identical sidebar rows signed out and in; hero background as CSS data-URI; card surfaces for charts. UI v2.1 fixes after first real run: navbar fixed + bigger + pill links + tagline, flat compact sidebar, smaller hero with right-aligned actions, role-card buttons first, layer cards, visible inputs, big card-style tabs. UI v2 redesign (out-of-plan job, spec in docs/UI_REDESIGN.md): new green/off-white design system (app/styles.css, app/charts.py, app/icons.py, .streamlit/config.toml); fixed navbar + fixed grouped sidebar (app/components.py, app/main.py); public Overview, sign-in screen and role cards (app/landing.py); redesigned signed-in Overview; tabs and cards on Cash Flow, Decision Lab, Financing, Analysis, Approvals, Upload, Assumptions, Security; removed leftover T02 placeholder block from the Cash Flow page; tests updated (test_design, test_overview, test_security) and tests/test_shell.py added. NOT yet verified inside a real Streamlit run: run `pytest -q`, `ruff check .`, `python run.py start` and look at every page.
 - **T01 Scaffold, tooling, run.py launcher, CI, status script** (2026-10-17)
   - Folder skeleton: core/, services/, app/pages/, data/, tests/, scripts/, evidence/, static/fonts/, docs/img/, .streamlit/, .github/workflows/
@@ -118,10 +118,12 @@ Secret scan: `python scripts/check_secrets.py` (exit 0 = clean).
 - The competition PDF in docs/inputs/ could not be read on this machine (no poppler, no PDF library; the file has no /ToUnicode CMap). docs/COMPETITION.md is therefore unverified against the PDF - verify by hand before submission.
 - `python run.py start` leaves the server running in its terminal (normal Streamlit behaviour); stop with Ctrl-C.
 - `python run.py status` reports the passing test count but then errors in `scripts/status.py` because `result.stdout` is `None`.
+- T16 QA on 2026-10-20: full suite 197 passed, 8 failed in `tests/test_analysis.py::test_financing_page_exposes_readiness_and_pack_tools`, `tests/test_financing.py::test_financing_page_renders_case_three_and_reacts_to_rate_and_tenor`, and six `tests/test_lab_page.py` cases; current uncommitted UI redesign makes expected demo cases/widgets unavailable. Ruff reports four issues in uncommitted redesign files (`app/landing.py`, `app/pages/overview.py`, `tests/test_shell.py`).
 - T08 import sales ramp uses recent actual weekly inflows as its deterministic proxy; shipment costs, duties/taxes and timings remain user-editable hypothetical assumptions.
 - `static/fonts/` has no Inter files, so the system fallback stack is active. To enable Inter, place Inter-Regular.woff2, Inter-Medium.woff2 and Inter-SemiBold.woff2 there and uncomment/configure the local font faces in `.streamlit/config.toml`.
 
 ## Decisions or assumptions changed (details in DECISIONS.md)
+- T16 package completed; see the T16 entry above.
 - Streamlit pinned to 1.66.0 rather than ">= 1.45" so the demo is reproducible (>= 1.45 was the stated floor for self-hosted fonts).
 - T15 checkpoint: reviewed the task requirements, existing evaluation entry points, security services and coverage matrix; implementation scope confirmed.
 - T15 checkpoint: implemented synthetic holdout backtest, decision-quality and security evaluation, full pytest evidence capture, 13 scripted service tasks, consolidated report builder, and Markdown Lab report download.

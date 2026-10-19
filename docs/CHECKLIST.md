@@ -1,4 +1,4 @@
-# CHECKLIST (coverage matrix). Status: [ ] open, [~] partial, [x] done with evidence (test or file).
+﻿# CHECKLIST (coverage matrix). Status: [ ] open, [~] partial, [x] done with evidence (test or file).
 
 ## Master brief
 - [ ] B-01 General SME copilot, not import-only (T03, T05, T08)
@@ -15,7 +15,7 @@
 - [x] B-12 Business analysis with reliable metrics only (T10) — `core/analysis.py`, `app/pages/analysis.py`, `tests/test_analysis.py`; unsupported indicators carry explicit reasons
 - [x] B-13 Grounded copilot, missing-data answers, untrusted input handling (T13) — ten injection payloads, masked IDs, missing-data and permission coverage in `tests/test_copilot.py`
 - [x] B-14 Security: validation, backend RBAC, owner approval, audit, env secrets, safe errors (T04, T11, T12) — upload validation, backend role checks, owner-only approval, audit chain, env secrets and safe errors are implemented (`services/agent_actions.py`, `services/permissions.py`)
-- [ ] B-15 No real payments, loans or bank claims (T12, T16)
+- [x] B-15 No real payments, loans or bank claims (T12, T16) � simulated/local-only actions and explicit limitations in `docs/SECURITY_SELF_ASSESSMENT.md` and `docs/README.md`
 - [x] B-16 Import demo scenario and stress tests (sales -20%, costs +15%, late payments, FX) editable (T08) — `core/stress.py`, `core/import_scenario.py`, and Lab controls
 - [x] B-17 CSV/Excel upload and validation of dates, amounts, types, duplicates, missing values (T04) — tests in tests/test_validation.py
 - [x] B-18 Synthetic data and illustrative terms labelled (T03, T06, T14) — shared header/footer labels plus Financing page banner
@@ -29,12 +29,12 @@
 
 ## Seven additions
 - [x] A-01 Agent action drafts with owner approval (T12) — persistent draft state machine and owner review tested in `tests/test_agent_actions.py`
-- [~] A-02 Security tiers, hash-chained audit and known-risk list are displayed in T11; self-assessment report is T16
+- [x] A-02 Security tiers, hash-chained audit and known-risk list are displayed in T11; self-assessment report is `docs/SECURITY_SELF_ASSESSMENT.md`
 - [x] A-03 Backtest vs naive baseline (T15) — `evidence/backtest_results.csv`, `.md`
 - [x] A-04 P10/P50/P90 band and computed shortage probabilities (T09) — `core/montecarlo.py`, Cash Flow and Lab uncertainty displays, `tests/test_montecarlo.py`
 - [x] A-05 Deterministic best-plan rule, Option 0, separate levers (T07) — `core/lab.py`, `tests/test_lab.py`
 - [x] A-06 Financing templates and repayment-capacity formula (T06) — `core/financing.py`, `tests/test_financing.py`
-- [ ] A-07 Deliverables and schedule (T16, T18)
+- [x] A-07 Deliverables and schedule (T16, T18) � `docs/DECK_OUTLINE.md`, `docs/DEMO_SCRIPT.md`
 
 ## UI requests
 - [x] U-01 Clean top-level UI (T02, T14) — computed Overview and shared page context header
@@ -51,11 +51,11 @@
 - [ ] U-12 English UI (all)
 
 ## Competition
-- [ ] C-01 Technical documentation (T16)
-- [ ] C-02 Deck outline for max 10 minutes (T16)
-- [ ] C-03 Demo script for max 5 minutes (T16)
-- [~] C-04 Source, README, deployment instructions, tests, GitHub (T01, T16, T18) — source, README stub and tests done (T01); deployment instructions are T17, no GitHub remote yet
-- [ ] C-05 Security self-assessment (T16)
+- [x] C-01 Technical documentation (T16) � `docs/TECHNICAL_DOC.md`
+- [x] C-02 Deck outline for max 10 minutes (T16) � 9:40 in `docs/DECK_OUTLINE.md`
+- [x] C-03 Demo script for max 5 minutes (T16) � 4:50 in `docs/DEMO_SCRIPT.md`
+- [~] C-04 Source, README, deployment instructions, tests, GitHub (T01, T16, T18) � source, README and tests documented; packaging/deployment work remains in T17; GitHub README render needs human check
+- [x] C-05 Security self-assessment (T16) � `docs/SECURITY_SELF_ASSESSMENT.md`
 - [x] C-06 Execution evidence logs (T12, T15) — T12 sandbox execution and audit events plus T15 backtest, security, decision-quality, task-suite and test artifacts
 - [ ] C-07 Integrity: no copied code, licences respected (T18)
 - [ ] C-08 English everywhere (all)
@@ -71,7 +71,7 @@
 - [ ] D-03 Receivables watchlist (T10)
 - [ ] D-04 Verifiable readiness pack with hash check (T10)
 - [x] D-05 Scripted task-completion suite with results (T15) — 13 service workflows and actual pass rate in `evidence/task_suite_results.md`
-- [ ] D-06 STRIDE threat model and LLM-risk mapping in docs (T16)
+- [x] D-06 STRIDE threat model and LLM-risk mapping in docs (T16) � `docs/SECURITY_SELF_ASSESSMENT.md`
 - [~] D-07 CI workflow runs tests on every push (T01) — .github/workflows/ci.yml on push+PR, Python 3.11 and 3.12, `pytest -q` then `ruff check .`; both commands pass locally, CI has not yet run remotely (no origin)
 - [x] D-08 One-command launcher run.py (T01, T17) — setup/start/demo/test/eval/check/status/report; verified setup, test, check, status and a live HTTP 200 from `start`
 - [x] D-09 Consolidated final report builder (T15) — `scripts/build_report.py`, outputs `reports/final_report.md` and `.html`
@@ -82,5 +82,5 @@
 - [ ] P-03 Demo video MP4 included inside the submission package, not only a link (T17, T18)
 - [ ] P-04 No CDN or external fonts; works offline and on mainland China networks (T02, T17, T18)
 - [ ] P-05 Optional live demo link, labelled as possibly unreachable in mainland China (T17)
-- [ ] P-06 GitHub README follows docs/README_BLUEPRINT.md and the repo is public before submission (T16, T18)
+- [~] P-06 GitHub README follows `docs/README_BLUEPRINT.md`; repo visibility and rendered README need human check after push (T16, T18)
 
