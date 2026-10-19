@@ -1,5 +1,7 @@
 ﻿# Execution Evidence Index
 
+**Expanded Word report:** [Execution_Evidence_Report.docx](Execution_Evidence_Report.docx) ? consolidated test, workflow, security, backtest, decision-quality and screenshot evidence (Times New Roman, 12 pt; reviewed 2026-10-20).
+
 Each line identifies an existing evidence artifact and the claim it supports. Artifacts use synthetic data and are not production validation.
 
 - `evidence/test_results.txt` — recorded full pytest run: 197 passed, exit code 0, 2026-10-18.
