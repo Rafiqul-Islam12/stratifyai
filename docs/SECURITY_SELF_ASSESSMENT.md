@@ -1,6 +1,6 @@
 # Security Self-Assessment
 
-**Scope:** local synthetic-data Streamlit prototype, reviewed for T16 on 2026-10-20. This is a project self-assessment, not a penetration test, certification or production approval.
+**Scope:** synthetic-data Streamlit prototype, publicly deployed at [stratifyai-avuusk24epzvvcaegax2uq.streamlit.app](https://stratifyai-avuusk24epzvvcaegax2uq.streamlit.app/). This document is a project self-assessment, not a deployment penetration test, certification or production approval.
 
 ## Permission-tier implementation
 
@@ -49,7 +49,7 @@ The current OWASP GenAI LLM Top 10 is the 2026 edition. Names below follow the o
 
 ## Known risks and mitigations
 
-- **Demo identity:** seeded local accounts, including password-free quick-sign-in buttons, are convenient for judges and unsafe as a production identity system. Keep the app local; replace demo passwords in ignored `.env`; do not expose it as a public service.
+- **Demo identity and public access:** seeded demo accounts and password-free quick-sign-in buttons are intended only for synthetic demonstrations. The public Streamlit deployment has no production identity provider, MFA, or tenant isolation. Do not upload real business, customer, personal, financial, credential, or other sensitive information. Local demo passwords can be changed in ignored `.env`.
 - **Local storage trust:** SQLite triggers and hash links reveal many accidental edits but cannot stop a host administrator from replacing the database. Export or replicate audit events to a separately controlled append-only store before any real deployment.
 - **External LLM:** offline is the default. In `llm` mode, a user-selected endpoint receives the question and masked evidence pack. Review provider privacy, retention, region and contractual terms before configuring it. No API key is required for offline demo.
 - **Forecast quality:** the current synthetic holdout model MAE is higher than the naive baseline on all five cases; four of five selected plans fail to keep reserve. Do not use results for real credit or cash decisions.
