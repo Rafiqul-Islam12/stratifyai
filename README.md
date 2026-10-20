@@ -2,6 +2,8 @@
 
 ## The Liquidity Decision Lab for SME Financial Intelligence
 
+**Live demo:** [Open StratifyAI](https://stratifyai-avuusk24epzvvcaegax2uq.streamlit.app/)
+
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB) ![Streamlit](https://img.shields.io/badge/Streamlit-1.66.0-FF4B4B) [![CI](https://github.com/Rafiqul-Islam12/stratifyai/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Rafiqul-Islam12/stratifyai/actions/workflows/ci.yml) ![Tests](https://img.shields.io/badge/tests-197%20passed-2E8B57) ![Offline](https://img.shields.io/badge/demo-offline--ready-2E8B57) ![Data](https://img.shields.io/badge/data-synthetic-6B7280)
 
 *2026 Shenzhen International FinTech Competition, International Track, Topic E: SME Finance Copilot.*
