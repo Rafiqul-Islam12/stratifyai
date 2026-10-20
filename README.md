@@ -177,7 +177,7 @@ The backtest used 10-week holdouts (training cutoff 2026-05-04). For example, st
 | Security self-assessment | `docs/SECURITY_SELF_ASSESSMENT.md` |
 | Presentation outline, max 10 min | `docs/DECK_OUTLINE.md` |
 | Optional demo video script, max 5 min | `docs/DEMO_SCRIPT.md` |
-| Execution evidence | `docs/EXECUTION_EVIDENCE.md`, `evidence/` |
+| Execution evidence | `docs/Execution_Evidence_Report.docx`, `docs/EXECUTION_EVIDENCE.md`, `evidence/` |
 
 ## Quick start
 

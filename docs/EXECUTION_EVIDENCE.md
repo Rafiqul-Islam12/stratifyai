@@ -1,17 +1,28 @@
-﻿# Execution Evidence Index
+# Execution Evidence Index
 
-**Technical report:** [Technical_Documentation_StratifyAI_Final.docx](Technical_Documentation_StratifyAI_Final.docx) — complete formatted technical documentation (Times New Roman, 12 pt; reviewed 2026-10-20).
+**Formatted report:** [Execution Evidence Report](Execution_Evidence_Report.docx) - follows the typography and green heading treatment used in the final Technical Documentation.
 
-Each line identifies an existing evidence artifact and the claim it supports. Artifacts use synthetic data and are not production validation.
+**Technical documentation:** [Technical_Documentation_StratifyAI.docx](Technical_Documentation_StratifyAI.docx) and [TECHNICAL_DOC.md](TECHNICAL_DOC.md).
 
-- `evidence/test_results.txt` — recorded full pytest run: 197 passed, exit code 0, 2026-10-18.
-- `evidence/task_suite_results.md` — 13/13 scripted service workflows passed, with per-workflow details.
-- `evidence/security_eval.md` — 60 role/action decisions, 10 poisoned-name cases, grounded receipts and audit tamper detection.
-- `evidence/backtest_results.csv` — per-case model and naive-baseline training/holdout counts, MAE and WAPE.
-- `evidence/backtest_results.md` — readable holdout method, per-case metrics and explicit accuracy caveat.
-- `evidence/decision_quality.json` — selected plan, deterministic minimum balance, reserve status and simulated breach probability for five cases.
-- `evidence/t02-overview-review.png` — historical Overview browser capture from T02; retained only as an older design record.
-- `docs/img/overview.png` — current 1440px public Overview capture of the green UI, used by the README.
-- Runtime simulated-action log — `evidence/sandbox_log.jsonl` is the default destination; no such file is currently checked in. The service records `network_sent: false` when an owner simulates an approved draft. Do not describe the log as existing until a live demo creates it.
+**Scope:** Topic E is non-on-chain. Evidence is from synthetic data and a local simulated-account workflow; no blockchain transaction hashes apply. Recorded tests and screenshots do not constitute live production validation.
 
-The requested signed-in UI evidence is now included in `docs/img/`: Overview Case 3, cash flow, Lab comparison and lever/stress states, financing/readiness, Case 2 analysis/watchlist, Copilot with expanded evidence receipt, draft-to-approval timeline, audit verification, formula-like upload validation, and the security permission matrix. Four paired exhibits combine directly captured states of the same workflow; the original captures are preserved alongside the composed report figures.
+## Recorded execution artifacts
+
+- evidence/test_results.txt - archived full pytest run: 197 passed, exit code 0, 2026-10-18.
+- evidence/task_suite_results.md - 13/13 scripted service workflows passed, with per-workflow details.
+- evidence/security_eval.md - 60 role/action decisions, 10 poisoned-name cases, grounded receipts and audit tamper detection.
+- evidence/backtest_results.csv and evidence/backtest_results.md - synthetic holdout metrics; model MAE is higher than the naive baseline in all five cases.
+- evidence/decision_quality.json - selected plans, minimum balances, reserve outcomes and seeded simulated breach probabilities for five synthetic cases.
+- evidence/t02-overview-review.png - historical T02 Overview review image; not current UI evidence.
+
+## Interface captures
+
+Current public and signed-in synthetic-data screenshots are checked in under docs/img/. The formatted report embeds eight core views: cashflow.png, lab.png, financing.png, analysis.png, copilot.png, approvals-workflow.png, upload.png and security.png. Supporting captures include overview-owner-case3.png, lab-levers.png, lab-stress.png, lab-levers-stress.png, financing-readiness.png, analysis-watchlist.png, approvals.png, approvals-pending.png, audit-verify.png and overview.png. Screenshots document selected UI states; they are not a video or proof that an action executed during a live session.
+
+## Sandbox log and demo video
+
+- evidence/sandbox_log.jsonl is the configured default runtime log destination. The JSONL file is absent from this checkout, so no live sandbox execution record is claimed. The service is designed to write local simulated-action entries with network_sent=false; scripted tests cover the simulation flow.
+- docs/DEMO_SCRIPT.md contains a recording script, not a recorded demo video. No demo video file is included in this checkout.
+- There are no on-chain transactions for this non-on-chain topic; transaction hashes are not applicable.
+
+All financial cases, values and accounts are synthetic. Results are limited to their recorded scope and do not establish production readiness, forecast accuracy or independent security validation.
