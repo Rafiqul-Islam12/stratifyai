@@ -2,6 +2,8 @@
 
 **Scope:** synthetic-data Streamlit prototype, publicly deployed at [stratifyai-avuusk24epzvvcaegax2uq.streamlit.app](https://stratifyai-avuusk24epzvvcaegax2uq.streamlit.app/). This document is a project self-assessment, not a deployment penetration test, certification or production approval.
 
+**Formatted report:** [Security Self-Assessment Report](Security_Self_Assessment_Report.docx)
+
 ## Permission-tier implementation
 
 | Action | Tier | Allowed roles | Enforcement location | Test reference |

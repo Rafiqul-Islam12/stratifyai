@@ -224,6 +224,7 @@ Use [the demo script](docs/DEMO_SCRIPT.md), [judge questions](demo/judging_quest
 | `docs/SECURITY.md` | Security baseline and roles |
 | `docs/TECHNICAL_DOC.md` | Architecture, algorithms and data flow |
 | `docs/SECURITY_SELF_ASSESSMENT.md` | Threat model, code/test mapping and residual risks |
+| `docs/Security_Self_Assessment_Report.docx` | Formatted security self-assessment report |
 | `docs/DECK_OUTLINE.md` | Timed presentation plan |
 | `docs/DEMO_SCRIPT.md` | Click-by-click optional video plan |
 | `docs/EXECUTION_EVIDENCE.md` | Evidence artifact index |
