@@ -1,4 +1,4 @@
-﻿# CHECKLIST (coverage matrix). Status: [ ] open, [~] partial, [x] done with evidence (test or file).
+# CHECKLIST (coverage matrix). Status: [ ] open, [~] partial, [x] done with evidence (test or file).
 
 ## Master brief
 - [ ] B-01 General SME copilot, not import-only (T03, T05, T08)
@@ -24,7 +24,7 @@
 - [x] B-21 Five synthetic cases (T03) — five generated case folders, schema validation and deterministic hash test in tests/test_data.py
 - [x] B-22 Required tests: gap, alerts, scenarios, financing cost, invalid data, unauthorized actions, audit tamper, AI grounding (T15) — full suite `evidence/test_results.txt`; scripted service checks `evidence/task_suite_results.md`
 - [x] B-23 UI/UX direction followed (T02, T14) — shared shell, context selectors, responsive KPI grid and consistent empty states implemented; browser visual review remains a HUMAN CHECK
-- [x] B-24 End-to-end workflow works (T14, T18) — finance_ops draft to owner approval/simulated execution and confirmed Lab proposal covered by AppTest
+- [x] B-24 End-to-end workflow works (T14) — finance_ops draft to owner approval/simulated execution and confirmed Lab proposal covered by AppTest
 - [ ] B-25 Title and tagline correct everywhere (T02, T16)
 
 ## Seven additions
@@ -34,7 +34,7 @@
 - [x] A-04 P10/P50/P90 band and computed shortage probabilities (T09) — `core/montecarlo.py`, Cash Flow and Lab uncertainty displays, `tests/test_montecarlo.py`
 - [x] A-05 Deterministic best-plan rule, Option 0, separate levers (T07) — `core/lab.py`, `tests/test_lab.py`
 - [x] A-06 Financing templates and repayment-capacity formula (T06) — `core/financing.py`, `tests/test_financing.py`
-- [x] A-07 Deliverables and schedule (T16, T18) � `docs/DECK_OUTLINE.md`, `docs/DEMO_SCRIPT.md`
+- [x] A-07 Deliverables and schedule (T16) � `docs/DECK_OUTLINE.md`, `docs/DEMO_SCRIPT.md`
 
 ## UI requests
 - [x] U-01 Clean top-level UI (T02, T14) — computed Overview and shared page context header
@@ -42,7 +42,7 @@
 - [~] U-03 Beautiful charts (T05, T08, T09, T10) — Cash Flow actual/forecast and P10-P90 band; later chart pages remain
 - [ ] U-04 Colour grading and layer colours (T02)
 - [x] U-05 Font and typography (T02) — consistent 12–36px type scale and wrapping; system fallback active pending optional local Inter files in `static/fonts/`
-- [x] U-06 Alignment and spacing (T02, T14, T18) — shared gutters, header/card baselines and six-card Overview grid verified in a 1440px browser capture
+- [x] U-06 Alignment and spacing (T02, T14) — shared gutters, header/card baselines and six-card Overview grid verified in a 1440px browser capture
 - [x] U-07 Overview shows all key details (T14) — alert, six KPIs, forecast band, recommended plan, readiness, aging, approvals, audit and source
 - [x] U-08 Sidebar, header, footer, navigation (T02) — shared business/scenario selectors and role badge in the shell
 - [x] U-09 Loading, empty and error states (T02, T14) — shared page spinner and safe error boundary, consistent no-data guards, plus page-specific empty states
@@ -54,16 +54,11 @@
 - [x] C-01 Technical documentation (T16) � `docs/TECHNICAL_DOC.md`
 - [x] C-02 Deck outline for max 10 minutes (T16) � 9:40 in `docs/DECK_OUTLINE.md`
 - [x] C-03 Demo script for max 5 minutes (T16) � 4:50 in `docs/DEMO_SCRIPT.md`
-- [~] C-04 Source, README, deployment instructions, tests, GitHub (T01, T16, T18) � source, README and tests documented; packaging/deployment work remains in T17; GitHub README render needs human check
+- [~] C-04 Source, README, local run instructions, tests, GitHub (T01, T16) � source, README, local run instructions and tests documented; GitHub README render needs human check
 - [x] C-05 Security self-assessment (T16) � `docs/SECURITY_SELF_ASSESSMENT.md`
 - [x] C-06 Execution evidence logs (T12, T15) — T12 sandbox execution and audit events plus T15 backtest, security, decision-quality, task-suite and test artifacts
-- [ ] C-07 Integrity: no copied code, licences respected (T18)
+- [ ] C-07 Integrity: no copied code, licences respected
 - [ ] C-08 English everywhere (all)
-
-## Workflow
-- [ ] W-01 Token discipline followed (all)
-- [ ] W-02 Handoff files kept current (all)
-- [ ] W-03 One task per turn, stop and check (all)
 
 ## Added differentiators (our own designs)
 - [x] D-01 System status panel on the Security page (T11) — version, synthetic data mode, copilot mode, audit chain, test evidence, and local fonts status
@@ -72,15 +67,11 @@
 - [ ] D-04 Verifiable readiness pack with hash check (T10)
 - [x] D-05 Scripted task-completion suite with results (T15) — 13 service workflows and actual pass rate in `evidence/task_suite_results.md`
 - [x] D-06 STRIDE threat model and LLM-risk mapping in docs (T16) � `docs/SECURITY_SELF_ASSESSMENT.md`
-- [~] D-07 CI workflow runs tests on every push (T01) — .github/workflows/ci.yml on push+PR, Python 3.11 and 3.12, `pytest -q` then `ruff check .`; both commands pass locally, CI has not yet run remotely (no origin)
-- [x] D-08 One-command launcher run.py (T01, T17) — setup/start/demo/test/eval/check/status/report; verified setup, test, check, status and a live HTTP 200 from `start`
+- [~] D-07 CI workflow runs tests on every push (T01) — .github/workflows/ci.yml on push+PR, Python 3.11 and 3.12, `pytest -q` then `ruff check .`; both commands pass locally; remote CI has not yet been checked
+- [x] D-08 One-command launcher run.py (T01) — setup/start/demo/test/eval/check/status/report; verified setup, test, check, status and a live HTTP 200 from `start`
 - [x] D-09 Consolidated final report builder (T15) — `scripts/build_report.py`, outputs `reports/final_report.md` and `.html`
 
-## Packaging and reachability
-- [ ] P-01 Docker image runs the app offline (T17)
-- [ ] P-02 Submission zip built by script, excludes secrets (T17)
-- [ ] P-03 Demo video MP4 included inside the submission package, not only a link (T17, T18)
-- [ ] P-04 No CDN or external fonts; works offline and on mainland China networks (T02, T17, T18)
-- [ ] P-05 Optional live demo link, labelled as possibly unreachable in mainland China (T17)
-- [~] P-06 GitHub README follows `docs/README_BLUEPRINT.md`; repo visibility and rendered README need human check after push (T16, T18)
+## Offline operation and GitHub
+- [x] P-04 Offline-capable demo with no CDN or external fonts (T02) — local assets and offline UI checks are covered by `tests/test_design.py`
+- [~] P-06 GitHub README follows `docs/README_BLUEPRINT.md`; repo visibility and rendered README need human check after push (T16)
 

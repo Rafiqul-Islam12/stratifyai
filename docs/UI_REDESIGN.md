@@ -1,12 +1,12 @@
 # UI REDESIGN SPEC (single source of truth for the redesign)
 
 Save this file as `docs/UI_REDESIGN.md`. It supersedes the colour, typography and layout parts of `docs/DESIGN.md`.
-Everything in CLAUDE.md "Non-negotiable product rules" still applies (offline, no CDN, numbers only from `core/`, four layers, permissions in `services/`).
+The product rules remain: offline operation, no CDN, deterministic numbers from `core/`, four financial layers, and backend permissions in `services/`.
 
 ## 0. Scope and ground rules
 
 - This is a **UI-only redesign**. Do NOT change `core/` logic, `services/` security logic, permission rules, datasets, audit, or any computed number. UI glue code is fine.
-- The redesign is an approved out-of-plan job (phases UI-1 to UI-5). It overrides the "one task per turn / wait for `next`" rule, but you must still: checkpoint in `docs/PROGRESS.md`, commit per phase, keep `pytest -q`, `ruff check .`, `python run.py check` and `python scripts/check_secrets.py` green.
+- The redesign was completed in phases UI-1 to UI-5. Its verification commands were `pytest -q`, `ruff check .`, `python run.py check` and `python scripts/check_secrets.py`.
 - Stack stays: Python 3.11, Streamlit 1.66.0 (pinned), plotly 7.1.0. Add no dependency. No CDN, no Google Fonts, no remote images, no external URL anywhere (a test enforces this). Everything must work offline.
 - English UI only. Keep title "StratifyAI" and tagline "The Liquidity Decision Lab for SME Financial Intelligence" (rule 12). Keep the "Synthetic data" labelling and the footer disclaimer.
 - Reference images (open and study every one before coding):
@@ -195,7 +195,7 @@ Put `Inter-Regular.woff2`, `Inter-Medium.woff2`, `Inter-SemiBold.woff2`, `Inter-
 
 1. `pytest -q`, `ruff check .`, `python run.py check`, `python scripts/check_secrets.py`, all green. If a test breaks because of an intentional UI change, update it in the same commit and say which and why. Never delete a test just to make it pass.
 2. Visual check. Use any headless browser available (Playwright if installable, otherwise Edge/Chrome headless) to take screenshots at **1440x900, 1920x1080 and 1280x720** of every page touched, signed out and signed in (Owner and Viewer), with the "Stable and healthy" and "High expense, shortage" cases. Save to `evidence/ui/`. Open them and fix anything clipped, overlapping, misaligned, or off-scale. If no browser can be launched, say so plainly and list what you could not verify; never claim a visual result you did not see.
-3. Report real results only (CLAUDE.md rule 10).
+3. Report real results only.
 
 ## 12. Acceptance checklist (the redesign is done when all are true)
 
@@ -208,4 +208,4 @@ Put `Inter-Regular.woff2`, `Inter-Medium.woff2`, `Inter-SemiBold.woff2`, `Inter-
 - [ ] Public Overview: hero with business-themed background, tagline, 5 feature buttons, questions, flow, role cards with demo sign-in, trust strip; readable without login; gated pages ask to sign in and return after login.
 - [ ] Every signed-in page uses cards on a grid; no page needs more than ~2 screens of scrolling for its main content; long forms are in tabs/expanders.
 - [ ] Sign-in screen redesigned; demo role buttons and password login both work; errors friendly.
-- [ ] `docs/DESIGN.md` updated to point to this spec (tokens, layout, chart rules), `docs/PROGRESS.md` updated, screenshots in `evidence/ui/`.
+- [ ] `docs/DESIGN.md` updated to point to this spec (tokens, layout, chart rules), screenshots in `evidence/ui/`.

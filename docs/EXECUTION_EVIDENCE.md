@@ -1,6 +1,6 @@
 ﻿# Execution Evidence Index
 
-**Expanded Word report:** [Execution_Evidence_Report.docx](Execution_Evidence_Report.docx) ? consolidated test, workflow, security, backtest, decision-quality and screenshot evidence (Times New Roman, 12 pt; reviewed 2026-10-20).
+**Technical report:** [Technical_Documentation_StratifyAI_Final.docx](Technical_Documentation_StratifyAI_Final.docx) — complete formatted technical documentation (Times New Roman, 12 pt; reviewed 2026-10-20).
 
 Each line identifies an existing evidence artifact and the claim it supports. Artifacts use synthetic data and are not production validation.
 
@@ -14,4 +14,4 @@ Each line identifies an existing evidence artifact and the claim it supports. Ar
 - `docs/img/overview.png` — current 1440px public Overview capture of the green UI, used by the README.
 - Runtime simulated-action log — `evidence/sandbox_log.jsonl` is the default destination; no such file is currently checked in. The service records `network_sent: false` when an owner simulates an approved draft. Do not describe the log as existing until a live demo creates it.
 
-Fresh 1440px screenshots still requested for the signed-in current UI: `docs/img/cashflow.png`, `docs/img/lab.png`, `docs/img/financing.png`, `docs/img/analysis.png`, `docs/img/copilot.png`, `docs/img/approvals.png`, `docs/img/upload.png`, and `docs/img/security.png`. The public Overview screenshot is already captured.
+The requested signed-in UI evidence is now included in `docs/img/`: Overview Case 3, cash flow, Lab comparison and lever/stress states, financing/readiness, Case 2 analysis/watchlist, Copilot with expanded evidence receipt, draft-to-approval timeline, audit verification, formula-like upload validation, and the security permission matrix. Four paired exhibits combine directly captured states of the same workflow; the original captures are preserved alongside the composed report figures.

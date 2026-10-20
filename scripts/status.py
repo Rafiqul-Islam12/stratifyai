@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Project status: tasks done from docs/PLAN.md, current task from docs/PROGRESS.md,
-recent commits, and an optional quick pytest run.
+"""Project status: task count from docs/PLAN.md, optional checkpoints, recent commits, and an optional pytest run.
 
 Usage: python scripts/status.py [--no-tests]
 """
@@ -76,7 +75,7 @@ def main(argv: list[str]) -> int:
             print(f"  in progress: {line}")
     else:
         print_section("Progress")
-        print("  docs/PROGRESS.md not found")
+        print("  no progress checkpoint file")
 
     print_section("Last commits")
     if (ROOT / ".git").is_dir():
@@ -97,7 +96,7 @@ def main(argv: list[str]) -> int:
     print_section("Tests (quick)")
     try:
         result = subprocess.run([sys.executable, "-m", "pytest", "-q"],
-                                check=False, cwd=ROOT, text=True)
+                                check=False, cwd=ROOT, text=True, capture_output=True)
         tail = [line for line in result.stdout.strip().splitlines() if line.strip()][-1:]
         print(f"  {' '.join(tail).strip() if tail else 'no output'}")
         print(f"  exit code {result.returncode}")

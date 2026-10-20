@@ -1,4 +1,4 @@
-﻿# StratifyAI
+# StratifyAI
 
 ## The Liquidity Decision Lab for SME Financial Intelligence
 
@@ -191,7 +191,7 @@ python run.py check
 python scripts/run_tasks.py
 ```
 
-For a server without the browser-opening helper, use `python run.py start`; stop it with Ctrl-C. The app serves at `http://127.0.0.1:8501`. Docker packaging is planned for T17 and is not included yet. Optional environment settings are listed below and in [.env.example](.env.example). Do not place credentials in chat or commit `.env`.
+For a server without the browser-opening helper, use `python run.py start`; stop it with Ctrl-C. The app serves at `http://127.0.0.1:8501`. Docker packaging is outside the current project scope; use the local Python commands above. Optional environment settings are listed below and in [.env.example](.env.example). Do not place credentials in chat or commit `.env`.
 
 | Variable | Default / purpose |
 | --- | --- |
@@ -237,12 +237,12 @@ Use [the demo script](docs/DEMO_SCRIPT.md), [judge questions](demo/judging_quest
 - Demo authentication has no MFA or production identity provider; password-free demo shortcuts are for local demonstration only.
 - Optional LLM mode depends on a user-configured provider. Offline mode is the default; the external provider's availability, retention and reachability are outside this repository's control.
 - Single-process local prototype; no real bank, payment, lending or external business-system integration.
-- `docs/img/overview.png` is a current 1440px public Overview capture; dedicated 1440px captures of the signed-in pages remain to be added.
-- `python run.py status` has a known status-script stdout error; the remaining quick-start commands are the supported path while it is corrected.
+- The public Overview and signed-in synthetic demo captures are included in `docs/img/`.
+- `python run.py status` runs a quick pytest check; use `python scripts/status.py --no-tests` to display repository status without running tests.
 
 ### Roadmap (future work)
 
-T17 packaging and T18 final QA remain: Docker, secret-safe submission archive, clean-clone validation, current UI screenshots and submission checklist. Forecast calibration, production-grade identity, rate limiting, provider privacy review and any real integration require separate validation and authorization.
+Docker packaging, a submission archive, live hosting and a fresh-clone QA pass are outside the current project scope. Forecast calibration, production-grade identity, rate limiting, provider privacy review and any real integration require separate validation and authorization.
 
 ## Team, credits and licence
 
