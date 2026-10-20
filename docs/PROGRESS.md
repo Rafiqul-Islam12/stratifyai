@@ -7,7 +7,7 @@ Updated: 2026-10-20
 - Refreshed the formatted Execution Evidence Report using the checked-in synthetic evaluation records.
 - Embedded eight current signed-in UI captures and updated the evidence index and README submission map.
 - Clarified that Topic E is non-on-chain; transaction hashes do not apply.
-- Confirmed that the report package opens as a valid DOCX archive and all embedded image relationships resolve.
+- Rebuilt the report from the known-good DOCX and confirmed that Microsoft Word opens it; embedded image relationships resolve.
 
 ## Evidence still to capture
 
