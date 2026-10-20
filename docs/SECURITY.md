@@ -12,7 +12,7 @@
 - viewer: READ only
 - auditor: READ plus view audit log and verify the audit chain
 
-## Demo authentication (T11)
+## Demo authentication 
 - Usernames are `owner`, `finance_ops`, `viewer`, and `auditor`; the role is resolved from the server-side user record.
 - The local synthetic-data demo defaults are `DEMO-owner-123`, `DEMO-finance-123`, `DEMO-viewer-123`, and `DEMO-auditor-123`. Replace them with `DEMO_OWNER_PASSWORD`, `DEMO_FINANCE_OPS_PASSWORD`, `DEMO_VIEWER_PASSWORD`, and `DEMO_AUDITOR_PASSWORD` in the ignored `.env` file for a local run.
 - Passwords are held as salted PBKDF2-HMAC-SHA256 hashes in process memory. This is a demo authentication boundary, not a production identity provider.
@@ -22,7 +22,7 @@
 ## Controls (baseline)
 Backend authorize() on privileged service calls; hash-chained append-only audit log with verify function; upload validation including spreadsheet formula-injection sanitising; untrusted-text handling for copilot; secrets only in .env; safe error messages; no real integrations. Pure parsing and deterministic calculation helpers do not mutate protected state.
 
-## Agent action drafts (T12)
+## Agent action drafts
 - finance_ops may create and inspect their own structured drafts; owners may review any pending draft. Draft payloads use deterministic templates and escape submitted free text.
 - Owner approval/rejection and simulated execution are state-checked and idempotent. Execution writes only to the local `evidence/sandbox_log.jsonl` and audit chain; it does not contact external services. MONEY_MOVEMENT remains denied for every role.
 - Approved Lab proposals are marked CONFIRMED as owner-asserted assumptions; this is a scenario annotation, not a verified business fact.
