@@ -27,6 +27,25 @@ python run.py demo
 
 The local demo uses synthetic accounts for `owner`, `finance_ops`, `viewer` and `auditor`. Use the page's labelled **DEMO** quick-sign-in buttons; local demo passwords are configurable in `.env`. After sign-in, click **Load demo business**, then open **Decision Lab**. No credentials or API key are needed in offline mode.
 
+
+## Judge quick review
+
+- **Live deployment:** [Open StratifyAI](https://stratifyai-avuusk24epzvvcaegax2uq.streamlit.app/)
+- **Local review:** clone the repository and follow [Run locally](#run-locally). The demo works offline with synthetic data and no API key.
+- **Fast path:** open **Overview**, choose **Load demo business**, then visit **Decision Lab**. Compare Options 0/A/B/C; check **Analysis** and **Audit** for evidence and traceability.
+- **What to read:** start with this README, then the [technical report](docs/StratifyAI_Technical_Report.docx), [security self-assessment report](docs/Security_Self_Assessment_Report.docx), and [execution evidence report](docs/Execution_Evidence_Report.docx). Their Markdown counterparts are [technical documentation](docs/TECHNICAL_DOC.md), [security assessment](docs/SECURITY_SELF_ASSESSMENT.md), and [execution evidence index](docs/EXECUTION_EVIDENCE.md).
+- **Review caveat:** all app data and evaluation results are synthetic; financing figures are illustrative. The public demo is for demonstration only. Do not upload real or sensitive information.
+
+## Run locally
+
+```bash
+git clone https://github.com/Rafiqul-Islam12/stratifyai.git
+cd stratifyai
+python run.py setup
+python run.py demo
+```
+
+Python 3.11 or later is required. The app opens at `http://127.0.0.1:8501`; stop it with Ctrl+C. To run without the browser-opening helper, use `python run.py start`. Offline mode is the default and needs no API key. Optional settings are described in [.env.example](.env.example); keep secrets in your local ignored `.env` file.
 ## The problem
 
 SME owners can discover a cash shortage only after a customer payment is late or a bill comes due. StratifyAI turns recorded synthetic transactions, invoices, bills and editable assumptions into a dated cash view with explicit uncertainty and owner-controlled what-if plans.
